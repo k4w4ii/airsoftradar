@@ -72,5 +72,105 @@
     "base_url": "https://www.airsoftcentrum.hu",
     "product_pattern": "^https://www\\.airsoftcentrum\\.hu/[a-z0-9-]+(?<!-m)-\\d{3,6}$",
     "status": "✓ microdata | kategóriaoldalon nincs terméklink (JS) -> sitemap, nagy bolt esetén forgó napi ablak"
+  },
+  "begadi": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.begadi.com",
+    "product_pattern": "airsoftwaffen[a-z0-9/-]*\\.html$",
+    "note": "Magento; csak az airsoftwaffen (fegyver) URL-ek",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "airsoftsports": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://airsoftsports.de",
+    "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "airsoft-guns-eu": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.airsoft-guns.eu",
+    "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "airsoftmania": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://airsoftmania.eu",
+    "product_pattern": "/products/[a-z0-9][a-z0-9-]*$",
+    "note": "Shopify",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "gunshot": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.gunshot.it",
+    "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "vsgun": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.vsgun.com",
+    "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "airsoft-legends": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.airsoft-legends.nl",
+    "product_pattern": "^https://(www\\.)?airsoft-legends\\.nl/en/.+\\.html$",
+    "note": "Lightspeed; csak az angol oldalak",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "bunker501": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.bunker501.nl",
+    "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "phenixairsoft": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.phenixairsoft.com",
+    "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "militaria": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://militaria.pl",
+    "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "redberet": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.redberet.pl",
+    "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+  },
+  "atom-airsoft": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://atom-airsoft.fi",
+    "product_pattern": "/products/[a-z0-9][a-z0-9-]*$",
+    "note": "Shopify",
+    "max_products": 1500,
+    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
   }
 }

@@ -229,7 +229,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(len(db.t["products"]), 1)
         p = db.t["products"][0]
         self.assertEqual((p["model_code_norm"], p["name_lang"]), ("CM522", "en"))      # angol név felülírta
-        self.assertEqual(p["name"], "CM.522 Sport Line Gen 2 (CYMA)")
+        self.assertEqual(p["name"], "CYMA CM.522 Sport Line Gen 2")    # egységes név, angol boltból
         matched = [o for o in db.t["offers"] if o["product_id"] == p["id"]]
         self.assertEqual({o["match_method"] for o in matched}, {"new", "code"})
         self.assertEqual(next(o for o in db.t["offers"] if o["external_id"] == "b2")["match_status"], "pending")
@@ -398,3 +398,35 @@ class TestRound4(unittest.TestCase):
                 return_value=([_offer("WE GLOCK 18 GEN.3 GÁZ GBB - FEKETE - Airsoftplaza", "53900", "g1")], [], 3)):
             run_shop.run("airsoftplaza", None, False)
         self.assertEqual(db.t["offers"][0]["title_raw"], "WE GLOCK 18 GEN.3 GÁZ GBB - FEKETE")
+
+
+class TestNames(unittest.TestCase):
+    A = {"cyma", "asg", "arsenal", "we", "jg", "jgworks", "emg", "aps", "doublebell", "ggarmament", "gg", "specnaarms"}
+
+    def test_examples(self):
+        from names import clean_name
+        cases = [
+            ("Airsoftová zbraň AK47 Arsenal SLR105", "ASG", "ASG AK47 Arsenal SLR105"),
+            ("WE GLOCK 18 GEN.3 GREEN GÁZ GBB - FEKETE", "WE", "WE Glock 18 Gen.3 Green Gas GBB Black"),
+            ("CM.513 Sport Line, GEN-2 - TAN [CYMA]", "CYMA", "CYMA CM.513 Sport Line GEN-2 Tan"),
+            ("F-1 Firearms UDR-15 AEG - Black - EMG / APS", "EMG", "EMG F-1 Firearms UDR-15 AEG Black"),
+            ("JG1011B EBB [J.G.WORKS]", "JG", "JG1011B EBB"),
+            ("Replica of the RK-01-W carbine", "Double Bell", "Double Bell RK-01-W"),
+            ("G&G CM16 Raider 2.0 Black", "G&G Armament", "G&G Armament CM16 Raider 2.0 Black"),
+        ]
+        for title, brand, exp in cases:
+            got = clean_name(title, brand, self.A)
+            self.assertEqual(got, exp, title)
+            self.assertEqual(clean_name(got, brand, self.A), got, "idempotens: " + title)
+
+    def test_existing_product_renamed_once(self):
+        db = FakeDB()
+        _seed(db)
+        db.t["shops"][1]["name"] = "AirsoftPlaza"
+        with mock.patch("db.DB", return_value=db), mock.patch.object(run_shop, "scrape",
+                return_value=([_offer("CYMA CM.522 AK fekete", "79990", "a1")], [], 3)):
+            run_shop.run("airsoftplaza", None, False)
+            name1 = db.t["products"][0]["name"]
+            run_shop.run("airsoftplaza", None, False)
+        self.assertEqual(name1, "CYMA CM.522 AK Black")
+        self.assertEqual(db.t["products"][0]["name"], name1)        # második futás nem változtat

@@ -29,9 +29,11 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false           # egy bolt hibája ne állítsa le a többit
-      max-parallel: 4
+      max-parallel: 6
       matrix:
-        shop: [gunfire, taiwangun, evike-europe, powair6, airsoftpro, combat-zone, airsoftplaza, airsoftcentrum]
+        shop: [gunfire, taiwangun, evike-europe, powair6, airsoftpro, combat-zone, airsoftplaza, airsoftcentrum,
+               begadi, airsoftsports, airsoft-guns-eu, airsoftmania, gunshot, vsgun, airsoft-legends, bunker501,
+               phenixairsoft, militaria, redberet, atom-airsoft]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

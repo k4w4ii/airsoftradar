@@ -25,6 +25,7 @@ from crawl import from_listing, from_sitemap
 from fetcher import Fetcher
 from jsonld import ScrapedOffer, extract
 from matcher import Catalog, OfferIn, Product, match_offer
+from names import clean_name
 
 CONFIG = json.loads((Path(__file__).parent / "shops.json").read_text())
 STALE_DAYS = 3
@@ -101,7 +102,9 @@ def load_catalog(db) -> tuple[Catalog, dict[int, str]]:
 
 def create_product(db, cat: Catalog, np: dict, lang: str, image: str | None) -> int:
     mid, code = np["manufacturer_id"], np["model_code_norm"]          # code None: cím alapú termék
-    slug = slugify(np["name"], f"{mid}:{code or np['name'].lower()}")
+    raw_name = np["name"]
+    np = {**np, "name": clean_name(raw_name, cat.manufacturers[mid][1], set(cat.aliases))}
+    slug = slugify(np["name"], f"{mid}:{code or raw_name.lower()}")
     try:
         pid = db.insert("products", [{
             "manufacturer_id": mid, "model_code": code, "model_code_norm": code, "name": np["name"],
@@ -156,22 +159,39 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
     # --- párosítás (csak 'pending'; manual/review/auto érintetlen) ---
     cat, name_lang = load_catalog(db)
     stats = defaultdict(int)
+    offer_pid = {o["id"]: o["product_id"] for o in saved if o.get("product_id")}
     for o in (o for o in saved if o["match_status"] == "pending"):
         r = match_offer(OfferIn(o["title_raw"], o["brand_raw"], o["sku_raw"], o["ean_raw"]), cat)
         stats[r.method or r.status] += 1
         if r.status == "auto":
             pid = r.product_id or create_product(db, cat, r.new_product, shop["lang"], o["image_url"])
+            offer_pid[o["id"]] = pid
             db.update("offers", {"product_id": pid, "match_status": "auto", "match_method": r.method,
                                  "match_confidence": r.confidence}, id=f"eq.{o['id']}")
-            if shop["lang"] == "en" and name_lang.get(pid, "en") != "en":   # angol név előnyben
-                db.update("products", {"name": o["title_raw"], "name_lang": "en"}, id=f"eq.{pid}")
-                name_lang[pid] = "en"
         elif r.status == "review":
             db.update("offers", {"match_status": "review", "match_method": r.method,
                                  "match_confidence": r.confidence}, id=f"eq.{o['id']}")
             db.upsert("match_candidates", [{"offer_id": o["id"], "product_id": pid, "score": sc,
                                             "reasons": {"method": "fuzzy"}} for pid, sc in r.candidates[:3]],
                       on_conflict="offer_id,product_id", returning=False)
+
+    # --- egységes terméknevek: angol bolt címe előnyben, egyébként a meglévő név tisztítása (idempotens) ---
+    titles = {o["id"]: o["title_raw"] for o in saved}
+    alias_set, renamed = set(cat.aliases), 0
+    for oid, pid in offer_pid.items():
+        prod = cat.products.get(pid)
+        if prod is None or getattr(prod, "_renamed", False):
+            continue
+        brand = cat.manufacturers[prod.manufacturer_id][1]
+        from_en = shop["lang"] == "en" and name_lang.get(pid, "en") != "en"
+        new = clean_name(titles[oid] if from_en else prod.name, brand, alias_set)
+        if new != prod.name or from_en:
+            db.update("products", {"name": new, **({"name_lang": "en"} if from_en else {})}, id=f"eq.{pid}")
+            prod.name, renamed = new, renamed + 1
+            if from_en:
+                name_lang[pid] = "en"
+        prod._renamed = True
+    stats["átnevezve"] = renamed
 
     # --- ártörténet (napi 1 pont, HUF + EUR rögzítve) ---
     hist = []

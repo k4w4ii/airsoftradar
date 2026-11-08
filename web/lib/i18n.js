@@ -2,6 +2,16 @@ export const LOCALES = ["hu", "en"];
 export const CURRENCIES = ["HUF", "EUR", "PLN", "CZK", "GBP"];
 export const DEFAULT_CURRENCY = { hu: "HUF", en: "EUR" };
 
+// Árszűrő sávhatárai a választott pénznemben (kerek értékek); a lekérdezés HUF-ra váltja
+export const PRICE_EDGES = {
+  HUF: [30000, 60000, 100000, 200000],
+  EUR: [75, 150, 250, 500],
+  PLN: [300, 600, 1000, 2000],
+  CZK: [2000, 4000, 6500, 13000],
+  GBP: [65, 130, 220, 440],
+};
+export const WEAPON_CATS = ["rifle", "pistol", "smg", "sniper", "lmg", "shotgun", "grenade"];
+
 export function isLocale(x) {
   return LOCALES.includes(x);
 }
@@ -42,6 +52,26 @@ const DICT = {
     otherLang: "English",
     currency: "Pénznem",
     notFound: "Ilyen termék nincs (vagy már egyik boltban sem kapható).",
+    filters: "Szűrés",
+    showResults: (n) => `${n} találat mutatása`,
+    category: "Típus",
+    cats: {
+      all: "Minden termék", weapons: "Airsoft fegyverek", rifle: "Gépkarabélyok (AR, AK)", pistol: "Pisztolyok",
+      smg: "Géppisztolyok", sniper: "Mesterlövész, DMR", lmg: "Géppuskák", shotgun: "Sörétes puskák",
+      grenade: "Gránátok, gránátvetők", other: "Kiegészítők, egyéb",
+    },
+    price: "Ár",
+    under: (v) => `${v} alatt`,
+    over: (v) => `${v} felett`,
+    customRange: "Egyedi ártartomány",
+    min: "Min",
+    max: "Max",
+    ok: "OK",
+    brands: "Gyártó",
+    moreBrands: (n) => `Összes gyártó (${n})`,
+    availability: "Elérhetőség",
+    activeFilters: "Aktív szűrők",
+    remove: (x) => `${x} szűrő törlése`,
   },
   en: {
     title: "AirsoftRadar – airsoft price comparison",
@@ -78,6 +108,26 @@ const DICT = {
     otherLang: "Magyar",
     currency: "Currency",
     notFound: "No such product (or no shop sells it any more).",
+    filters: "Filters",
+    showResults: (n) => `Show ${n} results`,
+    category: "Type",
+    cats: {
+      all: "All products", weapons: "Airsoft guns", rifle: "Assault rifles (AR, AK)", pistol: "Pistols",
+      smg: "SMGs", sniper: "Sniper rifles, DMR", lmg: "Machine guns", shotgun: "Shotguns",
+      grenade: "Grenades, launchers", other: "Accessories, other",
+    },
+    price: "Price",
+    under: (v) => `Under ${v}`,
+    over: (v) => `Over ${v}`,
+    customRange: "Custom range",
+    min: "Min",
+    max: "Max",
+    ok: "OK",
+    brands: "Brand",
+    moreBrands: (n) => `All brands (${n})`,
+    availability: "Availability",
+    activeFilters: "Active filters",
+    remove: (x) => `Remove ${x}`,
   },
 };
 
@@ -113,4 +163,11 @@ export function dateFmt(iso, locale) {
   return new Intl.DateTimeFormat(locale === "hu" ? "hu-HU" : "en-GB", {
     year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Budapest",
   }).format(new Date(iso));
+}
+
+/** Már a választott pénznemben lévő érték kiírása (pl. ársáv-határ) */
+export function plainMoney(value, currency, locale) {
+  return new Intl.NumberFormat(locale === "hu" ? "hu-HU" : "en-GB", {
+    style: "currency", currency, maximumFractionDigits: 0,
+  }).format(value);
 }

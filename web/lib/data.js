@@ -1,6 +1,8 @@
 // Supabase PostgREST elérés fetch-csel (nincs supabase-js függőség).
 // Szerveroldalon fut; a publishable kulcs csak olvasni tud (RLS).
-const PAGE_SIZE = 24;
+import { PRICE_EDGES } from "./i18n";
+
+export const PAGE_SIZE = 24;
 const REVALIDATE = 1800; // fél óra; az adatok éjjel frissülnek
 
 const SORTS = {
@@ -89,4 +91,41 @@ export async function getRates() {
 export async function getOfferTarget(id) {
   const rows = await q(`offers?id=eq.${Number(id)}&select=url,shops(affiliate_template)`);
   return rows[0] || null;
+}
+
+/** PostgreSQL tömb-literál: {"a","b"} (idézőjel és backslash escape-elve) */
+export function pgArray(values) {
+  return `{${values.map((v) => `"${String(v).replace(/["\\]/g, (m) => "\\" + m)}"`).join(",")}}`;
+}
+
+/**
+ * Lista + szűrő-darabszámok egy hívásban (SQL: catalog_search).
+ * params: { q, cat, brands[], min, max (a választott pénznemben), stock, sort, page }
+ */
+export function buildSearchQuery(params, currency, rates) {
+  const rate = currency === "HUF" ? 1 : rates?.[currency];
+  const cur = rate ? currency : "HUF";
+  const r = rate || 1;
+  const p = new URLSearchParams();
+  const term = cleanQuery(params.q);
+  if (term) p.set("q", term);
+  p.set("cat", params.cat === "all" ? "" : params.cat || "");
+  if (params.brands?.length) p.set("brands", pgArray(params.brands.slice(0, 30)));
+  if (params.min > 0) p.set("pmin", String(Math.floor(params.min * r)));
+  if (params.max > 0) p.set("pmax", String(Math.ceil(params.max * r)));
+  if (params.stock) p.set("in_stock", "true");
+  p.set("sort", params.sort || "popular");
+  const page = Math.max(1, Number(params.page) || 1);
+  p.set("lim", String(PAGE_SIZE));
+  p.set("off", String((page - 1) * PAGE_SIZE));
+  const edges = PRICE_EDGES[cur];
+  p.set("edges", pgArray(edges.map((e) => Math.round(e * r))));
+  // szóköz %20-ként (nem "+"), hogy a márkanevek biztosan helyesen érkezzenek
+  return { path: `rpc/catalog_search?${p.toString().replace(/\+/g, "%20")}`, page, edges, currency: cur };
+}
+
+export async function catalogSearch(params, currency, rates) {
+  const { path, page, edges, currency: cur } = buildSearchQuery(params, currency, rates);
+  const res = await q(path);
+  return { ...res, page, pages: Math.max(1, Math.ceil((res.total || 0) / PAGE_SIZE)), edges, edgeCurrency: cur };
 }
