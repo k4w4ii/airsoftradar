@@ -112,7 +112,7 @@ class TestMnb(unittest.TestCase):
 
 
 class FakeFetcher:
-    def __init__(self, pages): self.pages = pages
+    def __init__(self, pages): self.pages, self.stats = pages, {}
     def get(self, url): return self.pages.get(url)
 
 
@@ -285,3 +285,23 @@ class TestBudget(unittest.TestCase):
             out, errors, complete = run_shop.scrape("taiwangun", None)
         self.assertFalse(complete)
         self.assertIn("időkorlát", errors[-1]["error"])
+
+
+class TestDiagnostics(unittest.TestCase):
+    def test_403_everywhere_is_recorded(self):
+        import urllib.error
+        from fetcher import Fetcher
+        f = Fetcher(retries=1, delay=0)
+        def boom(url):
+            raise urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
+        with mock.patch.object(f, "_raw", side_effect=boom), mock.patch.object(run_shop, "Fetcher", return_value=f):
+            out, errors, complete = run_shop.scrape("powair6", None)
+        self.assertEqual(out, [])
+        self.assertIn("0 termék", errors[0]["error"])
+        self.assertGreaterEqual(errors[0]["http"]["403"], 1)
+
+    def test_wrong_pattern_shows_sample(self):
+        f = FakeFetcher({"https://s.hu/sitemap.xml": "<urlset><url><loc>https://s.hu/p/abc-123</loc></url></urlset>"})
+        diag = {}
+        self.assertEqual(crawl.from_sitemap(f, "https://s.hu/sitemap.xml", r"/termek/", diag=diag), [])
+        self.assertEqual(diag, {"locs": 1, "minta": ["https://s.hu/p/abc-123"]})

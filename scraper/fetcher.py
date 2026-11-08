@@ -8,6 +8,7 @@ import urllib.error
 import urllib.request
 import urllib.robotparser
 import zlib
+from collections import Counter
 from urllib.parse import urlsplit
 
 USER_AGENT = "AirsoftPriceBot/0.1 (+https://example.com/bot)"  # TODO: saját domain + bot info oldal
@@ -20,6 +21,7 @@ class Fetcher:
         self.extra = extra_headers or {}   # pl. {"Cookie": "currency=EUR"} boltonként a shops.json-ból
         self._last: dict[str, float] = {}
         self._robots: dict[str, urllib.robotparser.RobotFileParser | None] = {}
+        self.stats: Counter = Counter()      # kimenetek: '200', '403', 'timeout', 'robots' ... (diagnosztika)
 
     def allowed(self, url: str) -> bool:
         p = urlsplit(url)
@@ -46,19 +48,20 @@ class Fetcher:
     def get(self, url: str) -> str | None:
         """HTML szöveg, vagy None (robots tiltás / 404 / tartós hiba)."""
         if not self.allowed(url):
+            self.stats["robots"] += 1
             return None
         for attempt in range(self.retries):
             self._throttle(url)
             try:
                 status, text = self._raw(url)
+                self.stats[str(status)] += 1
                 return text if status == 200 else None
             except urllib.error.HTTPError as e:
-                if e.code in (404, 410):
-                    return None
+                self.stats[str(e.code)] += 1
                 if e.code not in (429, 500, 502, 503, 504):
-                    raise
-            except (urllib.error.URLError, TimeoutError):
-                pass
+                    return None          # 403/404/...: nem próbáljuk újra, a statisztikában látszik
+            except (urllib.error.URLError, TimeoutError, OSError) as e:
+                self.stats["timeout" if "timed out" in str(e) else "neterr"] += 1
             if attempt < self.retries - 1:
                 time.sleep((2 ** attempt) * 5 + random.random() * 2)
         return None

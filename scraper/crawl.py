@@ -16,16 +16,23 @@ def _clean(u: str) -> str:
     return urlunsplit((p.scheme, p.netloc, p.path, "", ""))   # query/fragment le: duplikátumok ellen
 
 
-def from_sitemap(f: Fetcher, url: str, pattern: str, limit: int = 5000, _depth: int = 0) -> list[str]:
+def from_sitemap(f: Fetcher, url: str, pattern: str, limit: int = 5000, _depth: int = 0,
+                 diag: dict | None = None) -> list[str]:
+    """diag (opcionális): {'locs': összes látott URL, 'minta': pár nem illeszkedő URL} – hibakereséshez."""
     rx, out = re.compile(pattern), []
+    diag = diag if diag is not None else {}
     body = f.get(url) or ""
     for loc in (html.unescape(x) for x in _LOC_RX.findall(body)):
         if len(out) >= limit:
             break
         if "<sitemapindex" in body and _depth < 2:
-            out += from_sitemap(f, loc, pattern, limit - len(out), _depth + 1)
-        elif rx.search(loc):
-            out.append(_clean(loc))
+            out += from_sitemap(f, loc, pattern, limit - len(out), _depth + 1, diag)
+        else:
+            diag["locs"] = diag.get("locs", 0) + 1
+            if rx.search(loc):
+                out.append(_clean(loc))
+            elif len(diag.setdefault("minta", [])) < 3:
+                diag["minta"].append(loc)
     return list(dict.fromkeys(out))[:limit]
 
 
@@ -40,7 +47,7 @@ def links_in(page: str, base: str, rx: re.Pattern) -> list[str]:
 
 
 def from_listing(f: Fetcher, start_urls: list[str], pattern: str, page_tpl: str | None = None,
-                 max_pages: int = 50, extract_fn=None) -> tuple[list[str], list]:
+                 max_pages: int = 50, extract_fn=None, diag: dict | None = None) -> tuple[list[str], list]:
     """page_tpl pl. '{url}?page={n}' ({n0} = nullától számozott).
     Ha extract_fn a kategóriaoldalból >=2 ajánlatot ad (pl. Gunfire JSON-LD lista), azokat közvetlenül
     visszaadja -> nem kell minden termékoldalt letölteni. Leáll, ha egy oldal semmi újat nem hoz."""
@@ -51,6 +58,10 @@ def from_listing(f: Fetcher, start_urls: list[str], pattern: str, page_tpl: str 
             page = f.get(url)
             if not page:
                 break
+            if diag is not None and n == 1 and "minta" not in diag:
+                same_host = links_in(page, url, re.compile("."))
+                diag["linkek"] = len(same_host)
+                diag["minta"] = [u for u in same_host if not rx.search(u)][:3]
             found = [o for o in (extract_fn(page, url) if extract_fn else []) if o.has_own_url]
             if len(found) >= 2:
                 new = [o for o in found if o.external_id not in offers]

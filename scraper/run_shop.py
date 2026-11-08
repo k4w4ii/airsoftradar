@@ -34,17 +34,23 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
     -> ilyenkor nem inaktiválunk (különben a le nem töltött termékek tévesen eltűnnének)."""
     cfg = CONFIG[slug]
     deadline = time.monotonic() + float(os.environ.get("SCRAPE_BUDGET_MIN", 90)) * 60
-    f, errors, out = Fetcher(extra_headers=cfg.get("headers")), [], []
-    if cfg["source"] == "sitemap":
-        maps = f.sitemaps(cfg["base_url"]) if cfg["sitemap"] == "auto" else [cfg["sitemap"]]
-        urls = list(dict.fromkeys(u for m in maps for u in from_sitemap(f, m, cfg["product_pattern"])))
-    else:
-        urls, out = from_listing(f, cfg["start_urls"], cfg["product_pattern"], cfg.get("page_tpl"),
-                                 cfg.get("max_pages", 50), extract_fn=extract)
+    f, errors, out, urls, diag = Fetcher(extra_headers=cfg.get("headers")), [], [], [], {}
+    try:
+        if cfg["source"] == "sitemap":
+            maps = f.sitemaps(cfg["base_url"]) if cfg["sitemap"] == "auto" else [cfg["sitemap"]]
+            diag["sitemapek"] = maps[:5]
+            urls = list(dict.fromkeys(u for m in maps for u in from_sitemap(f, m, cfg["product_pattern"], diag=diag)))
+        else:
+            urls, out = from_listing(f, cfg["start_urls"], cfg["product_pattern"], cfg.get("page_tpl"),
+                                     cfg.get("max_pages", 50), extract_fn=extract, diag=diag)
+    except Exception as e:
+        errors.append({"error": f"felderítés hiba: {e!r}"[:300]})
+    if not urls and not out:   # semmit nem talált: diagnosztika az allapot.sql-hez
+        errors.insert(0, {"error": "0 termék – blokkolás vagy rossz URL-minta?", "http": dict(f.stats), **diag})
     cap = min(limit or 10**9, cfg.get("max_products", 2000))
     complete = limit is None and len(urls) <= cap
     urls, out = urls[:cap], out[:cap]
-    print(f"[{slug}] {len(out)} ajánlat kategóriaoldalról, {len(urls)} termék URL", file=sys.stderr)
+    print(f"[{slug}] {len(out)} ajánlat kategóriaoldalról, {len(urls)} termék URL, http: {dict(f.stats)}", file=sys.stderr)
     for i, u in enumerate(urls):
         if time.monotonic() > deadline:
             errors.append({"error": f"időkorlát: {i}/{len(urls)} URL után leállt"})
