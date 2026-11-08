@@ -1,0 +1,196 @@
+/* AirsoftRadar – palaszürke, csontfehér, sárgaréz. A sárgaréz kizárólag árat és legjobb ajánlatot jelöl. */
+:root {
+  --slate: #1b2027;
+  --surface: #242b34;
+  --surface-2: #2c3540;
+  --line: #36404c;
+  --bone: #e9e4d8;
+  --muted: #9aa3ad;
+  --brass: #c8a24e;
+  --brass-dim: #8a7038;
+  --olive: #7e9a55;
+  --brick: #b9654a;
+  --steel: #6f8aa6;
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --display: var(--font-display, "Barlow Condensed"), "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: var(--font-body, "Barlow"), "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--slate);
+  color: var(--bone);
+  font: 400 16px/1.5 var(--body);
+}
+a { color: inherit; }
+img { display: block; max-width: 100%; }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+
+/* ---------- keret ---------- */
+.shell { min-height: 100vh; display: flex; flex-direction: column; }
+.page { width: 100%; max-width: 1120px; margin: 0 auto; padding: 24px 20px 48px; flex: 1; }
+
+.topbar { background: #161a20; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+.topbar-inner {
+  max-width: 1120px; margin: 0 auto; padding: 10px 20px;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center;
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 24px/1 var(--display); letter-spacing: .01em; }
+.logo-mark { width: 28px; height: 28px; color: var(--bone); }
+
+.topsearch { display: flex; min-width: 0; }
+.topsearch input {
+  flex: 1; min-width: 0; height: 40px; padding: 0 14px;
+  background: var(--slate); color: var(--bone); border: 1px solid var(--line); border-right: 0;
+  border-radius: var(--radius-s) 0 0 var(--radius-s); font: inherit;
+}
+.topsearch input::placeholder { color: #737d88; }
+.topsearch button {
+  height: 40px; padding: 0 16px; border: 1px solid var(--line); border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  background: var(--surface-2); color: var(--bone); font: 600 15px var(--body); cursor: pointer;
+}
+.topsearch button:hover { background: var(--line); }
+
+.toolbar { display: flex; align-items: center; gap: 14px; }
+.seg { display: flex; border: 1px solid var(--line); border-radius: var(--radius-s); overflow: hidden; }
+.seg a { padding: 6px 8px; font-size: 13px; font-weight: 600; text-decoration: none; color: var(--muted); font-variant-numeric: tabular-nums; }
+.seg a + a { border-left: 1px solid var(--line); }
+.seg a.on { background: var(--surface-2); color: var(--bone); }
+.lang { font-size: 14px; color: var(--muted); }
+
+.footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+.footer p { max-width: 1120px; margin: 0 auto; padding: 20px; }
+
+/* ---------- főoldal ---------- */
+.intro h1 {
+  margin: 8px 0 20px; font: 600 clamp(28px, 4.2vw, 44px)/1.05 var(--display);
+  letter-spacing: -.005em; max-width: 22ch; text-wrap: balance;
+}
+
+.filters {
+  display: flex; flex-wrap: wrap; align-items: end; gap: 12px 16px;
+  padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 8px;
+}
+.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.field select {
+  height: 36px; min-width: 180px; padding: 0 10px; background: var(--surface); color: var(--bone);
+  border: 1px solid var(--line); border-radius: var(--radius-s); font: 15px var(--body);
+}
+.check { display: flex; align-items: center; gap: 8px; height: 36px; font-size: 15px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--olive); }
+.btn {
+  display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: var(--radius-s);
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--bone);
+  font: 600 15px var(--body); text-decoration: none; cursor: pointer; white-space: nowrap;
+}
+.btn:hover { background: var(--line); }
+.clear { font-size: 14px; color: var(--muted); align-self: center; }
+.count { margin-left: auto; align-self: center; font-size: 14px; }
+
+.rows { list-style: none; margin: 0; padding: 0; }
+.row { border-bottom: 1px solid var(--line); }
+.row-link {
+  display: grid; grid-template-columns: 72px minmax(0, 1fr) 200px 150px; gap: 18px; align-items: center;
+  padding: 12px 8px; text-decoration: none;
+}
+.row-link:hover { background: var(--surface); }
+.thumb { width: 72px; height: 56px; border-radius: var(--radius-s); background: #fff; overflow: hidden; display: grid; place-items: center; }
+.thumb img { width: 100%; height: 100%; object-fit: contain; }
+.row-main { display: grid; gap: 2px; min-width: 0; }
+.row-mfr { font-size: 13px; color: var(--muted); }
+.row-name { font: 600 19px/1.2 var(--display); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.row-meta { display: flex; gap: 10px; align-items: center; font-size: 13px; margin-top: 2px; }
+.row-price { text-align: right; display: grid; justify-items: end; }
+.from { font-size: 12px; color: var(--muted); }
+
+.price { font: 600 22px/1.1 var(--display); color: var(--brass); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.price.big { font-size: 40px; }
+
+.stock { font-size: 13px; font-weight: 500; white-space: nowrap; }
+.stock::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; background: currentColor; }
+.stock-in_stock { color: var(--olive); }
+.stock-out_of_stock { color: var(--brick); }
+.stock-preorder { color: var(--steel); }
+.stock-unknown { color: var(--muted); }
+
+/* Árfolyosó: teljes sáv = legdrágább bolt, sárgaréz = legolcsóbb, a sraffozott maradék a megtakarítás */
+.spread { display: flex; align-items: center; gap: 10px; }
+.spread-track {
+  flex: 1; height: 8px; border-radius: 2px; overflow: hidden;
+  background: repeating-linear-gradient(135deg, var(--line) 0 3px, transparent 3px 6px);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.spread-fill { height: 100%; background: var(--brass); }
+.spread-label { font-size: 14px; font-weight: 600; color: var(--bone); font-variant-numeric: tabular-nums; min-width: 4ch; text-align: right; }
+
+.pager { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+.pager a { font-weight: 600; }
+.empty { padding: 48px 0; text-align: center; display: grid; gap: 12px; justify-items: center; }
+
+/* ---------- termékoldal ---------- */
+.back { display: inline-block; font-size: 14px; color: var(--muted); margin-bottom: 16px; }
+.product-head { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 32px; align-items: start; }
+.product-img { background: #fff; border-radius: var(--radius-m); aspect-ratio: 4 / 3; display: grid; place-items: center; overflow: hidden; }
+.product-img img { width: 100%; height: 100%; object-fit: contain; }
+.product-info h1 { margin: 4px 0 16px; font: 700 clamp(30px, 4vw, 46px)/1.02 var(--display); text-wrap: balance; }
+.best { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; }
+.best > .muted { flex-basis: 100%; font-size: 14px; }
+.saving { margin: 10px 0 0; font-weight: 500; }
+
+.block { margin-top: 40px; }
+.block h2 { font: 600 28px/1.1 var(--display); margin: 0 0 4px; }
+.block > p { margin: 0 0 14px; }
+
+.ladder { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.rung {
+  display: grid; grid-template-columns: minmax(150px, 220px) minmax(80px, 1fr) 150px auto; gap: 18px; align-items: center;
+  padding: 12px 4px; border-bottom: 1px solid var(--line);
+}
+.rung-shop { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.shop-name { font-weight: 600; font-size: 17px; }
+.cc { font-size: 11px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+.rung-shop .stock { flex-basis: 100%; }
+.rung-bar { height: 10px; }
+.rung-bar div { height: 100%; border-radius: 2px; background: var(--steel); opacity: .55; }
+.rung.best .rung-bar div { background: var(--brass); opacity: 1; }
+.rung .price { color: var(--bone); }
+.rung.best .price { color: var(--brass); }
+.rung-price { display: grid; justify-items: end; }
+.orig { font-size: 13px; font-variant-numeric: tabular-nums; }
+.rung.best .go { background: var(--brass); color: #1b2027; border-color: var(--brass); }
+.rung.best .go:hover { background: #d6b25f; }
+
+.chart { margin: 0; }
+.chart svg { width: 100%; height: auto; max-height: 220px; display: block; background: var(--surface); border-radius: var(--radius-m); }
+.chart-line { fill: none; stroke: var(--brass); stroke-width: 2.5; stroke-linejoin: round; }
+.chart-area { fill: var(--brass); opacity: .08; }
+.chart-dot { fill: var(--brass); }
+.chart figcaption { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); margin-top: 8px; font-variant-numeric: tabular-nums; }
+.chart-range { display: flex; gap: 16px; }
+.chart-range b { color: var(--bone); font-weight: 600; }
+.chart-empty { background: var(--surface); padding: 20px; border-radius: var(--radius-m); margin: 0; }
+
+/* ---------- mobil ---------- */
+@media (max-width: 860px) {
+  .topbar-inner { grid-template-columns: 1fr auto; gap: 10px; }
+  .topsearch { grid-column: 1 / -1; grid-row: 2; }
+  .row-link { grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; }
+  .thumb { width: 64px; height: 50px; }
+  .row-spread { grid-column: 2 / -1; grid-row: 2; }
+  .product-head { grid-template-columns: 1fr; gap: 20px; }
+  .rung { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
+  .rung-bar { grid-column: 1 / -1; grid-row: 2; }
+  .rung .go { grid-column: 1 / -1; justify-content: center; }
+  .count { margin-left: 0; flex-basis: 100%; }
+}
+@media (max-width: 480px) {
+  .seg a { padding: 6px 6px; font-size: 12px; }
+  .brand span { display: none; }
+  .field select { min-width: 140px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }

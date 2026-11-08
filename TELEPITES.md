@@ -36,7 +36,7 @@ git config --global user.email "a-github-email-cimed@pelda.hu"
 3. Bal menü **SQL Editor** → **New query**. Nyisd meg Jegyzettömbbel a `supabase\telepites_egyben.sql`-t, **Ctrl+A, Ctrl+C**, illeszd be az üres query-be, **Run**.
    - Ha felugrik egy „destructive operation” figyelmeztetés: **Run this query** (csak a saját árkereső-tábláinkat törli és hozza létre újra).
    - Várt eredmény alul egy sor: `boltok 8 | gyartok 42 | kategoriak 6`.
-4. Ez a fájl a 4 migrációt helyes sorrendben tartalmazza, és bármikor újrafuttatható (ha valami elromlik, csak futtasd újra).
+4. Ez a fájl az összes migrációt (0001–0005) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
 5. Bal lent **Project Settings** → **API Keys** → másold ki a **Secret key**-t (`sb_secret_...`).
    **Project Settings → Data API** (vagy a projekt főoldala) → másold ki a **Project URL**-t (`https://xxxx.supabase.co`).
 
@@ -60,6 +60,19 @@ git commit -m "Frissítés"
 git push
 ```
 
+## 8. Weboldal (Vercel) – egyszer kell
+1. **Supabase → SQL Editor → +**: futtasd a `supabase\migrations\0005_web_views.sql`-t (adatot nem töröl). Várt eredmény: `kész | <termékszám>`.
+2. **Supabase → Project Settings → API Keys**: másold ki a **Publishable key**-t (`sb_publishable_...`). Ez nyilvános olvasókulcs, a weboldal ezzel olvas.
+3. Új fájlok feltöltése (7. pont: kicsomagolás, `git add .`, `git commit`, `git push`).
+4. **vercel.com → Add New… → Project** → GitHub összekötése (ha kéri) → az `airsoftradar` repó mellett **Import**.
+5. A beállító oldalon:
+   - **Root Directory** → **Edit** → válaszd a `web` mappát → **Continue**.
+   - **Environment Variables** – két sor:
+     - `SUPABASE_URL` = `https://xxxx.supabase.co`
+     - `SUPABASE_PUBLISHABLE_KEY` = `sb_publishable_...`
+   - **Deploy**.
+6. 1–2 perc múlva kész: a kapott címen (pl. `airsoftradar.vercel.app`) él az oldal. Ezután minden `git push` után magától frissül.
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|
@@ -68,4 +81,6 @@ git push
 | `gh is not recognized` | 3.2 után nem nyitottál új PowerShellt. |
 | `null value in column "name_en"` | A migrációk rossz sorrendben futottak -> futtasd a `telepites_egyben.sql`-t. |
 | PowerShell „nem áll le” probe közben | Még dolgozik (sok oldalt tölt le). A `[probe] ...` sorok mutatják, hol tart; a végén `[probe] KÉSZ`. Leállítás: **Ctrl+C**. |
+| Vercel: „Hiányzik a SUPABASE_URL…” | A 8.5 környezeti változók hiányoznak; Vercel → Settings → Environment Variables, utána Deployments → Redeploy. |
+| Vercel: „Supabase 404 … product_summary/v_product_offers” | A 8.1 lépés (`0005_web_views.sql`) kimaradt. |
 | `Invalid JWT` | Rossz kulcs: a **Secret key**-t (`sb_secret_...`) add meg, ne a publishable-t. |
