@@ -3,38 +3,54 @@
   "gunfire": {
     "source": "listing",
     "start_urls": [
-      "https://gunfire.com/en/menu/electric-powered-rifles-and-carbines-17201.html"
+      "https://gunfire.com/en/menu/rifles-17200.html",
+      "https://gunfire.com/en/menu/sniper-rifles-17206.html",
+      "https://gunfire.com/en/menu/machine-guns-17216.html",
+      "https://gunfire.com/en/menu/pistols-17221.html",
+      "https://gunfire.com/en/menu/submachine-guns-17195.html",
+      "https://gunfire.com/en/menu/shotguns-17211.html",
+      "https://gunfire.com/en/menu/grenade-launchers-and-grenades-866.html",
+      "https://gunfire.com/en/menu/parts-and-accessories-361.html",
+      "https://gunfire.com/en/menu/internal-parts-488.html",
+      "https://gunfire.com/en/menu/tactical-vests-391.html",
+      "https://gunfire.com/en/menu/pouches-431.html",
+      "https://gunfire.com/en/menu/helmets-and-accessories-416.html",
+      "https://gunfire.com/en/menu/gun-bags-and-covers-401.html",
+      "https://gunfire.com/en/menu/gloves-568.html",
+      "https://gunfire.com/en/menu/tactical-glasses-and-goggles-456.html",
+      "https://gunfire.com/en/menu/masks-436.html",
+      "https://gunfire.com/en/menu/slings-and-sling-swivels-406.html",
+      "https://gunfire.com/en/menu/knee-pads-and-elbow-pads-421.html",
+      "https://gunfire.com/en/menu/holsters-386.html",
+      "https://gunfire.com/en/menu/radios-and-accessories-441.html"
     ],
     "product_pattern": "/en/products/",
     "page_tpl": "{url}?counter={n0}",
-    "status": "✓ kategóriaoldal JSON-LD (60/oldal, EUR), lapozás ?counter= működik"
+    "max_pages": 150,
+    "max_products": 30000,
+    "status": "kategóriaoldal JSON-LD (60/oldal): fegyverek + alkatrészek + kiegészítők + védő/taktikai felszerelés, ruházat nélkül"
   },
   "taiwangun": {
-    "source": "listing",
-    "start_urls": [
-      "https://www.taiwangun.com/assault-rifle-aeg"
-    ],
-    "product_pattern": "^https://www\\.taiwangun\\.com/assault-rifle-aeg/[a-z0-9-]+$",
-    "page_tpl": "{url}/page:{n}",
-    "status": "termékoldal ✓ (USD) | kategória: 61 terméklink ✓ | lapozás '/page:N' feltételezés -> dry-run-nal ellenőrizni"
+    "source": "sitemap",
+    "sitemap": "https://www.taiwangun.com/sitemap/products_sitemap/",
+    "product_pattern": "^https://www\\.taiwangun\\.com/(?!(?:pl|de|fr|es|it|cs|cz|hu|ro|sk|ru|ua|en)/)[a-z0-9-]+/[a-z0-9-]+$",
+    "exclude_pattern": "/(?:patches|naszywki|knives|noze|camping|outdoor|survival|watches|zegarki)[a-z0-9-]*/",
+    "max_products": 6000,
+    "status": "termék-sitemap (robots.txt), angol URL-ek, ruházat kiszűrve; nagy katalógus -> forgó napi ablak"
   },
   "evike-europe": {
-    "source": "listing",
-    "start_urls": [
-      "https://evike-europe.com/airsoft-guns/assault-rifles/aeg-assault-rifles.html",
-      "https://evike-europe.com/airsoft-guns/submachine-guns/aeg-submachine-gun.html",
-      "https://evike-europe.com/airsoft-guns/sniper-rifles/aeg-sniper-rifles.html"
-    ],
+    "source": "sitemap",
+    "sitemap": "https://evike-europe.com/media/google_sitemap_en_product.xml",
     "product_pattern": "^https://evike-europe\\.com/[a-z0-9-]*\\d[a-z0-9-]*\\.html$",
-    "page_tpl": "{url}?p={n}",
-    "status": "✓ AEG kategóriák; termék-URL-ben mindig van szám (epic-deals.html stb. kizárva)"
+    "max_products": 6000,
+    "status": "angol termék-sitemap (15 872 URL, fr/es nélkül); ruházat cím alapján kiszűrve; forgó napi ablak"
   },
   "powair6": {
     "source": "sitemap",
     "sitemap": "auto",
     "base_url": "https://www.powair6.com",
-    "product_pattern": "^https://www\\.powair6\\.com/fr/[a-z0-9-]*(aeg|aep|gbb|hpa|sniper|replique)[a-z0-9-]*/\\d+-[a-z0-9-]+\\.html$",
-    "status": "sitemap csak francia (12 223 URL) -> fegyverkategóriák /fr/ termékei, angol oldalra írva (PrestaShop id alapján átirányít)",
+    "product_pattern": "^https://www\\.powair6\\.com/fr/[a-z0-9-]+/\\d+-[a-z0-9-]+\\.html$",
+    "status": "francia sitemap (12 223 URL) -> minden termék, ruházat kiszűrve, angol oldalra írva",
     "url_rewrite": [
       "/fr/",
       "/en/"
@@ -43,13 +59,17 @@
   "airsoftpro": {
     "source": "listing",
     "start_urls": [
-      "https://airsoftpro.cz/cz/airsoftove-zbrane/airsoftove-zbrane-dlouhe"
+      "https://airsoftpro.cz/cz/airsoftove-zbrane",
+      "https://airsoftpro.cz/cz/zasobniky-plnicky",
+      "https://airsoftpro.cz/cz/kulicky-plyn",
+      "https://airsoftpro.cz/cz/dily-zbrani-upgrade"
     ],
-    "product_pattern": "^https://airsoftpro\\.cz/cz/airsoftove-zbrane/.+-detail$",
+    "product_pattern": "^https://airsoftpro\\.cz/cz/.+-detail$",
     "page_tpl": "{url}/results,{off1}-{off}",
     "page_size": 24,
+    "max_pages": 120,
     "timeout": 45,
-    "status": "microdata ✓ | VirtueMart lapozás results,25-24 (24/oldal)"
+    "status": "fegyverek + tárak + BB/gáz + alkatrészek (VirtueMart lapozás)"
   },
   "combat-zone": {
     "enabled": false,

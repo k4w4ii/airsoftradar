@@ -39,19 +39,19 @@ mnb_rates.py ─> run_shop.py × 8 bolt (párhuzamosan, max 4) ─> run_shop.py 
 - Titkok csak GitHub Secrets-ben (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`); forkból indított PR nem kapja meg őket.
 
 ## Migrációk (`supabase/migrations`, `supabase db push` sorrendben)
-`0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó · `0005_web_views` weboldal-nézetek, olvasási jog · `0006_dedupe_search` ismétlődés-szűrés (bolt+URL), valódi boltszám, kódos keresés · `0007_categories_search` fegyvertípus-besorolás + `catalog_search()` RPC · `0008_eu_shops` +12 EU-s bolt.
+`0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó · `0005_web_views` weboldal-nézetek, olvasási jog · `0006_dedupe_search` ismétlődés-szűrés (bolt+URL), valódi boltszám, kódos keresés · `0007_categories_search` fegyvertípus-besorolás + `catalog_search()` RPC · `0008_eu_shops` +12 EU-s bolt · `0009_accessory_brands` +31 kiegészítő/alkatrész-gyártó, ruházat elrejtése.
 A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN futtatná.
 
 ## Boltok (20; csak EU, UK nélkül)
 | Bolt | Ország | Forrás | Állapot |
 |---|---|---|---|
-| Gunfire | PL | kategória-lapozás (`?counter=`) | ✓ élesben |
-| Taiwangun | PL | kategória-lapozás | ✓ élesben (USD) |
-| Evike Europe | FR | 3 AEG kategória (`?p=N`) | ✓ élesben |
-| Powair6 | FR | sitemap (francia, CDATA) → `/en/` | ✓ élesben |
+| Gunfire | PL | 20 kategória JSON-LD lapozás (60/oldal): fegyverek, alkatrészek, kiegészítők, védő/taktikai | ✓ élesben |
+| Taiwangun | PL | termék-sitemap (`/sitemap/products_sitemap/`), angol URL-ek | ✓ élesben (USD) |
+| Evike Europe | FR | angol termék-sitemap (15 872 URL) | ✓ élesben |
+| Powair6 | FR | sitemap (francia, CDATA) → minden termék, `/en/` | ✓ élesben |
 | AirsoftPlaza | HU | sitemap | ✓ élesben |
 | AirsoftCentrum | HU | sitemap, forgó ablak | ✓ élesben (microdata) |
-| AirsoftPro | CZ | VirtueMart lapozás | ✓ élesben (microdata) |
+| AirsoftPro | CZ | VirtueMart lapozás: fegyverek, tárak, BB/gáz, alkatrészek | ✓ élesben (microdata) |
 | Combat-Zone | HU | – | ❌ letiltva (JS-lista) |
 | Begadi | DE | sitemap, csak `airsoftwaffen` | ÚJ (2026-11-08) – ellenőrizendő |
 | Airsoft Sports | DE | sitemap, általános minta | ÚJ – ellenőrizendő |
@@ -66,12 +66,12 @@ A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN f
 | Red Beret | PL | sitemap, általános minta | ÚJ – ellenőrizendő |
 | Atom Airsoft | FI | Shopify sitemap `/products/` | ÚJ – ellenőrizendő |
 
-Az új boltok `max_products: 1500`, a workflow 6 boltot futtat párhuzamosan. Ismeretlen gyártójú termékek `pending` maradnak (nem jelennek meg).
+Lefedettség (2026-11-08 óta): fegyverek + kiegészítők + alkatrészek + védő/taktikai felszerelés; **ruházat és lábbeli kizárva** (`scraper/filters.py`, URL-re letöltés előtt és címre). Boltonként 300 perc / 6000 termék naponta (forgó ablakkal a nagy katalógusok is körbeérnek), sitemapből max. 60 000 URL, a weboldal boltonként frissül. Párosítás: token-előszűrés (6000 termék/gyártó mellett is gyors). A workflow 6 boltot futtat párhuzamosan. Ismeretlen gyártójú termékek `pending` maradnak (nem jelennek meg).
 
-Nagy boltok: ha több termék van, mint `max_products` (2000), naponta forgó ablak; inaktiválás csak `STALE_DAYS + ciklushossz` nap után.
+Nagy boltok: ha több termék van, mint `max_products` (6000), naponta forgó ablak; inaktiválás csak `STALE_DAYS + ciklushossz` nap után.
 Hibakeresés: `supabase/allapot.sql` (összesítő), `supabase/diagnozis.sql` (http kódok, példa URL-ek).
 Kinyerési sorrend: JSON-LD -> microdata (itemscope/itemprop) -> OpenGraph meta.
-Időkorlát: boltonként 90 perc (`SCRAPE_BUDGET_MIN`) és max. 2000 termék; csonka futás után nincs inaktiválás.
+Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és alapból 6000 termék; csonka futás után nincs inaktiválás.
 Állapot-lekérdezés: `supabase/allapot.sql`.
 
 ## Weboldal (`web/`, Next.js 16, Vercel)
@@ -107,7 +107,7 @@ Védőkorlátok: szomszédos kódok (CM522/CM523) sosem olvadnak össze; család
 Karbantartás: új regex a `STRONG_PATTERNS`-be = több automatikus párosítás.
 
 ## Fejlesztési terv
-1. ✅ **Séma** – migrációk 0001–0008 (lásd fent).
+1. ✅ **Séma** – migrációk 0001–0009 (lásd fent).
 2. ✅ **MNB árfolyam job** – `mnb_rates.py`, napi cron.
 3. ✅ **Generikus scraper + pipeline** – JSON-LD, sitemap/lapozás, `run_shop.py`, GitHub Actions.
 4. ⏳ **Bolt-konfigok élesítése** – 2. kör kész (fenti táblázat, microdata-támogatás). Hátra: első éles futás `allapot.sql` alapján, Combat-Zone.

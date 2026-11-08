@@ -26,7 +26,9 @@ jobs:
   scrape:
     needs: rates
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 330          # GitHub max. 360; a scraper 300 perc után magától leáll és ment
+    env:
+      SCRAPE_BUDGET_MIN: "300"
     strategy:
       fail-fast: false           # egy bolt hibája ne állítsa le a többit
       max-parallel: 6

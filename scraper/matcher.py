@@ -143,6 +143,23 @@ class Catalog:
     ean_index: dict[str, int] = field(default_factory=dict)              # ean -> product_id
     code_index: dict[tuple[int, str], int] = field(default_factory=dict)  # (mfr, code) -> product_id
     _title_keys: dict[int, list[tuple[int, str]]] = field(default_factory=dict)
+    _key_of: dict[int, str] = field(default_factory=dict)                         # product_id -> title key
+    _tok_index: dict[tuple[int, str], set[int]] = field(default_factory=dict)     # (mfr, token) -> product_ids
+
+    def fuzzy_candidates(self, mid: int, key: str, top: int = 40) -> list[tuple[int, str]]:
+        """Előszűrés: csak a közös szót tartalmazó termékek (a legtöbb közös szóval elöl). Kis gyártónál mind."""
+        allp = self._title_keys.get(mid, [])
+        if len(allp) <= top:
+            return allp
+        shared: dict[int, int] = {}
+        for tok in set(key.split()):
+            ids = self._tok_index.get((mid, tok), ())
+            if len(ids) > 400:              # túl gyakori szó (pl. 'm4') nem különböztet meg
+                continue
+            for pid in ids:
+                shared[pid] = shared.get(pid, 0) + 1
+        best = sorted(shared, key=lambda p: -shared[p])[:top]
+        return [(pid, self._key_of[pid]) for pid in best]
 
     def add_product(self, p: Product, extra_codes: list[str] = (), eans: list[str] = ()) -> None:
         self.products[p.id] = p
@@ -151,7 +168,11 @@ class Catalog:
         for e in eans:
             self.ean_index[e] = p.id
         mname = self.manufacturers[p.manufacturer_id][1]
-        self._title_keys.setdefault(p.manufacturer_id, []).append((p.id, title_key(p.name, mname)))
+        k = title_key(p.name, mname)
+        self._title_keys.setdefault(p.manufacturer_id, []).append((p.id, k))
+        self._key_of[p.id] = k
+        for tok in set(k.split()):
+            self._tok_index.setdefault((p.manufacturer_id, tok), set()).add(p.id)
 
 
 @dataclass
@@ -207,7 +228,7 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
     # 5. fuzzy a gyártó termékein belül
     key = title_key(o.title, mname)
     scored = sorted(
-        ((pid, SequenceMatcher(None, key, pk).ratio()) for pid, pk in cat._title_keys.get(mid, [])),
+        ((pid, SequenceMatcher(None, key, pk).ratio()) for pid, pk in cat.fuzzy_candidates(mid, key)),
         key=lambda x: x[1], reverse=True)[:5]
     if scored:
         best_pid, best = scored[0]

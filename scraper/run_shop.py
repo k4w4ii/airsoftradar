@@ -22,7 +22,9 @@ from decimal import Decimal
 from pathlib import Path
 
 from crawl import from_listing, from_sitemap
+from urllib.parse import urlsplit
 from fetcher import Fetcher
+from filters import is_clothing
 from jsonld import ScrapedOffer, extract
 from matcher import Catalog, OfferIn, Product, match_offer
 from names import clean_name
@@ -36,14 +38,14 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
     ajánlat; None = ne inaktiváljunk (teszt-limit vagy időkorlát miatt csonka futás).
     Ha több termék van, mint max_products, naponta forgó ablakot tölt le -> N nap alatt mindet."""
     cfg = CONFIG[slug]
-    deadline = time.monotonic() + float(os.environ.get("SCRAPE_BUDGET_MIN", 90)) * 60
+    deadline = time.monotonic() + float(os.environ.get("SCRAPE_BUDGET_MIN", 300)) * 60
     f = Fetcher(extra_headers=cfg.get("headers"), timeout=cfg.get("timeout", 30))
     errors, out, urls, diag = [], [], [], {}
     try:
         if cfg["source"] == "sitemap":
             maps = f.sitemaps(cfg["base_url"]) if cfg["sitemap"] == "auto" else [cfg["sitemap"]]
             diag["sitemapek"] = maps[:5]
-            urls = list(dict.fromkeys(u for m in maps for u in from_sitemap(f, m, cfg["product_pattern"], diag=diag)))
+            urls = list(dict.fromkeys(u for m in maps for u in from_sitemap(f, m, cfg["product_pattern"], limit=60000, diag=diag)))
         else:
             urls, out = from_listing(f, cfg["start_urls"], cfg["product_pattern"], cfg.get("page_tpl"),
                                      cfg.get("max_pages", 50), extract_fn=extract, diag=diag,
@@ -52,9 +54,16 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
             urls = list(dict.fromkeys(u.replace(rw[0], rw[1], 1) for u in urls))
     except Exception as e:
         errors.append({"error": f"felderítés hiba: {e!r}"[:300]})
+    # ruházat kiszűrése még letöltés előtt (URL-ben gyakran ott a kategória), + boltonkénti kizáró minta
+    excl = re.compile(cfg["exclude_pattern"], re.I) if cfg.get("exclude_pattern") else None
+    skip = lambda u: is_clothing(urlsplit(u).path) or (excl is not None and bool(excl.search(u)))
+    n_before = len(urls) + len(out)
+    urls = [u for u in urls if not skip(u)]
+    out = [o for o in out if not skip(o.url) and not is_clothing(o.title)]
+    diag["kiszurve"] = n_before - len(urls) - len(out)
     if not urls and not out:   # semmit nem talált: diagnosztika az allapot.sql-hez
         errors.insert(0, {"error": "0 termék – blokkolás vagy rossz URL-minta?", "http": dict(f.stats), **diag})
-    cap = min(limit or 10**9, cfg.get("max_products", 2000))
+    cap = min(limit or 10**9, cfg.get("max_products", 6000))
     stale_days = None if limit else STALE_DAYS
     if limit is None and len(urls) > cap:
         total = len(urls)
@@ -73,8 +82,8 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
             page = f.get(u)
             found = extract(page, u) if page else []
             if not found:
-                errors.append({"url": u, "error": "no product data"})
-            out += found
+                errors.append({"url": u, "error": "no product data" if page else f"letöltés sikertelen ({dict(f.stats)})"})
+            out += [o for o in found if not is_clothing(o.title)]
         except Exception as e:  # egy hibás oldal ne állítsa le a futást
             errors.append({"url": u, "error": repr(e)[:200]})
     return out, errors, stale_days
@@ -216,6 +225,10 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
                               "offers_seen": len(saved), "offers_new": stats.get("new", 0),
                               "errors": errors[:50]}, id=f"eq.{run_id}")
     db.update("shops", {"last_scraped_at": now}, id=f"eq.{shop['id']}")
+    try:                                   # a weboldal boltonként frissül, nem csak a teljes futás végén
+        db.rpc("refresh_product_summary")
+    except RuntimeError as e:
+        print(f"[{slug}] refresh hiba: {e}", file=sys.stderr)
     print(f"[{slug}] {status}: {len(saved)} ajánlat, párosítás: {dict(stats)}, hibák: {len(errors)}")
     if status == "failed":
         sys.exit(1)

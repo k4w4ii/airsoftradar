@@ -281,7 +281,10 @@ class TestBudget(unittest.TestCase):
         listing = "".join(f'<a href="/assault-rifle-aeg/p{i}">x</a>' for i in range(5))
         pages["https://www.taiwangun.com/assault-rifle-aeg"] = listing
         fake = FakeFetcher(pages)
-        with mock.patch.object(run_shop, "Fetcher", return_value=fake), mock.patch.dict("os.environ", {"SCRAPE_BUDGET_MIN": "0"}):
+        cfg = {"source": "listing", "start_urls": ["https://www.taiwangun.com/assault-rifle-aeg"],
+               "product_pattern": "^https://www\\.taiwangun\\.com/assault-rifle-aeg/[a-z0-9-]+$"}
+        with mock.patch.object(run_shop, "Fetcher", return_value=fake), mock.patch.dict("os.environ", {"SCRAPE_BUDGET_MIN": "0"}), \
+                mock.patch.dict(run_shop.CONFIG, {"taiwangun": cfg}):
             out, errors, stale = run_shop.scrape("taiwangun", None)
         self.assertIsNone(stale)
         self.assertIn("időkorlát", errors[-1]["error"])
@@ -430,3 +433,36 @@ class TestNames(unittest.TestCase):
             run_shop.run("airsoftplaza", None, False)
         self.assertEqual(name1, "CYMA CM.522 AK Black")
         self.assertEqual(db.t["products"][0]["name"], name1)        # második futás nem változtat
+
+
+class TestCoverage(unittest.TestCase):
+    def test_clothing_skipped_before_download(self):
+        sm = "<urlset>" + "".join(f"<url><loc>{u}</loc></url>" for u in [
+            "https://www.taiwangun.com/assault-rifle-aeg/cm-522-sport-line",
+            "https://www.taiwangun.com/tactical-trousers/helikon-sfu-next",
+            "https://www.taiwangun.com/025g-bbs-6mm/specna-bbs-025g",
+            "https://www.taiwangun.com/pl/karabin-szturmowy-aeg/cm-522"]) + "</urlset>"
+        fetched = []
+        class F(FakeFetcher):
+            def get(self, url):
+                fetched.append(url)
+                return super().get(url)
+        fake = F({"https://www.taiwangun.com/sitemap/products_sitemap/": sm,
+                  "https://www.taiwangun.com/assault-rifle-aeg/cm-522-sport-line": WOO,
+                  "https://www.taiwangun.com/025g-bbs-6mm/specna-bbs-025g": WOO})
+        with mock.patch.object(run_shop, "Fetcher", return_value=fake):
+            out, errors, stale = run_shop.scrape("taiwangun", None)
+        self.assertNotIn("https://www.taiwangun.com/tactical-trousers/helikon-sfu-next", fetched)
+        self.assertNotIn("https://www.taiwangun.com/pl/karabin-szturmowy-aeg/cm-522", fetched)
+        self.assertEqual(len(fetched), 3)          # sitemap + 2 termék
+
+    def test_listing_offers_clothing_filtered(self):
+        def item(n, title):
+            return ('{"@type":"Product","name":"%s","sku":"%s","offers":{"price":"10","priceCurrency":"EUR",'
+                    '"url":"/en/products/%s.html"}}' % (title, n, n))
+        page = '<script type="application/ld+json">[%s]</script>' % ",".join(
+            [item("a", "Specna Arms SA-E01"), item("b", "Combat shirt MCU"), item("c", "M4 magazine 120 BB")])
+        fake = FakeFetcher({u: (page if i == 0 else "") for i, u in enumerate(run_shop.CONFIG["gunfire"]["start_urls"])})
+        with mock.patch.object(run_shop, "Fetcher", return_value=fake):
+            out, errors, stale = run_shop.scrape("gunfire", None)
+        self.assertEqual(sorted(o.title for o in out), ["M4 magazine 120 BB", "Specna Arms SA-E01"])

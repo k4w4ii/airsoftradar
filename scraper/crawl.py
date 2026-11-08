@@ -27,7 +27,7 @@ def _clean(u: str) -> str:
     return urlunsplit((p.scheme, p.netloc, p.path, "", ""))   # query/fragment le: duplikátumok ellen
 
 
-def from_sitemap(f: Fetcher, url: str, pattern: str, limit: int = 5000, _depth: int = 0,
+def from_sitemap(f: Fetcher, url: str, pattern: str, limit: int = 60000, _depth: int = 0,
                  diag: dict | None = None) -> list[str]:
     """diag (opcionális): {'locs': összes látott URL, 'minta': pár nem illeszkedő URL} – hibakereséshez."""
     rx, out = re.compile(pattern), []

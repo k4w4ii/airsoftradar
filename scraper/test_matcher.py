@@ -102,6 +102,18 @@ class TestMatcher(unittest.TestCase):
         r2 = match_offer(OfferIn('Noveske N4 Gen.4 "Shorty" AEG - 350 fps version - Black', "EMG"), self.c)
         self.assertEqual((r2.product_id, r2.method), (80, "fuzzy"))     # második bolt ugyanarra párosul
 
+    def test_fuzzy_scales_to_large_catalog(self):
+        import time
+        c = Catalog(aliases={"specna": 9}, manufacturers={9: ("specna-arms", "Specna Arms")})
+        for i in range(6000):     # 6000 kód nélküli termék egy gyártónál
+            c.add_product(Product(1000 + i, 9, f"Specna Arms part {i} widget model{i} kit", None))
+        c.add_product(Product(1, 9, "Specna Arms Flex FX01 HAL ETU carbine", None))
+        t0 = time.perf_counter()
+        for _ in range(200):
+            r = match_offer(OfferIn("Specna Arms FLEX FX01 HAL ETU Carbine Black", "Specna"), c)
+        self.assertEqual((r.product_id, r.method), (1, "fuzzy"))
+        self.assertLess(time.perf_counter() - t0, 3.0)     # 200 ajánlat < 3 mp (régen ~percek)
+
     def test_norm_alias(self):
         self.assertEqual(norm_alias("G&G Armament"), "ggarmament")
 
