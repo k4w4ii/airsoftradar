@@ -1,0 +1,51 @@
+name: daily-scrape
+
+on:
+  schedule:
+    - cron: "17 2 * * *"        # 02:17 UTC, éjszaka -> kíméli a boltokat
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max termék / bolt (teszthez)"
+        required: false
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+
+jobs:
+  rates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python scraper/mnb_rates.py
+
+  scrape:
+    needs: rates
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false           # egy bolt hibája ne állítsa le a többit
+      max-parallel: 4
+      matrix:
+        shop: [gunfire, taiwangun, evike-europe, powair6, airsoftpro, combat-zone, airsoftplaza, airsoftcentrum]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python scraper/run_shop.py ${{ matrix.shop }} ${{ inputs.limit && format('--limit {0}', inputs.limit) || '' }}
+
+  refresh:
+    needs: scrape
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python scraper/run_shop.py --refresh
+      # Next.js ISR újraépítés (opcionális): curl -X POST "$REVALIDATE_URL?secret=$REVALIDATE_SECRET"

@@ -1,0 +1,65 @@
+{
+  "_doc": "source: 'sitemap' | 'listing'. product_pattern: termék URL regex. headers: extra HTTP fejlécek (pl. deviza-cookie). enabled=false -> kihagyva. status: probe eredménye.",
+  "gunfire": {
+    "source": "listing",
+    "start_urls": [
+      "https://gunfire.com/en/menu/electric-powered-rifles-and-carbines-17201.html"
+    ],
+    "product_pattern": "/en/products/",
+    "page_tpl": "{url}?counter={n0}",
+    "status": "✓ kategóriaoldal JSON-LD (60/oldal, EUR), lapozás ?counter= működik"
+  },
+  "taiwangun": {
+    "source": "listing",
+    "start_urls": [
+      "https://www.taiwangun.com/assault-rifle-aeg"
+    ],
+    "product_pattern": "^https://www\\.taiwangun\\.com/assault-rifle-aeg/[a-z0-9-]+$",
+    "page_tpl": "{url}/page:{n}",
+    "status": "termékoldal ✓ (USD) | kategória: 61 terméklink ✓ | lapozás '/page:N' feltételezés -> dry-run-nal ellenőrizni"
+  },
+  "evike-europe": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "product_pattern": "/\\d+\\.html$",
+    "status": "termékoldal ✓ | /sitemap.xml nem sitemap -> robots.txt alapján (auto)",
+    "base_url": "https://evike-europe.com"
+  },
+  "powair6": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.powair6.com",
+    "product_pattern": "/en/[a-z0-9-]+/\\d+-[a-z0-9-]+\\.html$",
+    "status": "termékoldal ✓ | kategória URL 404 -> robots.txt sitemap (auto)"
+  },
+  "airsoftpro": {
+    "enabled": false,
+    "source": "sitemap",
+    "sitemap": "auto",
+    "product_pattern": "-detail$",
+    "status": "HIBÁS: a JSON-LD name='ASG', ár gyanús, készlet nincs -> --dump kell, egyedi adapter",
+    "base_url": "https://airsoftpro.cz"
+  },
+  "combat-zone": {
+    "enabled": false,
+    "source": "sitemap",
+    "sitemap": "auto",
+    "product_pattern": "/spd/",
+    "status": "kategóriaoldalon nincs terméklink (JS-ből tölt) -> sitemap ellenőrizendő",
+    "base_url": "https://www.combat-zone.hu"
+  },
+  "airsoftplaza": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "product_pattern": "/termek/[^/]+/?$",
+    "status": "✓ product-sitemap 199 termék; auto = minden al-sitemap",
+    "base_url": "https://airsoftplaza.hu"
+  },
+  "airsoftcentrum": {
+    "source": "sitemap",
+    "sitemap": "auto",
+    "product_pattern": "-\\d{3,6}$",
+    "status": "termékoldal: ár ✓, készlet ismeretlen -> --dump kell | sitemap ellenőrizendő",
+    "base_url": "https://www.airsoftcentrum.hu"
+  }
+}

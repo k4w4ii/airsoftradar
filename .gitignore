@@ -1,0 +1,8 @@
+.env
+.env.*
+__pycache__/
+*.pyc
+debug/
+node_modules/
+.next/
+supabase/.temp/
