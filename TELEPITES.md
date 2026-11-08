@@ -33,8 +33,10 @@ git config --global user.email "a-github-email-cimed@pelda.hu"
 ## 4. Supabase (adatbázis)
 1. https://supabase.com → **Start your project** → belépés GitHubbal.
 2. **New project**: név `airsoftradar`, adatbázis-jelszó (mentsd el), Region: **Central EU (Frankfurt)**. Várj ~2 percet.
-3. Bal menü **SQL Editor** → **New query**. Nyisd meg Jegyzettömbbel a `supabase\migrations\0001_init.sql`-t, másold be az egészet, **Run**. Várt eredmény: „Success. No rows returned”.
-4. Ugyanígy sorban: `0002_seed.sql`, `0003_i18n_multicurrency.sql`, `0004_more_manufacturers.sql`. Mindegyik új query-ben.
+3. Bal menü **SQL Editor** → **New query**. Nyisd meg Jegyzettömbbel a `supabase\telepites_egyben.sql`-t, **Ctrl+A, Ctrl+C**, illeszd be az üres query-be, **Run**.
+   - Ha felugrik egy „destructive operation” figyelmeztetés: **Run this query** (csak a saját árkereső-tábláinkat törli és hozza létre újra).
+   - Várt eredmény alul egy sor: `boltok 8 | gyartok 42 | kategoriak 6`.
+4. Ez a fájl a 4 migrációt helyes sorrendben tartalmazza, és bármikor újrafuttatható (ha valami elromlik, csak futtasd újra).
 5. Bal lent **Project Settings** → **API Keys** → másold ki a **Secret key**-t (`sb_secret_...`).
    **Project Settings → Data API** (vagy a projekt főoldala) → másold ki a **Project URL**-t (`https://xxxx.supabase.co`).
 
@@ -48,7 +50,15 @@ Mindkettő után illeszd be az értéket (jobb klikk) és Enter. A titkos kulcs 
 ## 6. Első próbafutás
 1. https://github.com → a repód → **Actions** fül → bal oldalt **daily-scrape** → **Run workflow** → `limit` mezőbe: `10` → **Run workflow**.
 2. ~5–10 perc múlva zöld pipa = siker. Piros X esetén kattints rá, és küldd el a hibaüzenetet.
-3. Supabase → **Table Editor** → `offers` táblában látszanak a letöltött ajánlatok.
+3. Supabase → **SQL Editor** → futtasd a `supabase\allapot.sql`-t: boltonként mutatja, hány ajánlat jött le, mennyi párosodott, és az első hibát.
+
+## 7. Frissítés (amikor új fájlokat kapsz)
+Zip kicsomagolása az `E:\airsoftradar` mappába (felülírás), majd:
+```powershell
+git add .
+git commit -m "Frissítés"
+git push
+```
 
 ## Hibák
 | Üzenet | Megoldás |
@@ -56,4 +66,6 @@ Mindkettő után illeszd be az értéket (jobb klikk) és Enter. A titkos kulcs 
 | `LF will be replaced by CRLF` | Csak figyelmeztetés, nem hiba. |
 | `Author identity unknown` | 2. lépés kimaradt. |
 | `gh is not recognized` | 3.2 után nem nyitottál új PowerShellt. |
+| `null value in column "name_en"` | A migrációk rossz sorrendben futottak -> futtasd a `telepites_egyben.sql`-t. |
+| PowerShell „nem áll le” probe közben | Még dolgozik (sok oldalt tölt le). A `[probe] ...` sorok mutatják, hol tart; a végén `[probe] KÉSZ`. Leállítás: **Ctrl+C**. |
 | `Invalid JWT` | Rossz kulcs: a **Secret key**-t (`sb_secret_...`) add meg, ne a publishable-t. |

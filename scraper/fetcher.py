@@ -59,7 +59,8 @@ class Fetcher:
                     raise
             except (urllib.error.URLError, TimeoutError):
                 pass
-            time.sleep((2 ** attempt) * 5 + random.random() * 2)
+            if attempt < self.retries - 1:
+                time.sleep((2 ** attempt) * 5 + random.random() * 2)
         return None
 
     def _throttle(self, url: str) -> None:

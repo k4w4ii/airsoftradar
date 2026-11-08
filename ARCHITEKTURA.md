@@ -26,7 +26,7 @@ mnb_rates.py ─> run_shop.py × 8 bolt (párhuzamosan, max 4) ─> run_shop.py 
 |---|---|
 | `fetcher.py` | robots.txt, hostonkénti 2–3 mp késleltetés, 429/5xx újrapróbálás, gzip |
 | `crawl.py` | termék URL-ek sitemapből vagy kategória-lapozásból |
-| `jsonld.py` | schema.org Product / ProductGroup / AggregateOffer + OpenGraph tartalék |
+| `jsonld.py` | schema.org Product (JSON-LD, microdata) + OpenGraph tartalék |
 | `matcher.py` | termékpárosítás (lásd lent) |
 | `run_shop.py` | teljes futás egy boltra, `scrape_runs` napló |
 | `probe.py` | új bolt felderítése: mit lát a scraper, milyen linkminták vannak |
@@ -42,17 +42,21 @@ mnb_rates.py ─> run_shop.py × 8 bolt (párhuzamosan, max 4) ─> run_shop.py 
 `0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó.
 A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN futtatná.
 
-## Boltok állapota (probe, 2026-11-08)
-| Bolt | Állapot |
-|---|---|
-| Gunfire | kategóriaoldal JSON-LD-ben 60 terméket ad (EUR) -> termékoldalak nem kellenek; lapozás ellenőrizendő |
-| Taiwangun | termékoldal ✓, **USD**-ben ad árat, brand nincs (címből) |
-| Evike Europe | termékoldal ✓ (EMG) |
-| Powair6 | termékoldal ✓, SKU-ban TM JAN -> EAN |
-| AirsoftPlaza | termékoldal ✓ |
-| AirsoftCentrum | ár ✓, készlet ismeretlen -> HTML-dump kell |
-| AirsoftPro | ❌ hibás JSON-LD (name='ASG') -> letiltva, egyedi adapter |
-| Combat-Zone | ❌ kategórialista JS-ből tölt -> letiltva, sitemap ellenőrizendő |
+## Boltok állapota (2026-11-08, 2. kör)
+| Bolt | Forrás | Állapot |
+|---|---|---|
+| Gunfire | kategória-lapozás (`?counter=`) | ✓ kategóriaoldal JSON-LD, 60 termék/oldal, EUR |
+| Taiwangun | kategória-lapozás (`/page:N`?) | termékoldal ✓ (USD), 61 terméklink/oldal; lapozás feltételezés |
+| Evike Europe | 3 AEG kategória (`?p=N`) | termékoldal ✓; teljes sitemap 15 872 termék -> túl sok |
+| Powair6 | robots.txt sitemap, csak `/en/aeg-*` | termékoldal ✓ (TM JAN -> EAN); sitemap ellenőrizendő |
+| AirsoftPlaza | robots.txt sitemap | ✓ 199 termék |
+| AirsoftCentrum | AEG kategória (`?page=N`) | ✓ microdata (ár, készlet, márka) |
+| AirsoftPro | robots.txt sitemap, csak puska-kategória | ✓ microdata (a név korábban a márka volt) |
+| Combat-Zone | – | ❌ letiltva: a kategórialista JS-ből tölt |
+
+Kinyerési sorrend: JSON-LD -> microdata (itemscope/itemprop) -> OpenGraph meta.
+Időkorlát: boltonként 90 perc (`SCRAPE_BUDGET_MIN`) és max. 2000 termék; csonka futás után nincs inaktiválás.
+Állapot-lekérdezés: `supabase/allapot.sql`.
 
 ## Séma – lényeg
 - `products` = kanonikus termék, kulcs: **(manufacturer_id, model_code_norm)**.
@@ -78,7 +82,7 @@ Karbantartás: új regex a `STRONG_PATTERNS`-be = több automatikus párosítás
 1. ✅ **Séma** – migrációk 0001–0004 (lásd fent).
 2. ✅ **MNB árfolyam job** – `mnb_rates.py`, napi cron.
 3. ✅ **Generikus scraper + pipeline** – JSON-LD, sitemap/lapozás, `run_shop.py`, GitHub Actions.
-4. ⏳ **Bolt-konfigok élesítése** – 1. kör kész (fenti táblázat). Hátra: kategória/sitemap minták (`probe.py --file scraper/pelda_urls_2.txt`), AirsoftPro + AirsoftCentrum HTML-dump alapján adapter.
+4. ⏳ **Bolt-konfigok élesítése** – 2. kör kész (fenti táblázat, microdata-támogatás). Hátra: első éles futás `allapot.sql` alapján, Combat-Zone.
 5. ✅ **Párosítás bekötése** – `run_shop.py` hívja, `match_candidates` review-hoz.
 6. **Frontend MVP (5–7 nap)** – `/[locale]` (hu, en), kereső (pg_trgm), kategórialista szűrőkkel (ár, készlet, gyártó, szállítási ország), termékoldal (ajánlatok választott devizában, eredeti ár tooltipben, árdiagram), `/go/[offerId]` átirányító affiliate taggel + kattintásszámlálás.
 7. **Admin review oldal (1–2 nap)** – pending/review ajánlatok: „összevon X-szel” / „új termék” / „elutasít” (Supabase Auth, admin role).

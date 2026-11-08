@@ -1,5 +1,5 @@
 {
-  "_doc": "source: 'sitemap' | 'listing'. product_pattern: termék URL regex. headers: extra HTTP fejlécek (pl. deviza-cookie). enabled=false -> kihagyva. status: probe eredménye.",
+  "_doc": "source: 'sitemap' | 'listing'. sitemap: URL vagy 'auto' (robots.txt). product_pattern: termék URL regex. max_products: napi felső korlát (alap 2000). headers: extra HTTP fejlécek. enabled=false -> kihagyva.",
   "gunfire": {
     "source": "listing",
     "start_urls": [
@@ -19,26 +19,29 @@
     "status": "termékoldal ✓ (USD) | kategória: 61 terméklink ✓ | lapozás '/page:N' feltételezés -> dry-run-nal ellenőrizni"
   },
   "evike-europe": {
-    "source": "sitemap",
-    "sitemap": "auto",
-    "product_pattern": "/\\d+\\.html$",
-    "status": "termékoldal ✓ | /sitemap.xml nem sitemap -> robots.txt alapján (auto)",
-    "base_url": "https://evike-europe.com"
+    "source": "listing",
+    "start_urls": [
+      "https://evike-europe.com/airsoft-guns/assault-rifles/aeg-assault-rifles.html",
+      "https://evike-europe.com/airsoft-guns/submachine-guns/aeg-submachine-gun.html",
+      "https://evike-europe.com/airsoft-guns/sniper-rifles/aeg-sniper-rifles.html"
+    ],
+    "product_pattern": "^https://evike-europe\\.com/[a-z0-9-]+\\.html$",
+    "page_tpl": "{url}?p={n}",
+    "status": "termékoldal ✓ | teljes sitemap 15 872 termék (túl sok) -> AEG kategóriák lapozása"
   },
   "powair6": {
     "source": "sitemap",
     "sitemap": "auto",
     "base_url": "https://www.powair6.com",
-    "product_pattern": "/en/[a-z0-9-]+/\\d+-[a-z0-9-]+\\.html$",
-    "status": "termékoldal ✓ | kategória URL 404 -> robots.txt sitemap (auto)"
+    "product_pattern": "/en/aeg-[a-z0-9-]+/\\d+-[a-z0-9-]+\\.html$",
+    "status": "termékoldal ✓ | robots.txt sitemap, csak AEG kategóriák (a probe itt elakadt -> ellenőrizendő)"
   },
   "airsoftpro": {
-    "enabled": false,
     "source": "sitemap",
     "sitemap": "auto",
-    "product_pattern": "-detail$",
-    "status": "HIBÁS: a JSON-LD name='ASG', ár gyanús, készlet nincs -> --dump kell, egyedi adapter",
-    "base_url": "https://airsoftpro.cz"
+    "base_url": "https://airsoftpro.cz",
+    "product_pattern": "/cz/airsoftove-zbrane/airsoftove-zbrane-dlouhe/[a-z0-9-]+-detail$",
+    "status": "✓ microdata (név, ár, készlet, márka) | sitemap ellenőrizendő"
   },
   "combat-zone": {
     "enabled": false,
@@ -56,10 +59,12 @@
     "base_url": "https://airsoftplaza.hu"
   },
   "airsoftcentrum": {
-    "source": "sitemap",
-    "sitemap": "auto",
-    "product_pattern": "-\\d{3,6}$",
-    "status": "termékoldal: ár ✓, készlet ismeretlen -> --dump kell | sitemap ellenőrizendő",
-    "base_url": "https://www.airsoftcentrum.hu"
+    "source": "listing",
+    "start_urls": [
+      "https://www.airsoftcentrum.hu/airsoft-fegyverek/elektromos-airsoft-fegyverek"
+    ],
+    "product_pattern": "^https://www\\.airsoftcentrum\\.hu/[a-z0-9-]+(?<!-m)-\\d{3,6}$",
+    "page_tpl": "{url}?page={n}",
+    "status": "✓ microdata (ár, készlet, márka) | AEG kategória lapozása"
   }
 }

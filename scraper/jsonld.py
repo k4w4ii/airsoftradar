@@ -7,6 +7,7 @@ import json
 import re
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
+from html.parser import HTMLParser
 from urllib.parse import urljoin, urlsplit
 
 _LD_RX = re.compile(r"<script[^>]+type=[\"']application/ld\+json[\"'][^>]*>(.*?)</script>", re.S | re.I)
@@ -163,6 +164,10 @@ def extract(page: str, page_url: str) -> list[ScrapedOffer]:
                     results += _from_product(v, page_url, parent=node)
             elif "Product" in types:
                 results += _from_product(node, page_url)
+    if not results:                                   # 2. microdata (itemscope/itemprop), pl. Shoprenter, VirtueMart
+        for node in microdata_items(page):
+            if "Product" in _types(node):
+                results += _from_product(node, page_url)
     if results:
         seen, uniq = set(), []
         for r in results:
@@ -185,3 +190,91 @@ def _from_meta(page: str, page_url: str) -> list[ScrapedOffer]:
         currency=(meta.get("product:price:currency") or meta.get("og:price:currency") or meta.get("pricecurrency") or "").upper() or None,
         stock=map_stock(meta.get("product:availability") or meta.get("og:availability") or meta.get("availability")),
         brand=meta.get("product:brand"), image=meta.get("og:image"))]
+
+
+# ---------------------------------------------------------------- microdata
+_VOID = {"meta", "link", "img", "br", "hr", "input", "source", "area", "base", "col", "embed", "param", "track", "wbr"}
+
+
+class _Microdata(HTMLParser):
+    """schema.org microdata -> JSON-LD-szerű dict-ek ({'@type': ..., prop: érték | dict | [..]})."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.items: list[dict] = []      # gyökér itemek
+        self.scopes: list[dict] = []     # aktív itemscope-ok
+        self.stack: list[tuple] = []     # (tag, scope_pushed, capture)
+
+    def _add(self, prop: str, value) -> None:
+        if self.scopes and value not in (None, ""):
+            for name in prop.split():
+                self.scopes[-1].setdefault(name, []).append(value)
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        prop, pushed, capture = a.get("itemprop"), False, None
+        if "itemscope" in a:
+            itype = (a.get("itemtype") or "").split()
+            item = {"@type": itype[0].rsplit("/", 1)[-1] if itype else ""}
+            if prop and self.scopes:
+                self._add(prop, item)
+            elif not prop:
+                self.items.append(item)
+            self.scopes.append(item)
+            pushed = True
+        elif prop:
+            val = a.get("content")
+            if val is None:
+                val = a.get("href") if tag in ("a", "link") else a.get("src") if tag in ("img", "source") else None
+            if val is not None or tag in _VOID:
+                self._add(prop, val)
+            else:
+                capture = [prop, self.scopes[-1] if self.scopes else None, []]
+        if tag not in _VOID:
+            self.stack.append((tag, pushed, capture))
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        if tag not in _VOID:
+            self.handle_endtag(tag)
+
+    def handle_data(self, data):
+        for _, _, cap in self.stack:
+            if cap:
+                cap[2].append(data)
+
+    def handle_endtag(self, tag):
+        if not any(t == tag for t, _, _ in self.stack):
+            return
+        while self.stack:
+            t, pushed, cap = self.stack.pop()
+            if cap and cap[1] is not None:
+                text = re.sub(r"\s+", " ", "".join(cap[2])).strip()
+                if text:
+                    for name in cap[0].split():
+                        cap[1].setdefault(name, []).append(text)
+            if pushed and self.scopes:
+                self.scopes.pop()
+            if t == tag:
+                break
+
+
+def _flatten(item: dict) -> dict:
+    """Listás értékek -> első érték (offers kivétel: lista marad), beágyazott itemek rekurzívan."""
+    out = {"@type": item.get("@type") or ""}
+    for k, vals in item.items():
+        if k == "@type":
+            continue
+        vals = [_flatten(v) if isinstance(v, dict) else v for v in vals]
+        out[k] = vals if k == "offers" else vals[0]
+    return out
+
+
+def microdata_items(page: str) -> list[dict]:
+    p = _Microdata()
+    try:
+        p.feed(page)
+        p.close()
+    except Exception:
+        pass
+    return [_flatten(i) for i in p.items]

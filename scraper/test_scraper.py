@@ -68,6 +68,27 @@ class TestJsonLd(unittest.TestCase):
         [o] = extract(html, "https://www.taiwangun.com/x")
         self.assertEqual(o.title, "CM.522 Sport Line, GEN-2 [CYMA]")
 
+    def test_microdata_shoprenter(self):
+        page = """<ol itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope
+        itemtype="https://schema.org/ListItem"><span itemprop="name">Kezdőlap</span></li></ol>
+        <div itemscope itemtype="//schema.org/Product"><h1><span itemprop="name">Double Bell RK-10 AKMS AK47 Fém</span></h1>
+        <span class="x" itemprop="brand">Double Bell</span><img itemprop="image" src="/img/rk10.jpg">
+        <div itemprop="offers" itemscope itemtype="https://schema.org/Offer"><span>89.990 Ft</span>
+        <meta itemprop="price" content="89990"/><meta itemprop="priceCurrency" content="HUF"/><meta itemprop="sku" content="00016582"/>
+        <link itemprop="availability" href="http://schema.org/InStock"/></div></div>"""
+        [o] = extract(page, "https://www.airsoftcentrum.hu/double-bell-rk-10-akms-ak47-7084")
+        self.assertEqual((o.title, o.brand, o.price, o.currency, o.stock), ("Double Bell RK-10 AKMS AK47 Fém", "Double Bell", Decimal("89990"), "HUF", "in_stock"))
+        self.assertEqual(o.image, "https://www.airsoftcentrum.hu/img/rk10.jpg")
+
+    def test_microdata_nested_brand_not_title(self):
+        page = """<div itemscope itemtype="https://schema.org/Product"><meta itemprop="name" content="Airsoftová zbraň AK47 Arsenal SLR105" />
+        <span class="hidden" itemprop="brand" itemscope itemtype="https://schema.org/Thing"><meta itemprop="name" content="ASG" /></span>
+        <meta itemprop="sku" content="7416" /><span itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+        <meta itemprop="price" content="1699" /><meta itemprop="priceCurrency" content="CZK" />
+        <link itemprop="availability" href="https://schema.org/OutOfStock" /></span></div>"""
+        [o] = extract(page, "https://airsoftpro.cz/x-detail")
+        self.assertEqual((o.title, o.brand, o.stock), ("Airsoftová zbraň AK47 Arsenal SLR105", "ASG", "out_of_stock"))
+
     def test_no_data(self):
         self.assertEqual(extract("<html>kategória</html>", "https://x.hu"), [])
 
@@ -199,10 +220,10 @@ class TestPipeline(unittest.TestCase):
         db = FakeDB()
         _seed(db)
         with mock.patch("db.DB", return_value=db):
-            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522 AK fekete", "79990", "a1")], [])):
+            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522 AK fekete", "79990", "a1")], [], True)):
                 run_shop.run("airsoftplaza", None, False)
             with mock.patch.object(run_shop, "scrape", return_value=([_offer("CM.522 Sport Line Gen 2 (CYMA)", "189.90", "b1"),
-                                                                      _offer("Unknown brand rifle", "50", "b2")], [])):
+                                                                      _offer("Unknown brand rifle", "50", "b2")], [], True)):
                 run_shop.run("taiwangun", None, False)
 
         self.assertEqual(len(db.t["products"]), 1)
@@ -237,3 +258,30 @@ class TestRobotsSitemaps(unittest.TestCase):
         f = Fetcher()
         with mock.patch.object(f, "_raw", return_value=(404, "")):
             self.assertEqual(f.sitemaps("https://s.hu/"), ["https://s.hu/sitemap.xml"])
+
+
+class TestBudget(unittest.TestCase):
+    def test_partial_run_does_not_deactivate(self):
+        db = FakeDB()
+        _seed(db)
+        db.t["offers"].append({"id": 999, "shop_id": 1, "external_id": "old", "last_seen_at": "2000-01-01", "is_active": True,
+                               "match_status": "auto", "product_id": None})
+        with mock.patch("db.DB", return_value=db):
+            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522", "189.90", "n1")], [{"error": "időkorlát"}], False)):
+                run_shop.run("taiwangun", None, False)
+        self.assertTrue(next(o for o in db.t["offers"] if o["id"] == 999)["is_active"])
+        self.assertEqual(db.t["scrape_runs"][-1]["status"], "partial")
+        with mock.patch("db.DB", return_value=db):
+            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522", "189.90", "n1")], [], True)):
+                run_shop.run("taiwangun", None, False)
+        self.assertFalse(next(o for o in db.t["offers"] if o["id"] == 999)["is_active"])
+
+    def test_scrape_respects_budget(self):
+        pages = {f"https://www.taiwangun.com/assault-rifle-aeg/p{i}": WOO for i in range(5)}
+        listing = "".join(f'<a href="/assault-rifle-aeg/p{i}">x</a>' for i in range(5))
+        pages["https://www.taiwangun.com/assault-rifle-aeg"] = listing
+        fake = FakeFetcher(pages)
+        with mock.patch.object(run_shop, "Fetcher", return_value=fake), mock.patch.dict("os.environ", {"SCRAPE_BUDGET_MIN": "0"}):
+            out, errors, complete = run_shop.scrape("taiwangun", None)
+        self.assertFalse(complete)
+        self.assertIn("időkorlát", errors[-1]["error"])

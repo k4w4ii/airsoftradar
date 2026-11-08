@@ -43,6 +43,7 @@ def dump(directory: str, url: str, page: str) -> None:
 
 
 def probe(f: Fetcher, url: str, dump_dir: str | None = None) -> None:
+    print(f"[probe] {url}", file=sys.stderr, flush=True)      # haladás a konzolon, akkor is, ha a kimenet fájlba megy
     if urlsplit(url).path in ("", "/"):
         maps = f.sitemaps(url)
         print(f"\n=== {url}\n  robots.txt sitemapek: {maps}")
@@ -90,9 +91,11 @@ if __name__ == "__main__":
         urls = [l.strip() for l in open(args[1], encoding="utf-8") if l.strip().startswith("http")]
     else:
         urls = args
-    f = Fetcher(delay=1.0)
+    f = Fetcher(delay=1.0, retries=1, timeout=20)
     for u in urls:
         try:
             probe(f, u, dump_dir)
         except Exception as e:
             print(f"\n=== {u}\n  HIBA: {e!r}")
+        sys.stdout.flush()
+    print("[probe] KÉSZ", file=sys.stderr)

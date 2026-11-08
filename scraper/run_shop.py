@@ -10,7 +10,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
+import time
 import sys
 import unicodedata
 from collections import defaultdict
@@ -27,8 +29,11 @@ CONFIG = json.loads((Path(__file__).parent / "shops.json").read_text())
 STALE_DAYS = 3
 
 
-def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]]:
+def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict], bool]:
+    """Visszaad: (ajánlatok, hibák, teljes-e). Nem teljes, ha időkorlát vagy max_products vágta le
+    -> ilyenkor nem inaktiválunk (különben a le nem töltött termékek tévesen eltűnnének)."""
     cfg = CONFIG[slug]
+    deadline = time.monotonic() + float(os.environ.get("SCRAPE_BUDGET_MIN", 90)) * 60
     f, errors, out = Fetcher(extra_headers=cfg.get("headers")), [], []
     if cfg["source"] == "sitemap":
         maps = f.sitemaps(cfg["base_url"]) if cfg["sitemap"] == "auto" else [cfg["sitemap"]]
@@ -36,10 +41,15 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
     else:
         urls, out = from_listing(f, cfg["start_urls"], cfg["product_pattern"], cfg.get("page_tpl"),
                                  cfg.get("max_pages", 50), extract_fn=extract)
-    urls = urls[:limit]
-    out = out[:limit]
+    cap = min(limit or 10**9, cfg.get("max_products", 2000))
+    complete = limit is None and len(urls) <= cap
+    urls, out = urls[:cap], out[:cap]
     print(f"[{slug}] {len(out)} ajánlat kategóriaoldalról, {len(urls)} termék URL", file=sys.stderr)
-    for u in urls:
+    for i, u in enumerate(urls):
+        if time.monotonic() > deadline:
+            errors.append({"error": f"időkorlát: {i}/{len(urls)} URL után leállt"})
+            complete = False
+            break
         try:
             page = f.get(u)
             found = extract(page, u) if page else []
@@ -48,7 +58,7 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
             out += found
         except Exception as e:  # egy hibás oldal ne állítsa le a futást
             errors.append({"url": u, "error": repr(e)[:200]})
-    return out, errors
+    return out, errors, complete
 
 
 def slugify(text: str, key: str) -> str:
@@ -98,7 +108,7 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
     if not CONFIG[slug].get("enabled", True):
         print(f"[{slug}] kihagyva (enabled=false): {CONFIG[slug].get('note', '')}")
         return
-    scraped, errors = scrape(slug, limit)
+    scraped, errors, complete = scrape(slug, limit)
     if dry:
         for s in scraped:
             print(json.dumps(s.__dict__, default=str, ensure_ascii=False))
@@ -155,10 +165,11 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
     db.upsert("price_history", hist, on_conflict="offer_id,observed_on", returning=False)
 
     # --- eltűnt termékek inaktiválása ---
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=STALE_DAYS)).isoformat()
-    db.update("offers", {"is_active": False}, shop_id=f"eq.{shop['id']}", last_seen_at=f"lt.{cutoff}")
+    if complete:
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=STALE_DAYS)).isoformat()
+        db.update("offers", {"is_active": False}, shop_id=f"eq.{shop['id']}", last_seen_at=f"lt.{cutoff}")
 
-    status = "ok" if not errors else ("partial" if scraped else "failed")
+    status = "ok" if complete and not errors else ("partial" if scraped else "failed")
     db.update("scrape_runs", {"finished_at": datetime.now(timezone.utc).isoformat(), "status": status,
                               "offers_seen": len(saved), "offers_new": stats.get("new", 0),
                               "errors": errors[:50]}, id=f"eq.{run_id}")
