@@ -11,7 +11,7 @@ import zlib
 from collections import Counter
 from urllib.parse import urlsplit
 
-USER_AGENT = "AirsoftPriceBot/0.1 (+https://example.com/bot)"  # TODO: saját domain + bot info oldal
+USER_AGENT = "AirsoftHunterBot/1.0 (+https://www.airsofthunter.com/bot)"
 
 
 class Fetcher:

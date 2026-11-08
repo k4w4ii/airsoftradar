@@ -14,7 +14,7 @@ export async function generateMetadata({ params, searchParams }) {
   const tr = t(locale);
   const cat = typeof sp.cat === "string" && CATS.includes(sp.cat) ? sp.cat : null;
   return {
-    title: cat && cat !== "weapons" ? `${tr.cats[cat]} | AirsoftRadar` : tr.title,
+    title: cat && cat !== "weapons" ? `${tr.cats[cat]} | AirsoftHunter` : tr.title,
     description: tr.description,
     alternates: { canonical: `/${locale}${cat ? `?cat=${cat}` : ""}`, languages: { hu: "/hu", en: "/en" } },
   };

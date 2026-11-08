@@ -129,3 +129,14 @@ export async function catalogSearch(params, currency, rates) {
   const res = await q(path);
   return { ...res, page, pages: Math.max(1, Math.ceil((res.total || 0) / PAGE_SIZE)), edges, edgeCurrency: cur };
 }
+
+/** Sitemaphez: minden termék slug-ja lapozva (a Supabase egyszerre max. 1000 sort ad) */
+export async function getAllSlugs(max = 45000) {
+  const out = [];
+  for (let off = 0; off < max; off += 1000) {
+    const rows = await q(`product_summary?select=slug,updated_at&order=id.asc&limit=1000&offset=${off}`);
+    out.push(...rows);
+    if (rows.length < 1000) break;
+  }
+  return out;
+}

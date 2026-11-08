@@ -18,8 +18,8 @@ export function isLocale(x) {
 
 const DICT = {
   hu: {
-    title: "AirsoftRadar – airsoft árösszehasonlító",
-    description: "Airsoft replikák árai európai boltokból, naponta frissítve. Keresd meg, hol a legolcsóbb.",
+    title: "AirsoftHunter – airsoft árösszehasonlító",
+    description: "Airsoft replikák és kiegészítők árai európai boltokból, naponta frissítve. Vadászd le a legjobb árat.",
     tagline: (s) => `${s.products} replika ${s.shops} európai boltból, naponta frissítve`,
     searchPlaceholder: "Keresés: típus, gyártó vagy kód (pl. CM.522, Specna, EVOLT)",
     search: "Keresés",
@@ -74,8 +74,8 @@ const DICT = {
     remove: (x) => `${x} szűrő törlése`,
   },
   en: {
-    title: "AirsoftRadar – airsoft price comparison",
-    description: "Airsoft replica prices from European shops, updated daily. Find where it is cheapest.",
+    title: "AirsoftHunter – airsoft price comparison",
+    description: "Airsoft replica and gear prices from European shops, updated daily. Hunt down the best price.",
     tagline: (s) => `${s.products} replicas from ${s.shops} European shops, updated daily`,
     searchPlaceholder: "Search by model, brand or code (e.g. CM.522, Specna, EVOLT)",
     search: "Search",

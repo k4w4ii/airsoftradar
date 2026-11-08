@@ -1,5 +1,5 @@
 {
-  "name": "airsoftradar-web",
+  "name": "airsofthunter-web",
   "private": true,
   "scripts": {
     "dev": "next dev",

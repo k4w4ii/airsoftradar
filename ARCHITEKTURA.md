@@ -1,4 +1,4 @@
-# Airsoft árkereső – architektúra és fejlesztési terv (MVP)
+# AirsoftHunter – airsoft árkereső: architektúra és fejlesztési terv
 
 ## Stack
 | Réteg | Választás |
@@ -74,9 +74,13 @@ Kinyerési sorrend: JSON-LD -> microdata (itemscope/itemprop) -> OpenGraph meta.
 Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és alapból 6000 termék; csonka futás után nincs inaktiválás.
 Állapot-lekérdezés: `supabase/allapot.sql`.
 
+## Márka
+**AirsoftHunter** – „vadászd le a legjobb árat”. Logó: osztott szálkereszt (irányzék), sárgaréz középponttal (a találat = a legjobb ár). Domain: `www.airsofthunter.com` (az `airsofthunter.com` 308-cal ide irányít). Scraper User-Agent: `AirsoftHunterBot/1.0 (+https://www.airsofthunter.com/bot)`.
+
 ## Weboldal (`web/`, Next.js 16, Vercel)
 - Függőség csak `next`, `react`, `react-dom`; sima CSS (`app/globals.css`), JavaScript (nincs TS-típusellenőrzés, ami buildet törhetne).
 - Adat: PostgREST `fetch`-csel (`lib/data.js`), **publishable** kulccsal (csak olvas), 30 perces cache. Env: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`.
+- SEO: `app/sitemap.js` (lista- és termékoldalak hu/en hreflang-gal, naponta), `app/robots.js` (`/go/`, `/cur` tiltva), `metadataBase` = `SITE_URL` (`lib/site.js`).
 - Útvonalak: `/` -> `/hu` vagy `/en` (Accept-Language, `next.config.mjs` redirect) · `/[locale]` lista + szűrők · `/[locale]/p/[slug]` termékoldal · `/go/[id]` kimenő link (affiliate sablon) · `/cur` pénznem-süti.
 - Nézetek (0005–0007): `product_summary` (+max ár, `category`, `search_code`), `v_product_offers`, `v_price_daily`, `v_manufacturers`, `v_site_stats`.
 - Katalógus: **egy RPC-hívás** (`catalog_search`) adja a találatokat és a szűrő-darabszámokat; minden szűrő darabszáma a többi szűrővel számol. Szűrők: típus-fa (`weapons` = minden fegyver; alapértelmezés kereséskor `all`), ársávok (pénznemenként kerek határok, `PRICE_EDGES`) + kétfogantyús csúszka + min/max, márkák (többes választás), raktáron. Mobilon CSS-only lenyitható panel; JS nélkül „Szűrés” gombbal működik.
@@ -112,7 +116,7 @@ Karbantartás: új regex a `STRONG_PATTERNS`-be = több automatikus párosítás
 3. ✅ **Generikus scraper + pipeline** – JSON-LD, sitemap/lapozás, `run_shop.py`, GitHub Actions.
 4. ⏳ **Bolt-konfigok élesítése** – 2. kör kész (fenti táblázat, microdata-támogatás). Hátra: első éles futás `allapot.sql` alapján, Combat-Zone.
 5. ✅ **Párosítás bekötése** – `run_shop.py` hívja, `match_candidates` review-hoz.
-6. ✅ **Frontend MVP** – `web/` (lásd „Weboldal”). Élesben: https://airsoftradar.vercel.app (2026-11-08). Kész: kódos keresés (CM522 = CM.522). Kész: szűrősáv (típus, ár + csúszka, márka, készlet). Hátra: sitemap.xml, kattintásszámlálás, saját domain.
+6. ✅ **Frontend MVP** – `web/` (lásd „Weboldal”). Élesben: https://www.airsofthunter.com (Cloudflare DNS → Vercel; tartalék: airsoftradar.vercel.app). Kész: kódos keresés (CM522 = CM.522). Kész: szűrősáv (típus, ár + csúszka, márka, készlet). Kész: sitemap.xml, robots.txt, /bot oldal, saját domain. Hátra: kattintásszámlálás.
 7. **Admin review oldal (1–2 nap)** – pending/review ajánlatok: „összevon X-szel” / „új termék” / „elutasít” (Supabase Auth, admin role).
 8. **Üzemeltetés (1 nap)** – `scrape_runs` monitor, GitHub Actions hiba -> email; ajánlat `is_active=false`, ha 3 napig nem láttuk.
 9. **2. fázis** – árriasztás (`price_alerts` kész), szállítási költség HU-ra boltonként, affiliate XML feedek.

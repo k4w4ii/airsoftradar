@@ -1,4 +1,4 @@
-# Telepítési útmutató (kezdőknek)
+# AirsoftHunter – telepítési útmutató (kezdőknek)
 
 Minden parancsot **PowerShellben**, az `E:\airsoftradar` mappában futtass (`cd E:\airsoftradar`).
 
@@ -35,8 +35,8 @@ git config --global user.email "a-github-email-cimed@pelda.hu"
 2. **New project**: név `airsoftradar`, adatbázis-jelszó (mentsd el), Region: **Central EU (Frankfurt)**. Várj ~2 percet.
 3. Bal menü **SQL Editor** → **New query**. Nyisd meg Jegyzettömbbel a `supabase\telepites_egyben.sql`-t, **Ctrl+A, Ctrl+C**, illeszd be az üres query-be, **Run**.
    - Ha felugrik egy „destructive operation” figyelmeztetés: **Run this query** (csak a saját árkereső-tábláinkat törli és hozza létre újra).
-   - Várt eredmény alul egy sor: `boltok 8 | gyartok 42 | kategoriak 6`.
-4. Ez a fájl az összes migrációt (0001–0006) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
+   - Várt eredmény alul egy sor: `boltok 20 | gyartok 81 | kategoriak 6`.
+4. Ez a fájl az összes migrációt (0001–0009) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
 5. Bal lent **Project Settings** → **API Keys** → másold ki a **Secret key**-t (`sb_secret_...`).
    **Project Settings → Data API** (vagy a projekt főoldala) → másold ki a **Project URL**-t (`https://xxxx.supabase.co`).
 
@@ -76,6 +76,14 @@ git push
 ## 9. Adatbázis-frissítés (amikor új `migrations/000N_...sql` fájlt kapsz)
 Supabase → **SQL Editor** → **+** → az új fájl tartalma → **Run**. Ezek adatot nem törölnek. (A `telepites_egyben.sql`-t ilyenkor **ne** futtasd!)
 
+## 10. Saját domain (Cloudflare → Vercel)
+1. **Vercel → Project → Settings → Domains**: add hozzá az `airsofthunter.com`-ot (a `www` változat magától jön, a csupasz domain 308-cal a `www`-re irányít).
+2. **Cloudflare → airsofthunter.com → DNS → Records**: töröld a meglévő `@` és `www` A/AAAA/CNAME rekordokat (ha vannak).
+3. **Add record** kétszer (az értéket a Vercel mutatja, „View DNS configuration”):
+   - Type `CNAME`, Name `@`, Target `<…>.vercel-dns-017.com`, **Proxy status: DNS only (szürke felhő)**
+   - Type `CNAME`, Name `www`, Target ugyanaz (vagy amit a Vercel a www-hez ír), **DNS only**
+4. Vercel → **Refresh**. Pár perc – néhány óra, amíg „Valid Configuration” lesz; az SSL-t a Vercel adja.
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|
@@ -86,4 +94,5 @@ Supabase → **SQL Editor** → **+** → az új fájl tartalma → **Run**. Eze
 | PowerShell „nem áll le” probe közben | Még dolgozik (sok oldalt tölt le). A `[probe] ...` sorok mutatják, hol tart; a végén `[probe] KÉSZ`. Leállítás: **Ctrl+C**. |
 | Vercel: „Hiányzik a SUPABASE_URL…” | A 8.5 környezeti változók hiányoznak; Vercel → Settings → Environment Variables, utána Deployments → Redeploy. |
 | Vercel: „Supabase 404 … product_summary/v_product_offers” | A 8.1 lépés (`0005_web_views.sql`) kimaradt. |
+| Vercel domain: „Invalid Configuration” | Cloudflare-ben a felhő narancssárga (proxy) → kattints rá, legyen szürke (DNS only); vagy még terjed a DNS (várj, majd Refresh). |
 | `Invalid JWT` | Rossz kulcs: a **Secret key**-t (`sb_secret_...`) add meg, ne a publishable-t. |

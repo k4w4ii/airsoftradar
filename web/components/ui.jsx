@@ -2,12 +2,12 @@ import Link from "next/link";
 import { CURRENCIES, money, t } from "../lib/i18n";
 
 export function Logo() {
+  // Irányzék: osztott szálkereszt, a középpont sárgaréz (a „találat” = a legjobb ár)
   return (
     <svg className="logo-mark" viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="2" opacity=".35" />
-      <circle cx="16" cy="16" r="7.5" fill="none" stroke="currentColor" strokeWidth="2" opacity=".6" />
-      <path d="M16 16 L27.5 9.5" stroke="var(--brass)" strokeWidth="2.4" strokeLinecap="round" />
-      <circle cx="16" cy="16" r="2.2" fill="var(--brass)" />
+      <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M16 1.5v8M16 22.5v8M1.5 16h8M22.5 16h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="16" cy="16" r="2.6" fill="var(--brass)" />
     </svg>
   );
 }
@@ -21,7 +21,7 @@ export function Shell({ locale, currency, path = "", children, query = "" }) {
         <div className="topbar-inner">
           <Link href={`/${locale}`} className="brand">
             <Logo />
-            <span>AirsoftRadar</span>
+            <span>AirsoftHunter</span>
           </Link>
           <form action={`/${locale}`} className="topsearch" role="search">
             <input name="q" type="search" defaultValue={query} placeholder={tr.searchPlaceholder} aria-label={tr.search} />
