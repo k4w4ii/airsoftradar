@@ -42,8 +42,14 @@ def from_sitemap(f: Fetcher, url: str, pattern: str, limit: int = 5000, _depth: 
             diag["locs"] = diag.get("locs", 0) + 1
             if rx.search(loc):
                 out.append(_clean(loc))
-            elif len(diag.setdefault("minta", [])) < 3:
-                diag["minta"].append(loc)
+            else:
+                m = diag.setdefault("minta", [])
+                productish = bool(re.search(r"\d.*\.html$|-detail$|/termek/|/product", loc))
+                if productish and not diag.get("_pp"):     # első termékszerű URL-ek kiszorítják a menüpontokat
+                    m.clear()
+                    diag["_pp"] = True
+                if len(m) < 3 and (productish or not diag.get("_pp")):
+                    m.append(loc)
     return list(dict.fromkeys(out))[:limit]
 
 
@@ -58,14 +64,17 @@ def links_in(page: str, base: str, rx: re.Pattern) -> list[str]:
 
 
 def from_listing(f: Fetcher, start_urls: list[str], pattern: str, page_tpl: str | None = None,
-                 max_pages: int = 50, extract_fn=None, diag: dict | None = None) -> tuple[list[str], list]:
-    """page_tpl pl. '{url}?page={n}' ({n0} = nullától számozott).
+                 max_pages: int = 50, extract_fn=None, diag: dict | None = None,
+                 page_size: int = 24) -> tuple[list[str], list]:
+    """page_tpl pl. '{url}?page={n}'. Változók: {n} 1-től, {n0} 0-tól, {off} = (n-1)*page_size, {off1} = off+1
+    (VirtueMart: '{url}/results,{off1}-{off}').
     Ha extract_fn a kategóriaoldalból >=2 ajánlatot ad (pl. Gunfire JSON-LD lista), azokat közvetlenül
     visszaadja -> nem kell minden termékoldalt letölteni. Leáll, ha egy oldal semmi újat nem hoz."""
     rx, links, offers = re.compile(pattern), {}, {}
     for start in start_urls:
         for n in range(1, (max_pages if page_tpl else 1) + 1):
-            url = start if n == 1 or not page_tpl else page_tpl.format(url=start, n=n, n0=n - 1)
+            url = start if n == 1 or not page_tpl else page_tpl.format(url=start, n=n, n0=n - 1,
+                                                                     off=(n - 1) * page_size, off1=(n - 1) * page_size + 1)
             page = f.get(url)
             if not page:
                 break

@@ -308,13 +308,33 @@ class TestDiagnostics(unittest.TestCase):
 
 
 class TestRound3(unittest.TestCase):
-    def test_cdata_sitemap(self):
-        f = FakeFetcher({"https://www.powair6.com/1_index_sitemap.xml":
-            "<urlset><url><loc><![CDATA[https://www.powair6.com/en/aeg-assault/96396-tokyo-marui-evolt.html]]></loc></url>"
-            "<url><loc><![CDATA[https://www.powair6.com/fr/contactez-nous]]></loc></url></urlset>"})
-        cfg = run_shop.CONFIG["powair6"]
-        self.assertEqual(crawl.from_sitemap(f, "https://www.powair6.com/1_index_sitemap.xml", cfg["product_pattern"]),
-                         ["https://www.powair6.com/en/aeg-assault/96396-tokyo-marui-evolt.html"])
+    def test_cdata_sitemap_and_fr_to_en_rewrite(self):
+        sm = ("<urlset><url><loc><![CDATA[https://www.powair6.com/fr/]]></loc></url>"
+              "<url><loc><![CDATA[https://www.powair6.com/fr/aeg-assaut/96396-tokyo-marui-evolt.html]]></loc></url>"
+              "<url><loc><![CDATA[https://www.powair6.com/fr/textile/1234-tshirt.html]]></loc></url></urlset>")
+        en = "https://www.powair6.com/en/aeg-assaut/96396-tokyo-marui-evolt.html"
+        fake = FakeFetcher({"https://www.powair6.com/1_index_sitemap.xml": sm, en: WOO})
+        fake.sitemaps = lambda base: ["https://www.powair6.com/1_index_sitemap.xml"]
+        with mock.patch.object(run_shop, "Fetcher", return_value=fake):
+            out, errors, stale = run_shop.scrape("powair6", None)
+        self.assertEqual(len(out), 1)              # csak a fegyverkategória, angol URL-en letöltve
+        self.assertEqual(errors, [])
+
+    def test_diag_prefers_product_like_urls(self):
+        f = FakeFetcher({"https://s.fr/sm.xml": "<urlset>" + "".join(f"<url><loc>{u}</loc></url>" for u in
+                         ["https://s.fr/fr/", "https://s.fr/fr/contact", "https://s.fr/fr/x/12-a.html"]) + "</urlset>"})
+        diag = {}
+        crawl.from_sitemap(f, "https://s.fr/sm.xml", r"/en/", diag=diag)
+        self.assertEqual(diag["minta"], ["https://s.fr/fr/x/12-a.html"])
+
+    def test_virtuemart_paging(self):
+        def page(ids):
+            return "".join(f'<a href="/cz/airsoftove-zbrane/airsoftove-zbrane-dlouhe/p{i}-detail">x</a>' for i in ids)
+        base = "https://airsoftpro.cz/cz/airsoftove-zbrane/airsoftove-zbrane-dlouhe"
+        f = FakeFetcher({base: page([1, 2]), base + "/results,25-24": page([3]), base + "/results,49-48": page([3])})
+        cfg = run_shop.CONFIG["airsoftpro"]
+        urls, _ = crawl.from_listing(f, [base], cfg["product_pattern"], cfg["page_tpl"], page_size=cfg["page_size"], extract_fn=extract)
+        self.assertEqual([u.rsplit("/", 1)[1] for u in urls], ["p1-detail", "p2-detail", "p3-detail"])
 
     def test_evike_pattern(self):
         rx = re.compile(run_shop.CONFIG["evike-europe"]["product_pattern"])
@@ -339,3 +359,19 @@ class TestRound3(unittest.TestCase):
         with mock.patch.dict(run_shop.CONFIG, {"airsoftcentrum": cfg}), mock.patch.object(run_shop, "Fetcher", return_value=fake):
             out, errors, stale = run_shop.scrape("airsoftcentrum", None)
         self.assertEqual(stale, run_shop.STALE_DAYS + 3)   # 10 termék / 4 = 3 napos ciklus
+
+
+class TestTitleProductPipeline(unittest.TestCase):
+    def test_codeless_offers_from_two_shops_merge(self):
+        db = FakeDB()
+        _seed(db)
+        with mock.patch("db.DB", return_value=db):
+            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA Platinum AKS-74U replica", "60000", "c1")], [], 3)):
+                run_shop.run("airsoftplaza", None, False)
+            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA Platinum AKS-74U replica - Black", "150", "c2")], [], 3)):
+                run_shop.run("taiwangun", None, False)
+        self.assertEqual(len(db.t["products"]), 1)
+        p = db.t["products"][0]
+        self.assertIsNone(p["model_code_norm"])
+        self.assertEqual(db.t["product_codes"], [])
+        self.assertEqual({o["match_method"] for o in db.t["offers"]}, {"new_title", "fuzzy"})

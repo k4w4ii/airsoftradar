@@ -33,16 +33,23 @@
     "source": "sitemap",
     "sitemap": "auto",
     "base_url": "https://www.powair6.com",
-    "product_pattern": "/en/aeg-[a-z0-9-]+/\\d+-[a-z0-9-]+\\.html$",
-    "status": "robots.txt sitemap (12 223 URL, CDATA-ban) -> csak /en/aeg-*"
+    "product_pattern": "^https://www\\.powair6\\.com/fr/[a-z0-9-]*(aeg|aep|gbb|hpa|sniper|replique)[a-z0-9-]*/\\d+-[a-z0-9-]+\\.html$",
+    "status": "sitemap csak francia (12 223 URL) -> fegyverkategóriák /fr/ termékei, angol oldalra írva (PrestaShop id alapján átirányít)",
+    "url_rewrite": [
+      "/fr/",
+      "/en/"
+    ]
   },
   "airsoftpro": {
-    "source": "sitemap",
-    "sitemap": "auto",
-    "base_url": "https://airsoftpro.cz",
-    "product_pattern": "/cz/airsoftove-zbrane/airsoftove-zbrane-dlouhe/[a-z0-9-]+-detail$",
-    "status": "microdata ✓ | sitemap-részek időtúllépés GitHubról -> kategória-lapozás kell (probe: lapozó linkek)",
-    "enabled": false
+    "source": "listing",
+    "start_urls": [
+      "https://airsoftpro.cz/cz/airsoftove-zbrane/airsoftove-zbrane-dlouhe"
+    ],
+    "product_pattern": "^https://airsoftpro\\.cz/cz/airsoftove-zbrane/.+-detail$",
+    "page_tpl": "{url}/results,{off1}-{off}",
+    "page_size": 24,
+    "timeout": 45,
+    "status": "microdata ✓ | VirtueMart lapozás results,25-24 (24/oldal)"
   },
   "combat-zone": {
     "enabled": false,

@@ -92,6 +92,16 @@ class TestMatcher(unittest.TestCase):
         self.assertFalse(ean_valid("4952839180026"))
         self.assertIsNone(find_ean("sku 11406 11406"))
 
+    def test_new_product_from_title_when_no_code(self):
+        self.c.manufacturers[8] = ("emg", "EMG")
+        self.c.aliases["emg"] = 8
+        r = match_offer(OfferIn('Noveske N4 Gen.4 "Shorty" AEG - 350 fps version', "EMG"), self.c)
+        self.assertEqual((r.status, r.method, r.new_product["model_code_norm"]), ("auto", "new_title", None))
+        from matcher import Product as P
+        self.c.add_product(P(80, 8, r.new_product["name"], None))
+        r2 = match_offer(OfferIn('Noveske N4 Gen.4 "Shorty" AEG - 350 fps version - Black', "EMG"), self.c)
+        self.assertEqual((r2.product_id, r2.method), (80, "fuzzy"))     # második bolt ugyanarra párosul
+
     def test_norm_alias(self):
         self.assertEqual(norm_alias("G&G Armament"), "ggarmament")
 

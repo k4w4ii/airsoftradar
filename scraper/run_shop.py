@@ -36,7 +36,8 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
     Ha több termék van, mint max_products, naponta forgó ablakot tölt le -> N nap alatt mindet."""
     cfg = CONFIG[slug]
     deadline = time.monotonic() + float(os.environ.get("SCRAPE_BUDGET_MIN", 90)) * 60
-    f, errors, out, urls, diag = Fetcher(extra_headers=cfg.get("headers")), [], [], [], {}
+    f = Fetcher(extra_headers=cfg.get("headers"), timeout=cfg.get("timeout", 30))
+    errors, out, urls, diag = [], [], [], {}
     try:
         if cfg["source"] == "sitemap":
             maps = f.sitemaps(cfg["base_url"]) if cfg["sitemap"] == "auto" else [cfg["sitemap"]]
@@ -44,7 +45,10 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
             urls = list(dict.fromkeys(u for m in maps for u in from_sitemap(f, m, cfg["product_pattern"], diag=diag)))
         else:
             urls, out = from_listing(f, cfg["start_urls"], cfg["product_pattern"], cfg.get("page_tpl"),
-                                     cfg.get("max_pages", 50), extract_fn=extract, diag=diag)
+                                     cfg.get("max_pages", 50), extract_fn=extract, diag=diag,
+                                     page_size=cfg.get("page_size", 24))
+        if rw := cfg.get("url_rewrite"):                        # pl. ["/fr/", "/en/"]: angol oldal a francia sitemapből
+            urls = list(dict.fromkeys(u.replace(rw[0], rw[1], 1) for u in urls))
     except Exception as e:
         errors.append({"error": f"felderítés hiba: {e!r}"[:300]})
     if not urls and not out:   # semmit nem talált: diagnosztika az allapot.sql-hez
@@ -96,17 +100,20 @@ def load_catalog(db) -> tuple[Catalog, dict[int, str]]:
 
 
 def create_product(db, cat: Catalog, np: dict, lang: str, image: str | None) -> int:
-    mid, code = np["manufacturer_id"], np["model_code_norm"]
+    mid, code = np["manufacturer_id"], np["model_code_norm"]          # code None: cím alapú termék
+    slug = slugify(np["name"], f"{mid}:{code or np['name'].lower()}")
     try:
         pid = db.insert("products", [{
             "manufacturer_id": mid, "model_code": code, "model_code_norm": code, "name": np["name"],
-            "slug": slugify(np["name"], f"{mid}:{code}"), "name_lang": lang, "image_url": image}])[0]["id"]
+            "slug": slug, "name_lang": lang, "image_url": image}])[0]["id"]
     except RuntimeError as e:          # párhuzamos futás már létrehozta
         if "23505" not in str(e):
             raise
-        pid = db.select("products", select="id", manufacturer_id=f"eq.{mid}", model_code_norm=f"eq.{code}")[0]["id"]
+        found = db.select("products", select="id", slug=f"eq.{slug}") if code is None else \
+            db.select("products", select="id", manufacturer_id=f"eq.{mid}", model_code_norm=f"eq.{code}")
+        pid = found[0]["id"]
     codes = [{"product_id": pid, "code_type": "model", "code_norm": c, "manufacturer_id": mid}
-             for c in [code, *np.get("alt_codes", [])]]
+             for c in [code, *np.get("alt_codes", [])] if c]
     if np.get("ean"):
         codes.append({"product_id": pid, "code_type": "ean", "code_norm": np["ean"], "manufacturer_id": None})
     for row in codes:

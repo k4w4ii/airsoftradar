@@ -217,4 +217,10 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
         if best >= REVIEW_FUZZY:
             return MatchResult("review", "fuzzy", round(best, 3), None, candidates=scored, manufacturer_id=mid)
 
+    # 6. ismert gyártó, nincs kód és nincs hasonló termék -> új termék cím alapján
+    #    (EMG, Krytac, VFC... gyakran nem ad modellkódot; különben láthatatlan maradna)
+    if len(key.split()) >= 2:
+        return MatchResult("auto", "new_title", 0.6, new_product={
+            "manufacturer_id": mid, "model_code_norm": None, "name": o.title.strip(),
+            "alt_codes": [], "ean": ean}, candidates=scored, manufacturer_id=mid)
     return MatchResult("pending", None, 0.0, candidates=scored, manufacturer_id=mid)

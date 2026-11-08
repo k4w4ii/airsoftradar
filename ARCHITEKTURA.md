@@ -48,10 +48,10 @@ A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN f
 | Gunfire | kategória-lapozás (`?counter=`) | ✓ élesben: 10/10 letöltve, 7 párosítva |
 | Taiwangun | kategória-lapozás | ✓ élesben: 20 ajánlat, 12 párosítva (USD) |
 | Evike Europe | 3 AEG kategória (`?p=N`) | ✓ élesben; minta szigorítva (termék-URL-ben mindig van szám) |
-| Powair6 | robots.txt sitemap (12 223 URL, CDATA), csak `/en/aeg-*` | javítva: CDATA-kezelés |
+| Powair6 | robots.txt sitemap (csak francia, CDATA) -> fegyverkategóriák, `/fr/`→`/en/` átírás | javítva, élesben ellenőrizendő |
 | AirsoftPlaza | robots.txt sitemap | ✓ élesben |
 | AirsoftCentrum | robots.txt sitemap, forgó napi ablak | kategóriaoldalon nincs terméklink (JS) -> sitemap; microdata ✓ |
-| AirsoftPro | – | ⏸ letiltva: sitemap-részek időtúllépés GitHubról -> kategória-lapozás kell |
+| AirsoftPro | kategória-lapozás (VirtueMart `results,25-24`, 24/oldal) | microdata ✓, élesben ellenőrizendő |
 | Combat-Zone | – | ❌ letiltva: a kategórialista JS-ből tölt |
 
 Nagy boltok: ha több termék van, mint `max_products` (2000), naponta forgó ablak; inaktiválás csak `STALE_DAYS + ciklushossz` nap után.
@@ -75,7 +75,8 @@ Időkorlát: boltonként 90 perc (`SCRAPE_BUDGET_MIN`) és max. 2000 termék; cs
 3. Erős kód, de nincs termék -> új kanonikus termék
 4. Gyenge kód (betű+szám token) -> csak ha pontosan 1 meglévő termékre illik
 5. Gyártón belüli fuzzy cím (difflib): ≥0.92 és 0.05-ös előny -> auto; ≥0.75 -> review sor
-6. Egyébként `pending`
+6. Ismert gyártó, nincs kód és nincs hasonló termék -> új termék cím alapján (`new_title`, `model_code_norm = null`); a többi bolt fuzzy-val párosul rá
+7. Ismeretlen gyártó -> `pending`
 
 Védőkorlátok: szomszédos kódok (CM522/CM523) sosem olvadnak össze; családnevek (AK47, M4, MP5) nem kódok; rövid gyártóaliasok (TM, WE, DB) a címben csak nagybetűvel számítanak.
 Karbantartás: új regex a `STRONG_PATTERNS`-be = több automatikus párosítás.
