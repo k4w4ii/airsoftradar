@@ -6,9 +6,9 @@ export const SITE_NAME = "AirsoftHunter";
 // Töltsd ki a [szögletes zárójeles] értékeket (Jegyzettömbbel), majd git push.
 // Magánszemélyként: név + értesítési cím + e-mail. Cégként/egyéni vállalkozóként: + adószám, nyilvántartási szám.
 export const OPERATOR = {
-  name: "[Üzemeltető neve]",
-  address: "[Irányítószám, település, utca, házszám]",
-  email: "[kapcsolat e-mail cím]",
+  name: "Horváth Mátyás Csaba",
+  address: "",  // ha üresre állítod (""), nem jelenik meg; később pl. székhelyszolgáltató címe
+  email: "info@airsofthunter.com",
   taxNumber: "",        // pl. "12345678-1-42" (ha van)
   registry: "",         // pl. "Cégjegyzékszám: 01-09-123456" vagy "EV nyilvántartási szám: 12345678" (ha van)
 };

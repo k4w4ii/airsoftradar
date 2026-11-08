@@ -23,7 +23,7 @@ export function docFromSlug(slug) {
 const O = OPERATOR;
 const operatorLines = (hu) => [
   `${hu ? "Név" : "Name"}: ${O.name}`,
-  `${hu ? "Cím" : "Address"}: ${O.address}`,
+  ...(O.address ? [`${hu ? "Cím" : "Address"}: ${O.address}`] : []),
   `E-mail: ${O.email}`,
   ...(O.taxNumber ? [`${hu ? "Adószám" : "Tax number"}: ${O.taxNumber}`] : []),
   ...(O.registry ? [O.registry] : []),
