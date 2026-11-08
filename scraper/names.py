@@ -17,7 +17,7 @@ _GENERIC = [
     r"repli[ck]a", r"repliky", r"réplique", r"replik", r"elektromos", r"elektrick[áéý]", r"electric",
     r"gázos", r"rugós", r"fegyver(?:ek)?", r"assault\s+rifle", r"rohampuska", r"gépkarabély", r"karabély",
     r"géppisztoly", r"pisztoly", r"sniper\s+rifle", r"mesterlövész(?:\s+puska)?", r"odstřelovací", r"útočná",
-    r"karabinek", r"karabin", r"pistolet(?:\s+mitrailleur)?", r"fusil(?:\s+d['’]assaut)?", r"sturmgewehr",
+    r"karabin\w*", r"pistolet\w*", r"replik\w*", r"pistolet(?:\s+mitrailleur)?", r"fusil(?:\s+d['’]assaut)?", r"sturmgewehr",
     r"gewehr", r"rifle", r"carbine", r"airsoft\s+gun", r"új", r"new",
 ]
 _GENERIC_RX = re.compile(r"(?<![\w-])(?:" + "|".join(_GENERIC) + r")(?![\w-])", re.I)
@@ -27,9 +27,27 @@ _WORD_MAP = {  # szín és anyag egységesen angolul
     "czarny": "Black", "nero": "Black", "negro": "Black", "bk": "Black",
     "tan": "Tan", "homokszín": "Tan", "homokszínű": "Tan", "písková": "Tan",
     "olive": "OD", "od": "OD", "oliv": "OD", "olívzöld": "OD", "zöld": "Green", "green": "Green",
-    "szürke": "Grey", "grey": "Grey", "gray": "Grey", "šedá": "Grey",
+    "szürke": "Grey", "grey": "Grey", "gray": "Grey", "šedá": "Grey", "šedý": "Grey", "szary": "Grey", "grau": "Grey",
+    "gris": "Grey", "barna": "Brown", "brown": "Brown", "hnědá": "Brown", "hnědý": "Brown",
+    "černý": "Black", "černé": "Black", "czarna": "Black", "czarne": "Black", "noire": "Black", "nera": "Black", "negra": "Black",
+    "pískový": "Tan", "pískové": "Tan", "piaskowy": "Tan", "piaskowa": "Tan", "sand": "Tan", "sabbia": "Tan", "arena": "Tan",
+    "coyote": "Coyote", "olivový": "OD", "olivová": "OD", "oliwkowy": "OD", "oliwkowa": "OD", "oliva": "OD",
+    "zelený": "Green", "zelená": "Green", "zielony": "Green", "zielona": "Green", "grün": "Green", "verde": "Green",
+    "vert": "Green", "celokov": "Full Metal",
     "fém": "Metal", "metal": "Metal", "gáz": "Gas", "gas": "Gas",
 }
+# Többnyelvű jelzők -> egységes angol (vagy törlés). Sorrend számít; mind idempotens.
+_PHRASES = [
+    (r"licencovan[éá]\s+značen[íi]|with\s+licensed\s+markings|licensed\s+markings|s\s+licenc[íi]|oficiáln[íi]\s+licence"
+     r"|(?:licencelt|licenszelt|eredeti)\s+jelöl\w*|jelöl[ée]s(?:ek)?kel|jelöléssel"
+     r"|licencovan[éáý]|licen[sc]ed|licencja\w*|licencjonowan\w*|licencelt|licenszelt|licenc(?:es|szel)?", ""),
+    (r"celokov\w*|teljesen\s+fém\w*|full[- ]metal|all[- ]metal|pełny\s+metal|tout\s+métal|vollmetall", "Full Metal"),
+    (r"\bfa\s+(?:markolat|előagy|elem|tus|agy|borítás)\w*|dřev[ěo]\w*|drewn\w*|real\s+wood|wooden|holz\w*|bois", "Wood"),
+    (r"\bfém\s+(?:tok|ház|test)\w*|kovov[áéý]\w*|metalow\w*", "Metal"),
+    (r"\((?P<x>[^()]{1,24})\)", r" \g<x> "),           # rövid zárójel: tartalom marad, zárójel nem
+]
+_PHRASES = [(re.compile(rx, re.I), rep) for rx, rep in _PHRASES]
+
 _ACRONYMS = {"AEG", "AEP", "GBB", "GBBR", "NBB", "EBB", "HPA", "SMG", "LMG", "DMR", "CQB", "CQC", "RIS", "RAS",
              "MOSFET", "ETU", "ECU", "FPS", "ASG", "KJW", "VFC", "LCT", "ICS", "APS", "EMG", "KWA", "CYMA", "SRC",
              "WE", "JG", "TM", "PDW", "UMP", "AKM", "AKS", "SVD", "VSS", "OD", "DE", "USP", "MP5", "MP7", "SCAR",
@@ -85,11 +103,14 @@ def clean_name(title: str, brand: str, aliases: set[str] | None = None) -> str:
         return bool(ws) and all(w in aliases or (len(w) >= 2 and brand_norm.startswith(w)) for w in ws)
     segs = [s for s in segs if not junk(s)]
     t = " ".join(segs)
+    for rx, rep in _PHRASES:
+        t = rx.sub(rep, t)
     t = _GENERIC_RX.sub(" ", t)
     t = _SEP_RX.sub(" ", " " + t + " ")
     t = re.sub(r"[\s\-–—|/,:;]+$", "", re.sub(r"^[\s\-–—|/,:;]+", "", t))
     words = [w for w in t.split() if w not in {"-", "–", "—", "|", "/"}]
     words = _fix_case(words)
+    words = [w for i, w in enumerate(words) if i == 0 or w.lower() != words[i - 1].lower()]
     while words and words[0].lower() in {"of", "the", "for", "a", "an", "with"}:
         words = words[1:]
     rest = " ".join(words).strip()

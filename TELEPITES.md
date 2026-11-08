@@ -84,6 +84,27 @@ Supabase → **SQL Editor** → **+** → az új fájl tartalma → **Run**. Eze
    - Type `CNAME`, Name `www`, Target ugyanaz (vagy amit a Vercel a www-hez ír), **DNS only**
 4. Vercel → **Refresh**. Pár perc – néhány óra, amíg „Valid Configuration” lesz; az SSL-t a Vercel adja.
 
+## 11. Üzemeltetői adatok (ÁSZF, adatvédelem, impresszum)
+1. Nyisd meg Jegyzettömbbel: `web\lib\site.js`.
+2. Az `OPERATOR` részben írd át a `[szögletes zárójeles]` értékeket: név, cím, e-mail (cég / egyéni vállalkozó esetén adószám és nyilvántartási szám is). Az idézőjelek maradjanak!
+3. Mentés, majd `git add .` → `git commit -m "Uzemelteto adatai"` → `git push`. A jogi oldalak 1–2 perc múlva frissülnek.
+
+## 12. Bevétel: Google AdSense és „Hívj meg egy kávéra” (később, ha kéred)
+Alapból **minden ki van kapcsolva**, az oldalon semmi nem látszik. A beállítások a `web\lib\site.js` alján, a `MONETIZE` részben vannak (vagy Vercelen környezeti változóként, utána Redeploy).
+
+**Kávé:** regisztrálj a ko-fi.com vagy a buymeacoffee.com oldalon, és a saját oldalad címét írd be a `coffeeUrl` mezőbe. A lábléc jobb alsó sarkában megjelenik egy halk link.
+
+**AdSense, 1. lépés (jóváhagyás):**
+1. Regisztrálj: adsense.google.com, webhelyként add meg az `airsofthunter.com`-ot.
+2. A kapott `ca-pub-…` kódot írd be az `adsenseClient` mezőbe, majd push. Ettől betöltődik az ellenőrző kód, és elérhető lesz a `www.airsofthunter.com/ads.txt`. Hirdetés még nem jelenik meg.
+3. Az AdSense felületén: **Hirdetések → Webhelyek szerint → Automatikus hirdetések: KI** (ez alapból be van kapcsolva, ezért kell kikapcsolni!). Az átfedő formátumokat (rögzített sáv, teljes képernyős „vignette”) is kapcsold ki.
+4. **Adatvédelem és üzenetek → Európai szabályozás → üzenet létrehozása.** Ez a Google hitelesített hozzájárulás-kérő ablaka, az EU-ban kötelező. Nélküle az EU-s látogatóknak az AdSense nem vagy csak korlátozottan mutat hirdetést. Ez az egyetlen dolog, ami első látogatáskor felugrik, és ezt nem lehet kihagyni.
+5. Várd meg a jóváhagyást (néhány nap – pár hét).
+
+**AdSense, 2. lépés (hirdetések bekapcsolása):** Hirdetések → Hirdetési egység szerint → **Display hirdetés**, „vízszintes” formában. Két egység kell: egy a lista aljára, egy a termékoldal aljára. A kapott `data-ad-slot` számokat írd be az `adsenseSlotList` és az `adsenseSlotProduct` mezőbe, majd push.
+
+Az adatvédelmi tájékoztató a beállításoktól függően automatikusan kiegészül (Google AdSense, hozzájárulás, kávé-szolgáltató).
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { plainMoney, t, WEAPON_CATS } from "../lib/i18n";
 import AutoSubmit from "./AutoSubmit";
 import PriceSlider from "./PriceSlider";
-import { Price, SpreadBar, StockBadge } from "./ui";
+import { Price, SpreadBar, StockBadge, Ad } from "./ui";
 
 export const defaultCat = (q) => (q ? "all" : "weapons");
 
@@ -240,6 +240,8 @@ export default function HomeView({ locale, currency, rates, stats, data, params 
             <Link href={`/${locale}`} className="btn">{tr.clearFilters}</Link>
           </div>
         )}
+
+        {data.items.length ? <Ad place="list" locale={locale} /> : null}
 
         {data.pages > 1 ? (
           <nav className="pager" aria-label="pagination">

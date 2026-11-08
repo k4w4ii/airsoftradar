@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { dateFmt, money, shopMoney, t } from "../lib/i18n";
-import { Price, StockBadge } from "./ui";
+import { Ad, Price, StockBadge } from "./ui";
 
 /** Árdiagram SVG-ben (külső könyvtár nélkül). points: [{ observed_on, min_huf }] */
 export function PriceChart({ points, currency, rates, locale }) {
@@ -98,6 +98,8 @@ export default function ProductView({ locale, currency, rates, product, offers, 
         <h2>{tr.history}</h2>
         <PriceChart points={history} currency={currency} rates={rates} locale={locale} />
       </section>
+
+      <Ad key={product.slug} place="product" locale={locale} />
     </article>
   );
 }

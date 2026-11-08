@@ -63,8 +63,34 @@ img { display: block; max-width: 100%; }
 .seg a.on { background: var(--surface-2); color: var(--bone); }
 .lang { font-size: 14px; color: var(--muted); }
 
-.footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
-.footer p { max-width: 1120px; margin: 0 auto; padding: 20px; }
+.footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; background: #161a20; }
+.footer-inner { max-width: 1120px; margin: 0 auto; padding: 28px 20px 12px; display: flex; flex-wrap: wrap; gap: 20px 48px; justify-content: space-between; }
+.footer-brand { max-width: 560px; }
+.footer-brand p { margin: 10px 0 0; line-height: 1.55; }
+.small-brand { font-size: 20px; color: var(--bone); }
+.small-brand .logo-mark { width: 22px; height: 22px; }
+.footer-links { display: grid; grid-template-columns: repeat(2, auto); gap: 8px 32px; align-content: start; }
+.footer-links a { color: var(--bone); font-size: 14px; text-decoration: none; }
+.footer-links a:hover { text-decoration: underline; }
+.footer-copy { max-width: 1120px; margin: 0 auto; padding: 8px 20px 24px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: center; }
+.coffee { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); text-decoration: none; font-size: 13px; }
+.coffee:hover { color: var(--brass); }
+.coffee-icon { width: 16px; height: 16px; }
+
+/* hirdetés: halk keret, felirat, nincs elmozdulás; ha a Google nem tölti ki, eltűnik */
+.ad { margin: 28px 0 8px; padding: 10px 0 0; border-top: 1px solid var(--line); }
+.ad-label { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); opacity: .7; margin-bottom: 6px; }
+.ad ins { min-height: 90px; }
+.ad:has(ins[data-ad-status="unfilled"]) { display: none; }
+
+/* jogi oldalak */
+.legal { max-width: 72ch; }
+.legal h1 { font: 700 clamp(28px, 4vw, 40px)/1.1 var(--display); margin: 8px 0 20px; }
+.legal h2 { font: 600 22px/1.2 var(--display); margin: 28px 0 8px; }
+.legal p, .legal li { line-height: 1.65; color: #d5d0c4; }
+.legal ul { padding-left: 1.2em; margin: 8px 0; }
+.legal li + li { margin-top: 6px; }
+.legal-todo { border-left: 3px solid var(--brick); padding: 8px 12px; background: var(--surface); color: var(--bone); }
 
 /* ---------- főoldal ---------- */
 .intro h1 {

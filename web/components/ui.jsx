@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { CURRENCIES, money, t } from "../lib/i18n";
+import { DOCS, FOOTER_LABELS } from "../lib/legal";
+import { ADS, COFFEE_URL } from "../lib/site";
+import AdSlot from "./AdSlot";
 
 export function Logo() {
   // Irányzék: osztott szálkereszt, a középpont sárgaréz (a „találat” = a legjobb ár)
@@ -42,7 +45,26 @@ export function Shell({ locale, currency, path = "", children, query = "" }) {
       </header>
       <main className="page">{children}</main>
       <footer className="footer">
-        <p>{tr.footer}</p>
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <Link href={`/${locale}`} className="brand small-brand"><Logo /><span>AirsoftHunter</span></Link>
+            <p>{tr.footer}</p>
+          </div>
+          <nav className="footer-links" aria-label={locale === "hu" ? "Jogi információk" : "Legal"}>
+            {Object.keys(DOCS).map((d) => (
+              <Link key={d} href={`/${locale}/${DOCS[d][locale]}`}>{FOOTER_LABELS[locale === "hu" ? "hu" : "en"][d]}</Link>
+            ))}
+          </nav>
+        </div>
+        <div className="footer-copy">
+          <span>© {new Date().getFullYear()} AirsoftHunter</span>
+          {COFFEE_URL ? (
+            <a className="coffee" href={COFFEE_URL} target="_blank" rel="noopener">
+              <CoffeeIcon />
+              {locale === "hu" ? "Hasznos az oldal? Hívj meg egy kávéra" : "Find it useful? Buy me a coffee"}
+            </a>
+          ) : null}
+        </div>
       </footer>
     </div>
   );
@@ -69,4 +91,21 @@ export function SpreadBar({ min, max, locale }) {
 
 export function Price({ huf, currency, rates, locale, className = "price" }) {
   return <span className={className}>{money(huf, currency, rates, locale)}</span>;
+}
+
+function CoffeeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="coffee-icon">
+      <path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8 3.5c0 1 1 1.5 1 2.5M12 3.5c0 1 1 1.5 1 2.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** Hirdetési hely. Ha nincs beállítva hirdetéskód vagy egység-azonosító, semmit nem renderel. */
+export function Ad({ place, locale }) {
+  const slot = ADS.slots[place];
+  if (!ADS.client || !slot) return null;
+  return <AdSlot client={ADS.client} slot={slot} label={locale === "hu" ? "Hirdetés" : "Advertisement"} />;
 }

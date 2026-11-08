@@ -416,6 +416,14 @@ class TestNames(unittest.TestCase):
             ("JG1011B EBB [J.G.WORKS]", "JG", "JG1011B EBB"),
             ("Replica of the RK-01-W carbine", "Double Bell", "Double Bell RK-01-W"),
             ("G&G CM16 Raider 2.0 Black", "G&G Armament", "G&G Armament CM16 Raider 2.0 Black"),
+            # a weboldalon látott cseh címek
+            ("Airsoftová zbraň M4 CQB Sportline (CM.506) - černá", "CYMA", "CYMA M4 CQB Sportline CM.506 Black"),
+            ("Airsoftový samopal FN Herstal P90 (CM.060) - černá, licencované značení", "CYMA", "CYMA FN Herstal P90 CM.060 Black"),
+            ("Airsoftový samopal Thompson M1A1 (CM.033) - celokov, licencované značení", "CYMA", "CYMA Thompson M1A1 CM.033 Full Metal"),
+            # magyar / lengyel
+            ("Cyma CM.042 AK47 airsoft elektromos gépkarabély fa markolattal, fekete", "CYMA", "CYMA CM.042 AK47 Wood Black"),
+            ("Replika karabinka Specna Arms SA-E05 EDGE - czarna", "Specna Arms", "Specna Arms SA-E05 EDGE Black"),
+            ("JG MP5 airsoft géppisztoly teljesen fém, licencelt jelölésekkel", "JG", "JG MP5 Full Metal"),
         ]
         for title, brand, exp in cases:
             got = clean_name(title, brand, self.A)

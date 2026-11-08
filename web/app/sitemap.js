@@ -1,6 +1,7 @@
 import { getAllSlugs } from "../lib/data";
 import { WEAPON_CATS } from "../lib/i18n";
 import { SITE_URL } from "../lib/site";
+import { DOCS } from "../lib/legal";
 
 export const revalidate = 86400; // naponta újraépül
 
@@ -21,5 +22,9 @@ export default async function sitemap() {
     url: `${SITE_URL}/${l}/p/${p.slug}`, lastModified: p.updated_at ? new Date(p.updated_at) : undefined,
     changeFrequency: "daily", priority: 0.6, alternates: both(`/p/${p.slug}`),
   })));
-  return [...lists, ...items];
+  const legal = Object.values(DOCS).flatMap((d) => ["hu", "en"].map((l) => ({
+    url: `${SITE_URL}/${l}/${d[l]}`, changeFrequency: "yearly", priority: 0.2,
+    alternates: { languages: { hu: `${SITE_URL}/hu/${d.hu}`, en: `${SITE_URL}/en/${d.en}` } },
+  })));
+  return [...lists, ...legal, ...items];
 }
