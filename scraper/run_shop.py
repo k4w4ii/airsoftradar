@@ -144,8 +144,9 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
     rates["HUF"] = Decimal(1)
     now = datetime.now(timezone.utc).isoformat()
 
+    shop_tail = re.compile(rf"\s*[-–|:]\s*{re.escape(shop.get('name') or slug)}(\.\w+)?\s*$", re.I)
     rows = [{
-        "shop_id": shop["id"], "external_id": s.external_id, "url": s.url, "title_raw": s.title,
+        "shop_id": shop["id"], "external_id": s.external_id, "url": s.url, "title_raw": shop_tail.sub("", s.title) or s.title,
         "brand_raw": s.brand, "sku_raw": " ".join(dict.fromkeys(filter(None, [s.mpn, s.sku]))) or None, "ean_raw": s.ean,
         "image_url": s.image, "price": str(s.price), "currency": s.currency or shop["currency"],
         "stock": s.stock, "is_active": True, "last_seen_at": now} for s in scraped]

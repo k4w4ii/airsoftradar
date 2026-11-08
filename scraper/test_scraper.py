@@ -375,3 +375,26 @@ class TestTitleProductPipeline(unittest.TestCase):
         self.assertIsNone(p["model_code_norm"])
         self.assertEqual(db.t["product_codes"], [])
         self.assertEqual({o["match_method"] for o in db.t["offers"]}, {"new_title", "fuzzy"})
+
+
+class TestRound4(unittest.TestCase):
+    def test_single_offer_id_ignores_sku(self):
+        page_a = '<script type="application/ld+json">{"@type":"Product","name":"X","sku":"A1","offers":{"price":"1","priceCurrency":"EUR"}}</script>'
+        page_b = '<meta property="og:title" content="X"><meta property="product:price:amount" content="1">'
+        a, = extract(page_a, "https://s.pl/x")
+        b, = extract(page_b, "https://s.pl/x")
+        self.assertEqual(a.external_id, b.external_id)       # JSON-LD vs meta: ugyanaz az ID
+
+    def test_variants_keep_distinct_ids(self):
+        offers = extract(PRESTA_VARIANTS.replace('"url":"/p/sa-e01?c=black"', '"url":"/p/sa-e01"').replace('"url":"/p/sa-e01?c=tan"', '"url":"/p/sa-e01"'), "https://shop.eu/p/sa-e01")
+        self.assertEqual(len({o.external_id for o in offers}), 2)
+
+    def test_shop_name_suffix_removed(self):
+        db = FakeDB()
+        _seed(db)
+        db.t["shops"][1]["name"] = "AirsoftPlaza"
+        db.t["shops"][0]["name"] = "Taiwangun"
+        with mock.patch("db.DB", return_value=db), mock.patch.object(run_shop, "scrape",
+                return_value=([_offer("WE GLOCK 18 GEN.3 GÁZ GBB - FEKETE - Airsoftplaza", "53900", "g1")], [], 3)):
+            run_shop.run("airsoftplaza", None, False)
+        self.assertEqual(db.t["offers"][0]["title_raw"], "WE GLOCK 18 GEN.3 GÁZ GBB - FEKETE")

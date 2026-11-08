@@ -174,6 +174,13 @@ def extract(page: str, page_url: str) -> list[ScrapedOffer]:
             if r.external_id not in seen:
                 seen.add(r.external_id)
                 uniq.append(r)
+        page_key = lambda u: urlsplit(u).netloc + urlsplit(u).path      # ugyanaz, amiből az ID készül
+        per_page: dict[str, int] = {}
+        for r in uniq:
+            per_page[page_key(r.url)] = per_page.get(page_key(r.url), 0) + 1
+        for r in uniq:                       # stabil ID: az SKU csak akkor számít, ha egy oldalon több változat van
+            if per_page[page_key(r.url)] == 1:
+                r.external_id = _ext_id(r.url, None)
         return uniq
     return _from_meta(page, page_url)
 

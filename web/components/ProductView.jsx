@@ -37,6 +37,7 @@ export function PriceChart({ points, currency, rates, locale }) {
 function OfferLadder({ offers, currency, rates, locale }) {
   const tr = t(locale);
   const max = Math.max(...offers.map((o) => Number(o.price_huf)));
+  const perShop = offers.reduce((m, o) => ({ ...m, [o.shop_name]: (m[o.shop_name] || 0) + 1 }), {});
   return (
     <ol className="ladder">
       {offers.map((o, i) => (
@@ -45,6 +46,7 @@ function OfferLadder({ offers, currency, rates, locale }) {
             <span className="shop-name">{o.shop_name}</span>
             <span className="cc">{o.shop_country}</span>
             <StockBadge stock={o.stock} locale={locale} />
+            {perShop[o.shop_name] > 1 ? <span className="variant muted">{o.title_raw}</span> : null}
           </div>
           <div className="rung-bar" aria-hidden="true">
             <div style={{ width: `${Math.max(4, (Number(o.price_huf) / max) * 100)}%` }} />

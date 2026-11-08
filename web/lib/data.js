@@ -38,7 +38,10 @@ export function buildListQuery({ q: query, mfr, stock, sort, page }) {
   const term = cleanQuery(query);
   if (term) {
     // minden szó szerepeljen a névben vagy a gyártóban
-    const parts = term.split(" ").slice(0, 4).map((w) => `or(name.ilike.*${w}*,manufacturer.ilike.*${w}*)`);
+    const parts = term.split(" ").slice(0, 4).map((w) => {
+      const code = w.toLowerCase().replace(/[^a-z0-9]/g, ""); // CM522 = CM.522 = cm-522
+      return `or(name.ilike.*${w}*,manufacturer.ilike.*${w}*${code ? `,search_code.ilike.*${code}*` : ""})`;
+    });
     p.set("and", `(${parts.join(",")})`);
   }
   if (mfr) p.set("manufacturer", `eq.${mfr}`);
