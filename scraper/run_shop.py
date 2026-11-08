@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import time
@@ -29,9 +30,10 @@ CONFIG = json.loads((Path(__file__).parent / "shops.json").read_text())
 STALE_DAYS = 3
 
 
-def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict], bool]:
-    """Visszaad: (ajánlatok, hibák, teljes-e). Nem teljes, ha időkorlát vagy max_products vágta le
-    -> ilyenkor nem inaktiválunk (különben a le nem töltött termékek tévesen eltűnnének)."""
+def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict], int | None]:
+    """Visszaad: (ajánlatok, hibák, stale_days). stale_days: hány nap után inaktiválható egy nem látott
+    ajánlat; None = ne inaktiváljunk (teszt-limit vagy időkorlát miatt csonka futás).
+    Ha több termék van, mint max_products, naponta forgó ablakot tölt le -> N nap alatt mindet."""
     cfg = CONFIG[slug]
     deadline = time.monotonic() + float(os.environ.get("SCRAPE_BUDGET_MIN", 90)) * 60
     f, errors, out, urls, diag = Fetcher(extra_headers=cfg.get("headers")), [], [], [], {}
@@ -48,13 +50,19 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
     if not urls and not out:   # semmit nem talált: diagnosztika az allapot.sql-hez
         errors.insert(0, {"error": "0 termék – blokkolás vagy rossz URL-minta?", "http": dict(f.stats), **diag})
     cap = min(limit or 10**9, cfg.get("max_products", 2000))
-    complete = limit is None and len(urls) <= cap
-    urls, out = urls[:cap], out[:cap]
+    stale_days = None if limit else STALE_DAYS
+    if limit is None and len(urls) > cap:
+        total = len(urls)
+        start = (date.today().toordinal() * cap) % total
+        urls = (urls + urls)[start:start + cap]
+        stale_days = STALE_DAYS + math.ceil(total / cap)
+    out = out[:cap]
+    urls = urls[:cap]
     print(f"[{slug}] {len(out)} ajánlat kategóriaoldalról, {len(urls)} termék URL, http: {dict(f.stats)}", file=sys.stderr)
     for i, u in enumerate(urls):
         if time.monotonic() > deadline:
             errors.append({"error": f"időkorlát: {i}/{len(urls)} URL után leállt"})
-            complete = False
+            stale_days = None
             break
         try:
             page = f.get(u)
@@ -64,7 +72,7 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
             out += found
         except Exception as e:  # egy hibás oldal ne állítsa le a futást
             errors.append({"url": u, "error": repr(e)[:200]})
-    return out, errors, complete
+    return out, errors, stale_days
 
 
 def slugify(text: str, key: str) -> str:
@@ -114,7 +122,7 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
     if not CONFIG[slug].get("enabled", True):
         print(f"[{slug}] kihagyva (enabled=false): {CONFIG[slug].get('note', '')}")
         return
-    scraped, errors, complete = scrape(slug, limit)
+    scraped, errors, stale_days = scrape(slug, limit)
     if dry:
         for s in scraped:
             print(json.dumps(s.__dict__, default=str, ensure_ascii=False))
@@ -171,11 +179,11 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
     db.upsert("price_history", hist, on_conflict="offer_id,observed_on", returning=False)
 
     # --- eltűnt termékek inaktiválása ---
-    if complete:
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=STALE_DAYS)).isoformat()
+    if stale_days:
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=stale_days)).isoformat()
         db.update("offers", {"is_active": False}, shop_id=f"eq.{shop['id']}", last_seen_at=f"lt.{cutoff}")
 
-    status = "ok" if complete and not errors else ("partial" if scraped else "failed")
+    status = "ok" if stale_days and not errors else ("partial" if scraped else "failed")
     db.update("scrape_runs", {"finished_at": datetime.now(timezone.utc).isoformat(), "status": status,
                               "offers_seen": len(saved), "offers_new": stats.get("new", 0),
                               "errors": errors[:50]}, id=f"eq.{run_id}")

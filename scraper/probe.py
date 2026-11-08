@@ -14,7 +14,7 @@ from collections import Counter
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from crawl import _LOC_RX, links_in
+from crawl import _HREF_RX, links_in, locs as sitemap_locs
 from fetcher import Fetcher
 from jsonld import _load_blocks, extract
 
@@ -61,7 +61,7 @@ def probe(f: Fetcher, url: str, dump_dir: str | None = None) -> None:
     if dump_dir:
         dump(dump_dir, url, page)
     if "<urlset" in page or "<sitemapindex" in page:
-        locs = _LOC_RX.findall(page)
+        locs = sitemap_locs(page)
         print(f"  {'sitemap INDEX' if '<sitemapindex' in page else 'sitemap'}: {len(locs)} URL")
         for s, n, sample in shapes(locs):
             print(f"    {n:5d}x  {s:55s} pl. {sample}")
@@ -81,6 +81,9 @@ def probe(f: Fetcher, url: str, dump_dir: str | None = None) -> None:
         print("  nincs termékadat (kategóriaoldal, vagy nincs JSON-LD) – linkminták:")
         for s, n, sample in shapes(links_in(page, url, re.compile("."))):
             print(f"    {n:4d}x  {s:55s} pl. {sample}")
+        pager = sorted({h for h in _HREF_RX.findall(page)
+                        if re.search(r"[?&](page|p|start|limitstart|counter)=\d|/page[:/]\d|results,\d", h)})[:6]
+        print(f"  lapozó linkek: {pager or 'nincs'}")
 
 
 if __name__ == "__main__":

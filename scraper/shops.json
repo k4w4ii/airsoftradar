@@ -25,23 +25,24 @@
       "https://evike-europe.com/airsoft-guns/submachine-guns/aeg-submachine-gun.html",
       "https://evike-europe.com/airsoft-guns/sniper-rifles/aeg-sniper-rifles.html"
     ],
-    "product_pattern": "^https://evike-europe\\.com/[a-z0-9-]+\\.html$",
+    "product_pattern": "^https://evike-europe\\.com/[a-z0-9-]*\\d[a-z0-9-]*\\.html$",
     "page_tpl": "{url}?p={n}",
-    "status": "termékoldal ✓ | teljes sitemap 15 872 termék (túl sok) -> AEG kategóriák lapozása"
+    "status": "✓ AEG kategóriák; termék-URL-ben mindig van szám (epic-deals.html stb. kizárva)"
   },
   "powair6": {
     "source": "sitemap",
     "sitemap": "auto",
     "base_url": "https://www.powair6.com",
     "product_pattern": "/en/aeg-[a-z0-9-]+/\\d+-[a-z0-9-]+\\.html$",
-    "status": "termékoldal ✓ | robots.txt sitemap, csak AEG kategóriák (a probe itt elakadt -> ellenőrizendő)"
+    "status": "robots.txt sitemap (12 223 URL, CDATA-ban) -> csak /en/aeg-*"
   },
   "airsoftpro": {
     "source": "sitemap",
     "sitemap": "auto",
     "base_url": "https://airsoftpro.cz",
     "product_pattern": "/cz/airsoftove-zbrane/airsoftove-zbrane-dlouhe/[a-z0-9-]+-detail$",
-    "status": "✓ microdata (név, ár, készlet, márka) | sitemap ellenőrizendő"
+    "status": "microdata ✓ | sitemap-részek időtúllépés GitHubról -> kategória-lapozás kell (probe: lapozó linkek)",
+    "enabled": false
   },
   "combat-zone": {
     "enabled": false,
@@ -59,12 +60,10 @@
     "base_url": "https://airsoftplaza.hu"
   },
   "airsoftcentrum": {
-    "source": "listing",
-    "start_urls": [
-      "https://www.airsoftcentrum.hu/airsoft-fegyverek/elektromos-airsoft-fegyverek"
-    ],
+    "source": "sitemap",
+    "sitemap": "auto",
+    "base_url": "https://www.airsoftcentrum.hu",
     "product_pattern": "^https://www\\.airsoftcentrum\\.hu/[a-z0-9-]+(?<!-m)-\\d{3,6}$",
-    "page_tpl": "{url}?page={n}",
-    "status": "✓ microdata (ár, készlet, márka) | AEG kategória lapozása"
+    "status": "✓ microdata | kategóriaoldalon nincs terméklink (JS) -> sitemap, nagy bolt esetén forgó napi ablak"
   }
 }

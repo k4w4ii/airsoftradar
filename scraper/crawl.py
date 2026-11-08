@@ -11,6 +11,17 @@ _LOC_RX = re.compile(r"<loc>\s*(.*?)\s*</loc>", re.I | re.S)
 _HREF_RX = re.compile(r"href=[\"']([^\"'#]+)[\"']", re.I)
 
 
+def locs(body: str) -> list[str]:
+    """<loc> értékek; kezeli a <![CDATA[...]]> csomagolást (pl. PrestaShop)."""
+    out = []
+    for x in _LOC_RX.findall(body):
+        x = html.unescape(x.strip())
+        if x.startswith("<![CDATA["):
+            x = x[9:].removesuffix("]]>").strip()
+        out.append(x)
+    return out
+
+
 def _clean(u: str) -> str:
     p = urlsplit(u)
     return urlunsplit((p.scheme, p.netloc, p.path, "", ""))   # query/fragment le: duplikátumok ellen
@@ -22,7 +33,7 @@ def from_sitemap(f: Fetcher, url: str, pattern: str, limit: int = 5000, _depth: 
     rx, out = re.compile(pattern), []
     diag = diag if diag is not None else {}
     body = f.get(url) or ""
-    for loc in (html.unescape(x) for x in _LOC_RX.findall(body)):
+    for loc in locs(body):
         if len(out) >= limit:
             break
         if "<sitemapindex" in body and _depth < 2:

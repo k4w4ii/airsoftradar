@@ -220,10 +220,10 @@ class TestPipeline(unittest.TestCase):
         db = FakeDB()
         _seed(db)
         with mock.patch("db.DB", return_value=db):
-            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522 AK fekete", "79990", "a1")], [], True)):
+            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522 AK fekete", "79990", "a1")], [], 3)):
                 run_shop.run("airsoftplaza", None, False)
             with mock.patch.object(run_shop, "scrape", return_value=([_offer("CM.522 Sport Line Gen 2 (CYMA)", "189.90", "b1"),
-                                                                      _offer("Unknown brand rifle", "50", "b2")], [], True)):
+                                                                      _offer("Unknown brand rifle", "50", "b2")], [], 3)):
                 run_shop.run("taiwangun", None, False)
 
         self.assertEqual(len(db.t["products"]), 1)
@@ -267,12 +267,12 @@ class TestBudget(unittest.TestCase):
         db.t["offers"].append({"id": 999, "shop_id": 1, "external_id": "old", "last_seen_at": "2000-01-01", "is_active": True,
                                "match_status": "auto", "product_id": None})
         with mock.patch("db.DB", return_value=db):
-            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522", "189.90", "n1")], [{"error": "időkorlát"}], False)):
+            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522", "189.90", "n1")], [{"error": "időkorlát"}], None)):
                 run_shop.run("taiwangun", None, False)
         self.assertTrue(next(o for o in db.t["offers"] if o["id"] == 999)["is_active"])
         self.assertEqual(db.t["scrape_runs"][-1]["status"], "partial")
         with mock.patch("db.DB", return_value=db):
-            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522", "189.90", "n1")], [], True)):
+            with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522", "189.90", "n1")], [], 3)):
                 run_shop.run("taiwangun", None, False)
         self.assertFalse(next(o for o in db.t["offers"] if o["id"] == 999)["is_active"])
 
@@ -282,8 +282,8 @@ class TestBudget(unittest.TestCase):
         pages["https://www.taiwangun.com/assault-rifle-aeg"] = listing
         fake = FakeFetcher(pages)
         with mock.patch.object(run_shop, "Fetcher", return_value=fake), mock.patch.dict("os.environ", {"SCRAPE_BUDGET_MIN": "0"}):
-            out, errors, complete = run_shop.scrape("taiwangun", None)
-        self.assertFalse(complete)
+            out, errors, stale = run_shop.scrape("taiwangun", None)
+        self.assertIsNone(stale)
         self.assertIn("időkorlát", errors[-1]["error"])
 
 
@@ -295,7 +295,7 @@ class TestDiagnostics(unittest.TestCase):
         def boom(url):
             raise urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
         with mock.patch.object(f, "_raw", side_effect=boom), mock.patch.object(run_shop, "Fetcher", return_value=f):
-            out, errors, complete = run_shop.scrape("powair6", None)
+            out, errors, stale = run_shop.scrape("powair6", None)
         self.assertEqual(out, [])
         self.assertIn("0 termék", errors[0]["error"])
         self.assertGreaterEqual(errors[0]["http"]["403"], 1)
@@ -305,3 +305,37 @@ class TestDiagnostics(unittest.TestCase):
         diag = {}
         self.assertEqual(crawl.from_sitemap(f, "https://s.hu/sitemap.xml", r"/termek/", diag=diag), [])
         self.assertEqual(diag, {"locs": 1, "minta": ["https://s.hu/p/abc-123"]})
+
+
+class TestRound3(unittest.TestCase):
+    def test_cdata_sitemap(self):
+        f = FakeFetcher({"https://www.powair6.com/1_index_sitemap.xml":
+            "<urlset><url><loc><![CDATA[https://www.powair6.com/en/aeg-assault/96396-tokyo-marui-evolt.html]]></loc></url>"
+            "<url><loc><![CDATA[https://www.powair6.com/fr/contactez-nous]]></loc></url></urlset>"})
+        cfg = run_shop.CONFIG["powair6"]
+        self.assertEqual(crawl.from_sitemap(f, "https://www.powair6.com/1_index_sitemap.xml", cfg["product_pattern"]),
+                         ["https://www.powair6.com/en/aeg-assault/96396-tokyo-marui-evolt.html"])
+
+    def test_evike_pattern(self):
+        rx = re.compile(run_shop.CONFIG["evike-europe"]["product_pattern"])
+        ok = ["https://evike-europe.com/11406.html", "https://evike-europe.com/we-gx01-bk.html", "https://evike-europe.com/27631-az.html"]
+        bad = ["https://evike-europe.com/epic-deals.html", "https://evike-europe.com/airsoft-guns/assault-rifles/aeg-assault-rifles.html"]
+        self.assertTrue(all(rx.search(u) for u in ok))
+        self.assertFalse(any(rx.search(u) for u in bad))
+
+    def test_airsoftcentrum_pattern(self):
+        rx = re.compile(run_shop.CONFIG["airsoftcentrum"]["product_pattern"])
+        self.assertTrue(rx.search("https://www.airsoftcentrum.hu/double-bell-rk-10-akms-ak47-7084"))
+        self.assertFalse(rx.search("https://www.airsoftcentrum.hu/double-bell-m-151"))
+        self.assertFalse(rx.search("https://www.airsoftcentrum.hu/adatvedelmi_nyilatkozat_3"))
+
+    def test_rotating_window(self):
+        urls = [f"https://www.airsoftcentrum.hu/p-{i:04d}" for i in range(10)]
+        pages = {u: WOO for u in urls}
+        sm = "<urlset>" + "".join(f"<url><loc>{u}</loc></url>" for u in urls) + "</urlset>"
+        fake = FakeFetcher({"https://www.airsoftcentrum.hu/sitemap.xml": sm, **pages})
+        fake.sitemaps = lambda base: ["https://www.airsoftcentrum.hu/sitemap.xml"]
+        cfg = {**run_shop.CONFIG["airsoftcentrum"], "max_products": 4}
+        with mock.patch.dict(run_shop.CONFIG, {"airsoftcentrum": cfg}), mock.patch.object(run_shop, "Fetcher", return_value=fake):
+            out, errors, stale = run_shop.scrape("airsoftcentrum", None)
+        self.assertEqual(stale, run_shop.STALE_DAYS + 3)   # 10 termék / 4 = 3 napos ciklus

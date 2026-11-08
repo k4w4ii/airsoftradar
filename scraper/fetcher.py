@@ -60,6 +60,9 @@ class Fetcher:
                 self.stats[str(e.code)] += 1
                 if e.code not in (429, 500, 502, 503, 504):
                     return None          # 403/404/...: nem próbáljuk újra, a statisztikában látszik
+            except ValueError:
+                self.stats["badurl"] += 1
+                return None
             except (urllib.error.URLError, TimeoutError, OSError) as e:
                 self.stats["timeout" if "timed out" in str(e) else "neterr"] += 1
             if attempt < self.retries - 1:

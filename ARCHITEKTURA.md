@@ -42,18 +42,20 @@ mnb_rates.py ─> run_shop.py × 8 bolt (párhuzamosan, max 4) ─> run_shop.py 
 `0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó.
 A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN futtatná.
 
-## Boltok állapota (2026-11-08, 2. kör)
+## Boltok állapota (2026-11-08, 3. kör – első éles futások után)
 | Bolt | Forrás | Állapot |
 |---|---|---|
-| Gunfire | kategória-lapozás (`?counter=`) | ✓ kategóriaoldal JSON-LD, 60 termék/oldal, EUR |
-| Taiwangun | kategória-lapozás (`/page:N`?) | termékoldal ✓ (USD), 61 terméklink/oldal; lapozás feltételezés |
-| Evike Europe | 3 AEG kategória (`?p=N`) | termékoldal ✓; teljes sitemap 15 872 termék -> túl sok |
-| Powair6 | robots.txt sitemap, csak `/en/aeg-*` | termékoldal ✓ (TM JAN -> EAN); sitemap ellenőrizendő |
-| AirsoftPlaza | robots.txt sitemap | ✓ 199 termék |
-| AirsoftCentrum | AEG kategória (`?page=N`) | ✓ microdata (ár, készlet, márka) |
-| AirsoftPro | robots.txt sitemap, csak puska-kategória | ✓ microdata (a név korábban a márka volt) |
+| Gunfire | kategória-lapozás (`?counter=`) | ✓ élesben: 10/10 letöltve, 7 párosítva |
+| Taiwangun | kategória-lapozás | ✓ élesben: 20 ajánlat, 12 párosítva (USD) |
+| Evike Europe | 3 AEG kategória (`?p=N`) | ✓ élesben; minta szigorítva (termék-URL-ben mindig van szám) |
+| Powair6 | robots.txt sitemap (12 223 URL, CDATA), csak `/en/aeg-*` | javítva: CDATA-kezelés |
+| AirsoftPlaza | robots.txt sitemap | ✓ élesben |
+| AirsoftCentrum | robots.txt sitemap, forgó napi ablak | kategóriaoldalon nincs terméklink (JS) -> sitemap; microdata ✓ |
+| AirsoftPro | – | ⏸ letiltva: sitemap-részek időtúllépés GitHubról -> kategória-lapozás kell |
 | Combat-Zone | – | ❌ letiltva: a kategórialista JS-ből tölt |
 
+Nagy boltok: ha több termék van, mint `max_products` (2000), naponta forgó ablak; inaktiválás csak `STALE_DAYS + ciklushossz` nap után.
+Hibakeresés: `supabase/allapot.sql` (összesítő), `supabase/diagnozis.sql` (http kódok, példa URL-ek).
 Kinyerési sorrend: JSON-LD -> microdata (itemscope/itemprop) -> OpenGraph meta.
 Időkorlát: boltonként 90 perc (`SCRAPE_BUDGET_MIN`) és max. 2000 termék; csonka futás után nincs inaktiválás.
 Állapot-lekérdezés: `supabase/allapot.sql`.
