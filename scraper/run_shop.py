@@ -137,6 +137,31 @@ def create_product(db, cat: Catalog, np: dict, lang: str, image: str | None) -> 
     return pid
 
 
+OFFER_COLS = "id,shop_id,title_raw,brand_raw,sku_raw,ean_raw,price,currency,image_url,product_id,match_status"
+
+
+def match_offers(db, cat: Catalog, offers: list[dict], rates: dict, lang_of, offer_pid: dict) -> dict:
+    """Pending ajánlatok párosítása (a run_shop és a rematch is ezt használja). offer_pid-be írja az eredményt."""
+    stats = defaultdict(int)
+    for o in offers:
+        rate = rates.get(o["currency"])
+        huf = float(Decimal(str(o["price"])) * rate) if rate and o.get("price") is not None else None
+        r = match_offer(OfferIn(o["title_raw"], o["brand_raw"], o["sku_raw"], o["ean_raw"], huf), cat)
+        stats[r.method or r.status] += 1
+        if r.status == "auto":
+            pid = r.product_id or create_product(db, cat, r.new_product, lang_of(o), o["image_url"])
+            offer_pid[o["id"]] = pid
+            db.update("offers", {"product_id": pid, "match_status": "auto", "match_method": r.method,
+                                 "match_confidence": r.confidence}, id=f"eq.{o['id']}")
+        elif r.status == "review":
+            db.update("offers", {"match_status": "review", "match_method": r.method,
+                                 "match_confidence": r.confidence}, id=f"eq.{o['id']}")
+            db.upsert("match_candidates", [{"offer_id": o["id"], "product_id": pid, "score": sc,
+                                            "reasons": {"method": "fuzzy"}} for pid, sc in r.candidates[:3]],
+                      on_conflict="offer_id,product_id", returning=False)
+    return stats
+
+
 def run(slug: str, limit: int | None, dry: bool) -> None:
     if not CONFIG[slug].get("enabled", True):
         print(f"[{slug}] kihagyva (enabled=false): {CONFIG[slug].get('note', '')}")
@@ -166,28 +191,17 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
     saved = db.upsert("offers", rows, on_conflict="shop_id,external_id")
 
     # --- párosítás (csak 'pending'; manual/review/auto érintetlen) ---
+    # A korábban leválasztott (pending) ajánlatokat is újrapárosítjuk, nem csak a mostani futásét.
     cat, name_lang = load_catalog(db)
-    stats = defaultdict(int)
+    seen = {o["id"] for o in saved}
+    older = [o for o in db.select("offers", select=OFFER_COLS, shop_id=f"eq.{shop['id']}",
+                                  match_status="eq.pending", is_active="eq.true") if o["id"] not in seen]
     offer_pid = {o["id"]: o["product_id"] for o in saved if o.get("product_id")}
-    for o in (o for o in saved if o["match_status"] == "pending"):
-        rate = rates.get(o["currency"])
-        huf = float(Decimal(str(o["price"])) * rate) if rate and o.get("price") is not None else None
-        r = match_offer(OfferIn(o["title_raw"], o["brand_raw"], o["sku_raw"], o["ean_raw"], huf), cat)
-        stats[r.method or r.status] += 1
-        if r.status == "auto":
-            pid = r.product_id or create_product(db, cat, r.new_product, shop["lang"], o["image_url"])
-            offer_pid[o["id"]] = pid
-            db.update("offers", {"product_id": pid, "match_status": "auto", "match_method": r.method,
-                                 "match_confidence": r.confidence}, id=f"eq.{o['id']}")
-        elif r.status == "review":
-            db.update("offers", {"match_status": "review", "match_method": r.method,
-                                 "match_confidence": r.confidence}, id=f"eq.{o['id']}")
-            db.upsert("match_candidates", [{"offer_id": o["id"], "product_id": pid, "score": sc,
-                                            "reasons": {"method": "fuzzy"}} for pid, sc in r.candidates[:3]],
-                      on_conflict="offer_id,product_id", returning=False)
+    stats = match_offers(db, cat, [o for o in saved if o["match_status"] == "pending"] + older,
+                         rates, lambda o: shop["lang"], offer_pid)
 
     # --- egységes terméknevek: angol bolt címe előnyben, egyébként a meglévő név tisztítása (idempotens) ---
-    titles = {o["id"]: o["title_raw"] for o in saved}
+    titles = {o["id"]: o["title_raw"] for o in saved + older}
     alias_set, renamed = set(cat.aliases), 0
     for oid, pid in offer_pid.items():
         prod = cat.products.get(pid)

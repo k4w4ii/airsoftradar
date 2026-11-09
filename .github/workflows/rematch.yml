@@ -1,0 +1,28 @@
+name: rematch
+
+# Kézi indítás: Actions -> rematch -> Run workflow. Letöltés nélkül újrapárosítja a 'pending' ajánlatokat,
+# egységesíti a termékneveket és frissíti a weboldalt (pár perc). Takarító SQL (pl. 0012) után futtasd.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# ne fusson egyszerre az éjszakai letöltéssel (megvárja)
+concurrency:
+  group: airsofthunter-db
+  cancel-in-progress: false
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+
+jobs:
+  rematch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - run: python scraper/rematch.py

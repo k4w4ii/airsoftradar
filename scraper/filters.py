@@ -61,6 +61,13 @@ _PART = [
     r"r-?hop", r"hop ?chambers?",
     # motor, elektronika
     r"motors?", r"mosfet\w*", r"wiring",
+    # cseh / lengyel / német / francia / olasz / spanyol / magyar alkatrésznevek
+    r"v[aá]lec\w*", r"v[aá]lce", r"p[ií]st(?:u|y|em)?", r"t[lł]ok\w*", r"kolben", r"zylinder", r"cylindre", r"cilindro",
+    r"pistone", r"feder", r"ressort", r"molla", r"muelle", r"t[eě]sn[eě]n[ií]", r"t[oö]m[ií]t[eé]s\w*", r"p[rř]evod\w*",
+    r"ozuben\w*", r"spou[sš][tť]\w*", r"ravasz\w*", r"(?:upgrade|tuning) ?(?:set|kit)s?", r"ersatzteil\w*",
+    r"n[aá]hradn[ií]", r"alkatr[eé]sz\w*", r"cz[eę][sś]ci", r"hlave[nň]\w*", r"lufa", r"lauf", r"canna",
+    r"gumi[cč]k\w*", r"pa[zž]b\w*", r"kolba", r"p[rř]edpa[zž]b\w*", r"el[oő]agy\w*", r"rukoje[tť]\w*", r"chwyt\w*",
+    r"t[lł]umik\w*", r"conversion ?kits?", r"konverz\w*", r"pu[sš]kohled\w*", r"luneta", r"nab[ií]je[cč]\w*",
     # védő- és taktikai felszerelés, egyéb
     r"masks?", r"maszk\w*", r"goggles?", r"szem[uü]veg\w*", r"helmets?", r"sisak\w*", r"holsters?", r"pisztolytok\w*",
     r"pouch\w*", r"tasak\w*", r"slings?", r"heveder\w*", r"vests?", r"mell[eé]ny\w*", r"plate ?carriers?",
@@ -84,6 +91,17 @@ WEAPON_RX = re.compile(r"(?<![\w])(?:aeg|aep|gbbr?|nbb|hpa|ebb|rifles?|carbines?
 # „X-hez”, „for X”: biztosan alkatrész/kiegészítő
 FOR_RX = re.compile(r"(?<![\w])(?:for|do|pro|f[uü]r|pour|per|para|compatible|kompatib\w*|\w+(?:hoz|hez|h[oö]z))(?![\w])", re.I)
 WEAPON_MIN_HUF = 30000
+# „X-hez / for X / pro X” + modellkód vagy platform: a termék valami MÁSHOZ készült -> alkatrész/tartozék,
+# akkor is, ha a szót nem ismerjük („Upgrade set pro CYMA M24 CM.702”, „RIS conversion for CM.030”).
+_TARGET = r"(?:\S+\s+){0,2}\S*(?:\d|m4|ak|glock|hi-?capa|vsr|mp5|g36|l96|aeg|gbb|pistol\w*|rifle\w*|pu[sš]k\w*|replik\w*|replic\w*|karabin\w*)"
+FOR_TARGET_RX = re.compile(r"(?<![\w])(?:for|f[uü]r|pour|para|compatible(?: with)?|kompatib\w*)\s+" + _TARGET, re.I)
+LOWER_FOR_RX = re.compile(r"(?<![\w])(?:pro|do|per)\s+" + _TARGET.replace("m4|ak|glock", "[Mm]4|AK|[Gg]lock"))   # kisbetűs cseh/lengyel/olasz „pro/do/per” (a „VSR-10 Pro” terméknév nem az)
+HOZ_RX = re.compile(r"\S*(?:\d|m4|ak|glock|vsr|mp5|g36)\S*-(?:hoz|hez|h[oö]z)(?![\w])", re.I)
+
+
+def made_for_other(title: str) -> bool:
+    core = BUNDLE_RX.sub("", title)
+    return bool(FOR_TARGET_RX.search(core) or LOWER_FOR_RX.search(core) or HOZ_RX.search(core))
 
 
 def is_part(title: str | None, price_huf: float | None = None) -> bool:
@@ -92,6 +110,8 @@ def is_part(title: str | None, price_huf: float | None = None) -> bool:
     if not title:
         return False
     core = BUNDLE_RX.sub("", title.replace("_", " "))
+    if made_for_other(core):
+        return True
     m = PART_RX.search(core)
     if not m:
         return False

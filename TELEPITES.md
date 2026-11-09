@@ -36,7 +36,7 @@ git config --global user.email "a-github-email-cimed@pelda.hu"
 3. Bal menü **SQL Editor** → **New query**. Nyisd meg Jegyzettömbbel a `supabase\telepites_egyben.sql`-t, **Ctrl+A, Ctrl+C**, illeszd be az üres query-be, **Run**.
    - Ha felugrik egy „destructive operation” figyelmeztetés: **Run this query** (csak a saját árkereső-tábláinkat törli és hozza létre újra).
    - Várt eredmény alul egy sor: `boltok 20 | gyartok 81 | kategoriak 6`.
-4. Ez a fájl az összes migrációt (0001–0011) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
+4. Ez a fájl az összes migrációt (0001–0012) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
 5. Bal lent **Project Settings** → **API Keys** → másold ki a **Secret key**-t (`sb_secret_...`).
    **Project Settings → Data API** (vagy a projekt főoldala) → másold ki a **Project URL**-t (`https://xxxx.supabase.co`).
 
@@ -122,6 +122,11 @@ Ha egy bolt partnerlinket ad, a `/go/…` kimenő link automatikusan azt haszná
    - **Kétlépcsős azonosítás (2FA)** mindenhol: GitHub (Settings → Password and authentication), Cloudflare (My Profile → Authentication), Vercel (Account Settings → Authentication), Supabase (Account → Security), Google.
    - **GitHub → a repó → Settings → Code security**: Dependabot alerts és Secret scanning: **Enable**.
    - **Cloudflare → airsofthunter.com → DNS → Settings → DNSSEC: Enable** (a Cloudflare-nél vett domainnél egy kattintás).
+
+## 16. Frissítés 2026-11-09 (3): összekevert termékek szétbontása
+1. Zip kicsomagolása, `git add .` → `git commit -m "Termekek szetbontasa"` → `git push`.
+2. **Supabase → SQL Editor**, mindegyik új lapon, ebben a sorrendben (amelyik már lefutott, az kihagyható, de újrafuttatni sem baj): `0010_parts_platforms.sql` → `0011_outliers_variants.sql` → `0012_parts_multilang.sql`.
+3. **GitHub → a repód → Actions → bal oldalt „rematch” → Run workflow.** Pár perc alatt újrapárosítja a leválasztott ajánlatokat, angolra egységesíti a termékneveket és frissíti az oldalt. (Ha épp fut az éjszakai letöltés, megvárja.)
 
 ## Hibák
 | Üzenet | Megoldás |

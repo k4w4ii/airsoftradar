@@ -162,3 +162,20 @@ class TestVariantGate(unittest.TestCase):
         self.cat.add_product(Product(21, 1, "CYMA VSR10 sniper spring CM.701B", "CM701B"))
         r = match_offer(OfferIn("CYMA VSR-10 SNIPER RUGÓ (CM.701B) - Airsoftpláza", price_huf=3700), self.cat)
         self.assertNotEqual(r.product_id, 21)
+
+
+class TestRematchAfterCleanup(unittest.TestCase):
+    """A 0012 takarítás után: a puska saját terméket kap a kódjával, az alkatrészek külön termékek lesznek."""
+    def test_flow(self):
+        cat = Catalog({"cyma": 1}, {1: ("cyma", "CYMA")})
+        cat.add_product(Product(301, 1, "CYMA Zásobník pro M24 CM.702 na 20 ran C.112", None))   # kód elengedve
+        gun = match_offer(OfferIn("CYMA M24 CM.702 sniper rifle", price_huf=45000), cat)
+        self.assertEqual((gun.method, gun.new_product["model_code_norm"]), ("new", "CM702"))
+        cat.add_product(Product(400, 1, "CYMA M24 CM.702 Sniper Rifle", "CM702"))
+        self.assertEqual(match_offer(OfferIn("CYMA CM.702 M24 Black", price_huf=47000), cat).product_id, 400)
+        for t, p in [("Odlehčený hybridní píst pro pušku CYMA M24 CM.702", 2800),
+                     ("AIRSOFTPRO ACÉL HENGER CYMA CM.702 M24-HEZ (12773)", 25500),
+                     ("Upgrade set pro CYMA M24 CM.702", 19000)]:
+            r = match_offer(OfferIn(t, price_huf=p), cat)
+            self.assertNotEqual(r.product_id, 400, t)
+            self.assertNotEqual(r.method, "code", t)

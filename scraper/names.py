@@ -35,7 +35,33 @@ _WORD_MAP = {  # szín és anyag egységesen angolul
     "zelený": "Green", "zelená": "Green", "zielony": "Green", "zielona": "Green", "grün": "Green", "verde": "Green",
     "vert": "Green", "celokov": "Full Metal",
     "fém": "Metal", "metal": "Metal", "gáz": "Gas", "gas": "Gas",
+    # alkatrész- és tartozéknevek egységesen angolul (cseh, magyar, lengyel, német, francia, olasz, spanyol)
+    "zásobník": "Magazine", "zásobníky": "Magazines", "zásobníku": "Magazine", "zasobnik": "Magazine",
+    "tár": "Magazine", "tárak": "Magazines", "magazynek": "Magazine", "magazynki": "Magazines",
+    "chargeur": "Magazine", "caricatore": "Magazine", "cargador": "Magazine",
+    "válec": "Cylinder", "valec": "Cylinder", "válce": "Cylinder", "henger": "Cylinder", "zylinder": "Cylinder",
+    "cylindre": "Cylinder", "cilindro": "Cylinder",
+    "píst": "Piston", "dugattyú": "Piston", "dugattyu": "Piston", "tłok": "Piston", "kolben": "Piston", "pistone": "Piston",
+    "pružina": "Spring", "pružinu": "Spring", "rugó": "Spring", "sprężyna": "Spring", "feder": "Spring",
+    "ressort": "Spring", "molla": "Spring", "muelle": "Spring",
+    "hlaveň": "Barrel", "lufa": "Barrel", "lauf": "Barrel", "canna": "Barrel",
+    "těsnění": "Seal", "tömítés": "Seal", "gumička": "Bucking",
+    "ocelový": "Steel", "ocelová": "Steel", "ocelové": "Steel", "acél": "Steel", "stalowy": "Steel", "stalowa": "Steel",
+    "nerezový": "Stainless", "nerezová": "Stainless", "nerezové": "Stainless", "rozsdamentes": "Stainless",
+    "odlehčený": "Lightweight", "odlehčená": "Lightweight", "könnyített": "Lightweight",
+    "hybridní": "Hybrid", "hibrid": "Hybrid", "sada": "Set", "szett": "Set", "készlet": "Set", "zestaw": "Set",
+    "nabíječka": "Charger", "töltő": "Charger", "ładowarka": "Charger", "akumulátor": "Battery", "akkumulátor": "Battery",
+    "akumulator": "Battery", "baterie": "Battery", "kuličky": "BBs", "golyó": "BBs", "kulki": "BBs",
+    "spoušť": "Trigger", "ravasz": "Trigger", "pažba": "Stock", "kolba": "Stock", "předpažbí": "Handguard",
+    "előagy": "Handguard", "rukojeť": "Grip", "markolat": "Grip", "chwyt": "Grip", "tlumič": "Suppressor",
+    "hangtompító": "Suppressor", "tłumik": "Suppressor", "puškohled": "Scope", "céltávcső": "Scope", "luneta": "Scope",
+    "kolimátor": "Red Dot", "pouzdro": "Holster", "taktická": "Tactical", "taktikai": "Tactical",
 }
+# kisbetűs kötőszavak (kis-nagybetű érzékeny: a „VSR-10 Pro” terméknév marad)
+_LOWER_PHRASES = [
+    (re.compile(r"(?<![\w])(?:pro|do)\s+(?:pušk\w*|pistol\w*|zbra\w*|repliky|replik\w*|karabin\w*)(?![\w])"), "for"),
+    (re.compile(r"(?<![\w])(?:pro|do|per)(?=\s+\S*(?:\d|[A-Z]{2}))"), "for"),
+]
 # Többnyelvű jelzők -> egységes angol (vagy törlés). Sorrend számít; mind idempotens.
 _PHRASES = [
     (r"licencovan[éá]\s+značen[íi]|with\s+licensed\s+markings|licensed\s+markings|s\s+licenc[íi]|oficiáln[íi]\s+licence"
@@ -44,6 +70,8 @@ _PHRASES = [
     (r"celokov\w*|teljesen\s+fém\w*|full[- ]metal|all[- ]metal|pełny\s+metal|tout\s+métal|vollmetall", "Full Metal"),
     (r"\bfa\s+(?:markolat|előagy|elem|tus|agy|borítás)\w*|dřev[ěo]\w*|drewn\w*|real\s+wood|wooden|holz\w*|bois", "Wood"),
     (r"\bfém\s+(?:tok|ház|test)\w*|kovov[áéý]\w*|metalow\w*", "Metal"),
+    (r"\bna\s+(\d+)\s+ran\b|\b(\d+)\s+(?:ran|kulek|lövetű|lövésre|golyós|billes|colpi)\b", lambda m: f"{m.group(1) or m.group(2)} rounds"),
+    (r"(?<![\w])([\w.]*\w)-(?:hoz|hez|höz)(?![\w])", r"for \1"),     # „M24-HEZ” -> „for M24”
     (r"\((?P<x>[^()]{1,24})\)", r" \g<x> "),           # rövid zárójel: tartalom marad, zárójel nem
 ]
 _PHRASES = [(re.compile(rx, re.I), rep) for rx, rep in _PHRASES]
@@ -80,7 +108,7 @@ def _fix_case(words: list[str]) -> list[str]:
             out.append(_WORD_MAP[key])
         elif mostly_upper and w.isalpha() and len(w) > 4 and w.upper() not in _ACRONYMS:
             out.append(w.capitalize())
-        elif mostly_upper and re.fullmatch(r"[A-ZÁÉÍÓÖŐÚÜŰ]{2,}\.\d+", w):   # GEN.3 -> Gen.3
+        elif mostly_upper and re.fullmatch(r"[A-ZÁÉÍÓÖŐÚÜŰ]{3,}\.\d+", w):   # GEN.3 -> Gen.3
             out.append(w[0] + w[1:].split(".")[0].lower() + "." + w.split(".", 1)[1])
         else:
             out.append(w)
@@ -103,6 +131,8 @@ def clean_name(title: str, brand: str, aliases: set[str] | None = None) -> str:
         return bool(ws) and all(w in aliases or (len(w) >= 2 and brand_norm.startswith(w)) for w in ws)
     segs = [s for s in segs if not junk(s)]
     t = " ".join(segs)
+    for rx, rep in _LOWER_PHRASES:
+        t = rx.sub(rep, t)
     for rx, rep in _PHRASES:
         t = rx.sub(rep, t)
     t = _GENERIC_RX.sub(" ", t)
