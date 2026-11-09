@@ -12,7 +12,13 @@ export const groupOf = (leaf) => CAT_GROUPS.find((g) => g.leaves.includes(leaf))
 // „Mihez jó”: sorrend a szűrőben (SQL: airsoft_platforms)
 export const PLATFORMS = ["m4", "ak", "g36", "mp5", "aug", "scar", "m14", "p90", "vsr", "l96", "glock", "hicapa", "m9", "gb_v2", "gb_v3"];
 
-export const SORTS = ["popular", "price", "price_desc", "name"];
+export const SORTS = ["discount", "popular", "price", "price_desc", "name"];
+export const DEFAULT_SORT = "discount";          // legnagyobb árkülönbség (legolcsóbb vs. legdrágább bolt)
+export const VIEWS = ["grid", "list"];           // csempe az alap
+
+/** Üres cím (/hu, /en) = üdvözlő oldal; bármilyen paraméter = katalógus. */
+const CATALOG_KEYS = ["q", "cat", "plat", "brand", "min", "max", "stock", "sort", "view", "page"];
+export const isWelcome = (sp) => !CATALOG_KEYS.some((k) => sp?.[k] !== undefined && sp[k] !== "");   // utm_*, gclid stb. nem számít
 
 /** Keresés nélkül a fegyverek az alap, kereséskor minden termék. */
 export const defaultCats = (q) => (q ? [] : ["weapons"]);
@@ -42,7 +48,8 @@ export function parseCatalog(sp) {
   let [min, max] = [num("min"), num("max")];
   if (min && max && min > max) [min, max] = [max, min];
   return { q, cats, plats, brands, min, max, stock: one("stock") === "1",
-           sort: SORTS.includes(one("sort")) ? one("sort") : "popular", page: Math.max(1, num("page")) };
+           sort: SORTS.includes(one("sort")) ? one("sort") : DEFAULT_SORT,
+           view: VIEWS.includes(one("view")) ? one("view") : "grid", page: Math.max(1, num("page")) };
 }
 
 /** Szűrőállapot -> URL. Lapozás minden szűrőváltozásnál az elejére ugrik. */
@@ -60,10 +67,12 @@ export function hrefFor(locale, params, over = {}) {
   if (p.min > 0) sp.set("min", String(p.min));
   if (p.max > 0) sp.set("max", String(p.max));
   if (p.stock) sp.set("stock", "1");
-  if (p.sort && p.sort !== "popular") sp.set("sort", p.sort);
+  if (p.sort && p.sort !== DEFAULT_SORT) sp.set("sort", p.sort);
+  if (p.view && p.view !== "grid") sp.set("view", p.view);
   if (p.page > 1) sp.set("page", String(p.page));
   const s = sp.toString();
-  return `/${locale}${s ? `?${s}` : ""}`;
+  // a paraméter nélküli cím az üdvözlő oldal -> az alap katalógus (fegyverek) kifejezett kategóriát kap
+  return `/${locale}?${s || "cat=weapons"}`;
 }
 
 /** Egy kategória-jelölés kivétele (chiphez): csoportból kivéve a többi elem marad. */

@@ -3,6 +3,7 @@ import { CURRENCIES, money, t } from "../lib/i18n";
 import { DOCS, FOOTER_LABELS } from "../lib/legal";
 import { ADS, COFFEE_URL } from "../lib/site";
 import AdSlot from "./AdSlot";
+import SearchBox from "./SearchBox";
 
 export function Logo() {
   // Irányzék: osztott szálkereszt, a középpont sárgaréz (a „találat” = a legjobb ár)
@@ -15,9 +16,10 @@ export function Logo() {
   );
 }
 
-export function Shell({ locale, currency, path = "", children, query = "" }) {
+export function Shell({ locale, currency, path = "", children, query = "", hideSearch = false }) {
   const tr = t(locale);
   const other = locale === "hu" ? "en" : "hu";
+  const curHref = (c) => `/cur?c=${c}&back=${encodeURIComponent(path || `/${locale}`)}`;
   return (
     <div className="shell">
       <header className="topbar">
@@ -26,19 +28,28 @@ export function Shell({ locale, currency, path = "", children, query = "" }) {
             <Logo />
             <span>AirsoftHunter</span>
           </Link>
-          <form action={`/${locale}`} className="topsearch" role="search">
-            <input name="q" type="search" defaultValue={query} placeholder={tr.searchPlaceholder} aria-label={tr.search} />
-            <button type="submit">{tr.search}</button>
-          </form>
+          {hideSearch ? <span className="topsearch-gap" /> : (
+            <SearchBox locale={locale} defaultValue={query} placeholder={tr.searchPlaceholder} label={tr.search}
+                       button={tr.search} allText={tr.allResultsFor} />
+          )}
           <nav className="toolbar" aria-label={tr.currency}>
             <div className="seg" role="group" aria-label={tr.currency}>
               {CURRENCIES.map((c) => (
-                <a key={c} href={`/cur?c=${c}&back=${encodeURIComponent(path || `/${locale}`)}`}
+                <a key={c} href={curHref(c)}
                    className={c === currency ? "on" : undefined} aria-current={c === currency ? "true" : undefined}>
                   {c}
                 </a>
               ))}
             </div>
+            {/* mobilon a pénznem lenyíló menü, hogy a logó mellett elférjen az oldal neve */}
+            <details className="cur-menu">
+              <summary aria-label={tr.currency}>{currency}</summary>
+              <div className="cur-pop">
+                {CURRENCIES.map((c) => (
+                  <a key={c} href={curHref(c)} className={c === currency ? "on" : undefined}>{c}</a>
+                ))}
+              </div>
+            </details>
             <Link href={`/${other}`} className="lang" hrefLang={other} lang={other}>{tr.otherLang}</Link>
           </nav>
         </div>

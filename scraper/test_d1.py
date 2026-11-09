@@ -129,7 +129,8 @@ class TestHealthCheck(unittest.TestCase):
         self.assertEqual(levels["MNB árfolyam"], "OK")
         self.assertEqual(levels["Napi letöltés"], "OK")
 
-        pages = {"/hu": "<a href=/hu/p/x>", "/en": "<a href=/en/p/x>", "/go/5": "location.replace(", "/sitemap.xml": "<loc>",
+        pages = {"/hu": '<a class="cat-tile">', "/hu?cat=weapons": "<a href=/hu/p/x>", "/en?cat=weapons": "<a href=/en/p/x>",
+                 "/api/suggest?l=hu&q=cyma": '{"products":[]}', "/go/5": "location.replace(", "/sitemap.xml": "<loc>",
                  "/robots.txt": "Disallow: /api/", "/hu/adatvedelem": "Cloudflare, Inc."}
         def get(url, method="GET", body=None, headers=None):
             path = url.split("workers.dev", 1)[-1] if "workers.dev" in url else None
@@ -139,7 +140,7 @@ class TestHealthCheck(unittest.TestCase):
                 return (404 if method == "GET" else 401), {}, ""
             if path == "/hu/p/cyma-cm048":
                 return 200, {}, "<p>Az adatok most nem érhetők el. / Data</p>"     # hibaoldal 200-as kóddal
-            return 200, {}, pages.get(path.split("?")[0], "ok")
+            return 200, {}, pages.get(path, pages.get(path.split("?")[0], "ok"))
         rep = hc.Report()
         hc.check_site("https://a.workers.dev", "https://www.example.com", sample, rep, get)
         levels = {n: l for l, n, _ in rep.rows}

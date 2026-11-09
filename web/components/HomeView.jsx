@@ -43,6 +43,50 @@ function ProductRow({ p, locale, currency, rates }) {
   );
 }
 
+/** Csempe-nézet kártyája: kép, árkülönbség-jelvény, márka, név, készlet, „már X Ft”. */
+export function ProductTile({ p, locale, currency, rates }) {
+  const tr = t(locale);
+  const best = p.best_price_huf ?? p.min_price_any_huf;
+  const pct = p.offer_count > 1 && p.max_price_huf > best ? Math.round((1 - best / p.max_price_huf) * 100) : 0;
+  return (
+    <li className="tile">
+      <Link href={`/${locale}/p/${p.slug}`} className="tile-link">
+        <div className="tile-img">
+          {p.image_url ? <img src={p.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : null}
+          {pct >= 1 ? <span className="tile-badge" title={tr.save(pct)}>−{pct}%</span> : null}
+        </div>
+        <div className="tile-body">
+          <span className="row-mfr">{p.manufacturer}</span>
+          <span className="tile-name">{p.name}</span>
+          <span className="row-meta">
+            <StockBadge stock={p.stock} locale={locale} />
+            <span className="muted">{tr.shops(p.offer_count)}</span>
+          </span>
+          <span className="tile-price">
+            {p.offer_count > 1 ? <span className="from">{tr.from}</span> : null}
+            <Price huf={best} currency={currency} rates={rates} locale={locale} />
+          </span>
+        </div>
+      </Link>
+    </li>
+  );
+}
+
+function ViewToggle({ locale, params }) {
+  const tr = t(locale);
+  const icon = { grid: "M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z", list: "M3 4h18v3H3zM3 10.5h18v3H3zM3 17h18v3H3z" };
+  return (
+    <div className="views seg" role="group" aria-label={tr.view}>
+      {["grid", "list"].map((v) => (
+        <Link key={v} href={hrefFor(locale, params, { view: v, page: params.page })} className={params.view === v ? "on" : undefined}
+              aria-current={params.view === v ? "true" : undefined} title={tr.views[v]} aria-label={tr.views[v]}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon[v]} fill="currentColor" /></svg>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 function CategoryTree({ locale, params, counts }) {
   const tr = t(locale);
   const sel = new Set(params.cats);
@@ -201,7 +245,7 @@ function Chips({ locale, params, currency }) {
       {chips.map((c) => (
         <Link key={c.label} href={c.href} className="chip" aria-label={tr.remove(c.label)}>{c.label}<span aria-hidden="true">×</span></Link>
       ))}
-      {chips.length > 1 ? <Link href={`/${locale}`} className="chip-clear">{tr.clearFilters}</Link> : null}
+      {chips.length > 1 ? <Link href={`/${locale}?cat=weapons`} className="chip-clear">{tr.clearFilters}</Link> : null}
     </div>
   );
 }
@@ -217,6 +261,7 @@ export default function HomeView({ locale, currency, rates, data, params }) {
     <form id="filters" action={`/${locale}`} className="catalog">
       <AutoSubmit />
       {params.q ? <input type="hidden" name="q" value={params.q} /> : null}
+      {params.view !== "grid" ? <input type="hidden" name="view" value={params.view} /> : null}
       {/* ha minden kategória-pipa üres: „minden termék” (nem az alapértelmezés) */}
       <input type="hidden" name="cat" value="all" />
 
@@ -257,24 +302,33 @@ export default function HomeView({ locale, currency, rates, data, params }) {
           <h1>{heading}</h1>
           <div className="results-bar">
             <span className="muted">{tr.results(data.total)}</span>
+            <div className="bar-right">
+            <ViewToggle locale={locale} params={params} />
             <label className="sort">
               <span>{tr.sort}</span>
               <select name="sort" defaultValue={params.sort}>
                 {Object.entries(tr.sorts).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </label>
+            </div>
           </div>
           <Chips locale={locale} params={params} currency={data.edgeCurrency} />
         </div>
 
         {data.items.length ? (
-          <ul className="rows">
-            {data.items.map((p) => <ProductRow key={p.id} p={p} locale={locale} currency={currency} rates={rates} />)}
-          </ul>
+          params.view === "list" ? (
+            <ul className="rows">
+              {data.items.map((p) => <ProductRow key={p.id} p={p} locale={locale} currency={currency} rates={rates} />)}
+            </ul>
+          ) : (
+            <ul className="tiles">
+              {data.items.map((p) => <ProductTile key={p.id} p={p} locale={locale} currency={currency} rates={rates} />)}
+            </ul>
+          )
         ) : (
           <div className="empty">
             <p>{tr.noResults}</p>
-            <Link href={`/${locale}`} className="btn">{tr.clearFilters}</Link>
+            <Link href={`/${locale}?cat=weapons`} className="btn">{tr.clearFilters}</Link>
           </div>
         )}
 

@@ -16,9 +16,13 @@ export async function getDB() {
 }
 
 const all = async (stmt) => (await stmt.all()).results || [];
+const CARD_COLS = "id, slug, name, manufacturer, image_url, category, best_price_huf, max_price_huf, min_price_any_huf, offer_count, stock";
 
 const GROUP_LEAVES = Object.fromEntries(CAT_GROUPS.map((g) => [g.id, g.leaves]));
+// árkülönbség: a legolcsóbb (raktáron lévő, ennek hiányában bármely) ár hány %-kal olcsóbb a legdrágább boltnál
+const DISCOUNT = "(CASE WHEN offer_count > 1 AND max_price_huf > price THEN (max_price_huf - price) * 1.0 / max_price_huf ELSE 0 END)";
 const SORT_SQL = {
+  discount: `${DISCOUNT} DESC, offer_count DESC, id`,
   popular: "offer_count DESC, price IS NULL, price ASC, id",
   price: "price IS NULL, price ASC, id",
   price_desc: "price IS NULL, price DESC, id",
@@ -66,14 +70,14 @@ export async function catalogSearchD1({ q, cats, plats, brands, pmin, pmax, inSt
   const f = buildFilters({ q, cats, plats, brands, pmin, pmax, inStock });
   const w = whereExcept(f, null);
   const T = "FROM product_summary";
-  const cols = "id, slug, name, manufacturer, image_url, category, best_price_huf, max_price_huf, min_price_any_huf, offer_count, stock";
+  const cols = CARD_COLS;
   const wc = whereExcept(f, "cat"), wp = whereExcept(f, "plat"), wb = whereExcept(f, "brand"), wpr = whereExcept(f, "price"), ws = whereExcept(f, "stock");
   const platSums = PLATFORMS.map((p) => `SUM(platforms LIKE '%,${p},%') AS "${p}"`).join(", ");
   const bucketCase = edges && edges.length
     ? "CASE " + edges.map((e, i) => `WHEN price < ${Number(e)} THEN ${i}`).join(" ") + ` ELSE ${edges.length} END`
     : null;
   const stmts = [
-    db.prepare(`SELECT ${cols} ${T}${w.sql} ORDER BY ${SORT_SQL[sort] || SORT_SQL.popular} LIMIT ? OFFSET ?`).bind(...w.params, lim, off),
+    db.prepare(`SELECT ${cols} ${T}${w.sql} ORDER BY ${SORT_SQL[sort] || SORT_SQL.discount} LIMIT ? OFFSET ?`).bind(...w.params, lim, off),
     db.prepare(`SELECT count(*) AS n ${T}${w.sql}`).bind(...w.params),
     db.prepare(`SELECT category, count(*) AS n ${T}${wc.sql} GROUP BY category`).bind(...wc.params),
     db.prepare(`SELECT ${platSums} ${T}${wp.sql}`).bind(...wp.params),
@@ -121,7 +125,7 @@ export async function getOffersD1(productId) {
     )
     SELECT d.id, d.product_id, d.url, d.title_raw, d.price, d.currency, d.price_huf,
            round(d.price_huf / (SELECT e FROM eur), 2) AS price_eur, d.stock, d.last_seen_at, d.is_outlier,
-           s.name AS shop_name, s.slug AS shop_slug, s.country AS shop_country
+           s.name AS shop_name, s.slug AS shop_slug, s.country AS shop_country, s.affiliate_template
     FROM d JOIN shops s ON s.id = d.shop_id
     WHERE d.rn = 1 ORDER BY d.price_huf`).bind(Number(productId)));
 }
@@ -151,4 +155,46 @@ export async function getOfferTargetD1(id) {
 export async function getAllSlugsD1(max = 45000) {
   const db = await getDB();
   return all(db.prepare("SELECT slug, updated_at FROM product_summary ORDER BY id LIMIT ?").bind(max));
+}
+
+/** Üdvözlő oldal: kategóriánkénti darabszám és mintakép, legnagyobb árkülönbségek, népszerű márkák, számok. */
+export async function getWelcomeD1() {
+  const db = await getDB();
+  const weapons = GROUP_LEAVES.weapons;
+  const res = await db.batch([
+    db.prepare("SELECT category, count(*) AS n FROM product_summary GROUP BY category"),
+    db.prepare(`SELECT category, image_url FROM (
+                  SELECT category, image_url, row_number() OVER (PARTITION BY category ORDER BY offer_count DESC, id) AS rn
+                  FROM product_summary WHERE image_url IS NOT NULL AND image_url <> '') WHERE rn = 1`),
+    // valódi, raktáron lévő árkülönbség 2+ boltnál; a 70% feletti (gyanús) eltérés kimarad
+    db.prepare(`SELECT ${CARD_COLS}, (max_price_huf - best_price_huf) * 1.0 / max_price_huf AS d FROM product_summary
+                WHERE category IN (${weapons.map(() => "?").join(",")}) AND offer_count > 1 AND best_price_huf IS NOT NULL
+                  AND max_price_huf > best_price_huf AND (max_price_huf - best_price_huf) * 1.0 / max_price_huf <= 0.7
+                ORDER BY d DESC, offer_count DESC LIMIT 8`).bind(...weapons),
+    db.prepare("SELECT manufacturer AS name, count(*) AS n FROM product_summary GROUP BY manufacturer ORDER BY n DESC LIMIT 14"),
+    db.prepare("SELECT count(*) AS n FROM shops WHERE is_active = 1 AND last_scraped_at IS NOT NULL"),
+  ]);
+  const [counts, images, deals, brands, shops] = res.map((r) => r.results || []);
+  return {
+    counts: Object.fromEntries(counts.map((r) => [r.category, r.n])),
+    images: Object.fromEntries(images.map((r) => [r.category, r.image_url])),
+    deals, brands, shops: shops[0]?.n || 0,
+    total: counts.reduce((x, r) => x + r.n, 0),
+  };
+}
+
+/** Keresési javaslatok gépelés közben: termékek (név, márka, kód) és márkák. */
+export async function suggestD1(q, limit = 6) {
+  const db = await getDB();
+  const f = buildFilters({ q });
+  if (!f.q) return { products: [], brands: [] };
+  const word = String(q).trim().split(/\s+/)[0].replace(/[\\%_]/g, (m) => "\\" + m);
+  const res = await db.batch([
+    db.prepare(`SELECT id, slug, name, manufacturer, image_url, best_price_huf, min_price_any_huf, offer_count
+                FROM product_summary WHERE ${f.q.sql} ORDER BY offer_count DESC, ${DISCOUNT} DESC, id LIMIT ?`).bind(...f.q.params, limit),
+    db.prepare(`SELECT manufacturer AS name, count(*) AS n FROM product_summary WHERE manufacturer LIKE ? ESCAPE '\\'
+                GROUP BY manufacturer ORDER BY n DESC LIMIT 4`).bind(`${word}%`),
+  ]);
+  const [products, brands] = res.map((r) => r.results || []);
+  return { products, brands };
 }

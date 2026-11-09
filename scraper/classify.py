@@ -22,7 +22,7 @@ _C = {
     'OPTICS': re.compile('(scopes?\\b|céltávcs|red ?dots?|holo(graphic)? ?sights?|kolimátor|kolimator|celownik|zaměřovač|magnifier|\\boptics?\\b|flashlights?|lámpa|\\blasers?\\b|tracer|puškohled|puskohled|\\bluneta)', 0),
     'HOPUP': re.compile('(hop-?up|bucking|inner ?barrel|belső ?cső|precision ?barrel|tight ?bore|\\br-?hop|hop ?chamber|\\bnub\\b|hlaveň|hlaven|\\blufa\\b|\\blauf\\b|\\bcanna\\b|gumičk|gumick)', 0),
     'MOTOR': re.compile('(\\bmotors?\\b|mosfet|wiring|trigger ?unit)', 0),
-    'INTERNAL': re.compile('(gearbox|mechabox|gear ?sets?|\\bgears\\b|fogaskerék|piston|dugattyú|cylinder|\\bhenger|nozzle|tappet|spring ?guide|rugóvezet|bushings?|bearings?|anti-?reversal|selector ?plate|air ?seal|o-?rings?|(main|aeg|upgrade|gearbox|power|valve|nozzle|hammer|recoil|tappet|trigger) ?springs?|\\bsprings? (m|sp)\\d{2,3}\\b|\\b(m|sp)\\d{2,3} ?springs?|\\brugó\\b|pružin|sprężyn|sprezyn|blowback ?unit|\\bvalves?\\b|\\bsear\\b|\\bválec|\\bvalec|\\bválce|\\bpíst|\\bpist(u|y|em)?\\b|tłok|\\btlok|kolben|zylinder|cylindre|cilindro|pistone|\\bfeder\\b|ressort|\\bmolla\\b|muelle|těsnění|tesneni|tömítés|převod|prevod|ozuben|spoušť|spoust|ravasz|(upgrade|tuning) ?(set|kit)|ersatzteil|náhradní|nahradni|alkatrész|części|czesci)', 0),
+    'INTERNAL': re.compile('(gearbox|mechabox|gear ?sets?|\\bgears\\b|fogaskerék|piston|dugattyú|cylinder|\\bhenger|nozzle|tappet|spring ?guide|rugóvezet|bushings?|bearings?|anti-?reversal|selector ?plate|air ?seal|o-?rings?|(main|aeg|upgrade|gearbox|power|valve|nozzle|hammer|recoil|tappet|trigger) ?springs?|\\bsprings? (m|sp)\\d{2,3}\\b|\\b(m|sp)\\d{2,3} ?springs?|\\brugó(szett|készlet|k)?\\b|pružin|sprężyn|sprezyn|blowback ?unit|\\bvalves?\\b|\\bsear\\b|\\bválec|\\bvalec|\\bválce|\\bpíst|\\bpist(u|y|em)?\\b|tłok|\\btlok|kolben|zylinder|cylindre|cilindro|pistone|\\bfeder\\b|ressort|\\bmolla\\b|muelle|těsnění|tesneni|tömítés|převod|prevod|ozuben|spoušť|spoust|ravasz|(upgrade|tuning) ?(set|kit)|ersatzteil|náhradní|nahradni|alkatrész|części|czesci)', 0),
     'EXTERNAL': re.compile('(suppressor|silencer|hangtompító|tlumič|flash ?hider|compensator|bipod|villaláb|tłumik|tlumik|conversion ?kit|konverz)', 0),
     'GRENADE': re.compile('(gránát|granát|grenade|granate|granada|granata|launcher|\\b40 ?mm\\b|\\bm203\\b|\\bm320\\b|\\bgl-?06\\b|claymore)', 0),
     'GRENADE_NOT': re.compile('(pouch|tasak|holder|tartó|zseb|pocket|sumka)', 0),
@@ -52,6 +52,22 @@ _WEAPON_RULES = [('SNIPER', 'sniper'), ('LMG', 'lmg'), ('SHOTGUN', 'shotgun'), (
 _URL_TYPES = [('URL_SNIPER', 'sniper'), ('URL_PISTOL', 'pistol'), ('URL_SMG', 'smg'), ('URL_RIFLE', 'rifle')]
 
 
+# Árküszöb (Ft): ennél olcsóbb tétel nem lehet ilyen fegyver. Csak modellnév (M4, AK, SCAR, 1911, SVD…) és nincs
+# fegyverszó (AEG, GBB, puska, pistol, replika…) -> magasabb küszöb. Így a „Šroub pažbičky M4” (csavar, 673 Ft)
+# vagy a „Klapka pro SVD GBB” nem kerül a fegyverek közé. Ár nélkül (terméknév-szavazat) nincs küszöb.
+_FLOOR = {'pistol': 2500, 'shotgun': 4000, 'smg': 6000, 'rifle': 6000, 'sniper': 6000, 'lmg': 20000}
+_FLOOR_MODEL_ONLY = {'pistol': 8000, 'shotgun': 10000}
+_FLOOR_MODEL_ONLY_DEFAULT = 15000
+
+
+def _weapon_ok(cat: str, p: float, explicit: bool) -> bool:
+    if p <= 0:
+        return True
+    if p < _FLOOR.get(cat, 6000):
+        return False
+    return explicit or p >= _FLOOR_MODEL_ONLY.get(cat, _FLOOR_MODEL_ONLY_DEFAULT)
+
+
 def category(title: str | None, url: str | None = None, price: float | None = None) -> str:
     o = _BUNDLE_O.sub('', title or '')
     c = _C['BUNDLE'].sub('', (title or '').lower())
@@ -62,6 +78,8 @@ def category(title: str | None, url: str | None = None, price: float | None = No
     m = has('M1') or has('M2', o) or has('M3')
     sub = next((name for k, name in _SUBS if has(k)), None)
     if has('GRENADE') and not has('GRENADE_NOT'):
+        if 0 < p < 8000 and (m or f or sub):              # „Bearings for 40mm grenades”, „seal kit pro granáty”
+            return sub or 'part_internal'
         return 'grenade'
     if m:
         return sub or ('part_external' if has('M_EXTERNAL') else 'other')
@@ -71,16 +89,18 @@ def category(title: str | None, url: str | None = None, price: float | None = No
         return 'part_external'
     if not w and has('OTHER_MISC'):
         return 'other'
+    explicit = w and not f
+    not_weapon = 'part_external' if (has('M_EXTERNAL') or platforms(o)) else 'other'
     for k, name in _WEAPON_RULES:
         if has(k):
-            return name
+            return name if _weapon_ok(name, p, explicit) else not_weapon
     if has('URL_PARTS', u) and p < 40000:
         return 'part_internal'
     if has('URL_ACC', u) and p < 40000:
         return 'other'
     for k, name in _URL_TYPES:
         if has(k, u):
-            return name
+            return name if _weapon_ok(name, p, explicit) else not_weapon
     return 'rifle' if p >= 40000 else 'other'
 
 

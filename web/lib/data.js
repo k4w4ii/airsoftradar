@@ -15,6 +15,8 @@ export const getHistory = (productId) => d1.getHistoryD1(productId);
 export const getRates = () => d1.getRatesD1();
 export const getOfferTarget = (id) => d1.getOfferTargetD1(id);
 export const getAllSlugs = (max = 45000) => d1.getAllSlugsD1(max);
+export const getWelcome = () => d1.getWelcomeD1();
+export const suggest = (q) => d1.suggestD1(cleanQuery(q));
 
 /**
  * Lista + szűrő-darabszámok egy D1-kötegben.
@@ -29,7 +31,7 @@ export async function catalogSearch(params, currency, rates) {
   const res = await d1.catalogSearchD1({
     q: cleanQuery(params.q), cats: params.cats || [], plats: params.plats || [], brands: (params.brands || []).slice(0, 30),
     pmin: params.min > 0 ? Math.floor(params.min * r) : null, pmax: params.max > 0 ? Math.ceil(params.max * r) : null,
-    inStock: !!params.stock, sort: params.sort || "popular", lim: PAGE_SIZE, off: (page - 1) * PAGE_SIZE,
+    inStock: !!params.stock, sort: params.sort || "discount", lim: PAGE_SIZE, off: (page - 1) * PAGE_SIZE,
     edges: edges.map((e) => Math.round(e * r)),
   });
   return { ...res, page, pages: Math.max(1, Math.ceil((res.total || 0) / PAGE_SIZE)), edges, edgeCurrency: cur };

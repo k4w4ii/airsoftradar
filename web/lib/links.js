@@ -12,3 +12,10 @@ export function withUtm(url) {
     return url;
   }
 }
+
+/** A bolti cél-URL: partnersablon ({url} helyére a termékoldal), különben utm-jelölés. Csak http(s) cél; egyébként null. */
+export function shopTarget(url, template) {
+  if (!url) return null;
+  const target = template ? template.replace("{url}", encodeURIComponent(url)) : withUtm(url);
+  return /^https?:\/\//i.test(target) ? target : null;
+}

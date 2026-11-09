@@ -119,8 +119,10 @@ def check_site(base: str, site: str, sample: dict, rep: Report, get=http) -> Non
             rep.ok(name, path)
         return body
 
-    page("Főoldal (HU)", "/hu", "/hu/p/")
-    page("Főoldal (EN)", "/en", "/en/p/")
+    page("Üdvözlő oldal (HU)", "/hu", "cat-tile")
+    page("Katalógus (HU)", "/hu?cat=weapons", "/hu/p/")
+    page("Katalógus (EN)", "/en?cat=weapons", "/en/p/")
+    page("Keresési javaslatok", "/api/suggest?l=hu&q=cyma", '"products"')
     page("Szűrés + keresés", "/hu?cat=all&q=ak&sort=price")
     if sample.get("slug"):
         page("Termékoldal", f"/hu/p/{sample['slug']}")
