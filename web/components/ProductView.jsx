@@ -1,3 +1,4 @@
+import { shopTarget } from "../lib/links";
 import Link from "next/link";
 import { dateFmt, money, shopMoney, t } from "../lib/i18n";
 import { Ad, Price, StockBadge } from "./ui";
@@ -57,7 +58,9 @@ function OfferLadder({ offers, currency, rates, locale, odd = false, scaleMax })
               <span className="orig muted" title={tr.original}>{shopMoney(o.price, o.currency, locale)}</span>
             ) : null}
           </div>
-          <a className="btn go" href={`/go/${o.id}`} rel="nofollow sponsored noopener noreferrer" target="_blank">{tr.goToShop}</a>
+          {/* közvetlen bolti link (nincs köztes átirányítás); Referer nélkül, utm-jelöléssel vagy partnersablonnal */}
+          <a className="btn go" href={shopTarget(o.url, o.affiliate_template) || `/go/${o.id}`}
+             rel="nofollow sponsored noopener noreferrer" referrerPolicy="no-referrer" target="_blank">{tr.goToShop}</a>
         </li>
       ))}
     </ol>

@@ -125,7 +125,7 @@ export async function getOffersD1(productId) {
     )
     SELECT d.id, d.product_id, d.url, d.title_raw, d.price, d.currency, d.price_huf,
            round(d.price_huf / (SELECT e FROM eur), 2) AS price_eur, d.stock, d.last_seen_at, d.is_outlier,
-           s.name AS shop_name, s.slug AS shop_slug, s.country AS shop_country
+           s.name AS shop_name, s.slug AS shop_slug, s.country AS shop_country, s.affiliate_template
     FROM d JOIN shops s ON s.id = d.shop_id
     WHERE d.rn = 1 ORDER BY d.price_huf`).bind(Number(productId)));
 }

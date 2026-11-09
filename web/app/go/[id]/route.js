@@ -1,5 +1,5 @@
 import { getOfferTarget } from "../../../lib/data";
-import { withUtm } from "../../../lib/links";
+import { shopTarget } from "../../../lib/links";
 
 // Kimenő link a boltba; ha a boltnak van affiliate sablonja ({url} helyére kerül a termék URL-je), azt használja.
 // Nem HTTP-átirányítás (Location fejléc), hanem egy azonnal továbbugró mini oldal: a Cloudflare-es Next.js
@@ -9,10 +9,8 @@ const esc = (s) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g
 export async function GET(_req, { params }) {
   const { id } = await params;
   const offer = await getOfferTarget(id).catch(() => null);
-  if (!offer?.url) return new Response("Not found", { status: 404 });
-  const tpl = offer.shops?.affiliate_template;
-  const target = tpl ? tpl.replace("{url}", encodeURIComponent(offer.url)) : withUtm(offer.url);
-  if (!/^https?:\/\//i.test(target)) return new Response("Not found", { status: 404 });   // csak http(s) cél
+  const target = shopTarget(offer?.url, offer?.shops?.affiliate_template);
+  if (!target) return new Response("Not found", { status: 404 });   // csak http(s) cél
   const js = JSON.stringify(target).replace(/</g, "\\u003c");
   const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
 <meta http-equiv="refresh" content="0;url=${esc(target)}"><title>AirsoftHunter</title></head>
