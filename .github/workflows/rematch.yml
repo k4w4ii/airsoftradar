@@ -15,10 +15,7 @@ concurrency:
 
 env:
   PYTHONUNBUFFERED: "1"       # a napló azonnal látszik (nem pufferelve)
-  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-  SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-  # Cloudflare D1: a GitHub „DB_BACKEND” változó d1-re állításával vált át a scraper (TELEPITES.md 20. pont)
-  DB_BACKEND: ${{ vars.DB_BACKEND }}
+  # Cloudflare D1 (a weboldal titkos /api/db végpontján át)
   D1_API_URL: ${{ vars.D1_API_URL }}
   D1_API_TOKEN: ${{ secrets.D1_API_TOKEN }}
 

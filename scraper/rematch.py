@@ -69,11 +69,8 @@ def main() -> None:
                 print(f"[rematch] átnevezve eddig: {renamed}", flush=True)
     print(f"[rematch] átnevezve: {renamed}", flush=True)
 
-    if hasattr(db, "execute"):          # D1: az összesítést a Python építi újra
-        import summary
-        summary.rebuild(db)
-    else:                               # Supabase: tárolt eljárás
-        db.rpc("refresh_product_summary")
+    import summary                      # az összesítő tábla (product_summary) újraépítése
+    summary.rebuild(db)
     print("[rematch] kész, a weboldal frissítve", flush=True)
 
 

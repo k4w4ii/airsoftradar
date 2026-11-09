@@ -109,72 +109,46 @@ class TestD1Pipeline(unittest.TestCase):
         self.assertNotEqual(p1, p2)
 
 
+
+class TestHealthCheck(unittest.TestCase):
+    def test_db_and_site(self):
+        import health_check as hc
+        from datetime import date, datetime, timezone
+        db = LocalD1()
+        seed(db)
+        now = datetime.now(timezone.utc).isoformat()
+        db.execute([("INSERT INTO products (id,manufacturer_id,name,slug) VALUES (1,1,'CYMA CM048','cyma-cm048')", []),
+                    ("INSERT INTO offers (id,shop_id,external_id,url,title_raw,price,currency,product_id,match_status,last_seen_at) "
+                     "VALUES (5,1,'x','https://a/x','CYMA CM048',200,'EUR',1,'matched',?)", [now])])
+        summary.rebuild(db)
+        rep = hc.Report()
+        sample = hc.check_db(db, rep, date(2026, 11, 10))
+        self.assertEqual(sample, {"slug": "cyma-cm048", "name": "CYMA CM048", "offer_id": 5})
+        levels = {n: l for l, n, _ in rep.rows}
+        self.assertEqual(levels["Weboldal-összesítő"], "HIBA")      # 1 termék < 100
+        self.assertEqual(levels["MNB árfolyam"], "OK")
+        self.assertEqual(levels["Napi letöltés"], "OK")
+
+        pages = {"/hu": "<a href=/hu/p/x>", "/en": "<a href=/en/p/x>", "/go/5": "location.replace(", "/sitemap.xml": "<loc>",
+                 "/robots.txt": "Disallow: /api/", "/hu/adatvedelem": "Cloudflare, Inc."}
+        def get(url, method="GET", body=None, headers=None):
+            path = url.split("workers.dev", 1)[-1] if "workers.dev" in url else None
+            if path is None:
+                return 403, {"cf-mitigated": "challenge"}, ""
+            if path == "/api/db":
+                return (404 if method == "GET" else 401), {}, ""
+            if path == "/hu/p/cyma-cm048":
+                return 200, {}, "<p>Az adatok most nem érhetők el. / Data</p>"     # hibaoldal 200-as kóddal
+            return 200, {}, pages.get(path.split("?")[0], "ok")
+        rep = hc.Report()
+        hc.check_site("https://a.workers.dev", "https://www.example.com", sample, rep, get)
+        levels = {n: l for l, n, _ in rep.rows}
+        self.assertEqual(levels["Termékoldal"], "HIBA")
+        self.assertEqual(levels["Saját domain"], "FIGYELEM")
+        self.assertEqual(levels["Titkos végpont token nélkül"], "OK")
+        self.assertTrue(all(l == "OK" for n, l in levels.items() if n not in ("Termékoldal", "Saját domain")))
+        self.assertIn("❌", rep.markdown())
+
+
 if __name__ == "__main__":
     unittest.main()
-
-
-class FakePG:
-    """Supabase PostgREST helyettesítő a migrációs teszthez (select / order / limit / offset / and=(k.gte.a,k.lt.b))."""
-    def __init__(self, tables):
-        self.t = tables
-
-    def _req(self, method, table, params):
-        rows = list(self.t.get(table, []))
-        if "and" in params:
-            conds = params["and"][1:-1].split(",")
-            for c in conds:
-                col, op, val = c.split(".")
-                rows = [r for r in rows if (r[col] >= int(val) if op == "gte" else r[col] < int(val))]
-        o = params.get("order", "")
-        if o:
-            col, *desc = o.split(",")[0].split(".")
-            rows.sort(key=lambda r: r[col], reverse=bool(desc and desc[0] == "desc"))
-        off, lim = params.get("offset", 0), params.get("limit", 10**9)
-        rows = rows[off:off + lim]
-        sel = params.get("select", "*")
-        return rows if sel == "*" else [{k: r[k] for k in sel.split(",")} for r in rows]
-
-
-class TestMigration(unittest.TestCase):
-    def test_copy(self):
-        import migrate_to_d1 as m
-        m.PG_PAGE = 7
-        offers = [{"id": i, "shop_id": 1, "external_id": f"e{i}", "url": f"https://a/{i}", "title_raw": f"O'Brien \"{i}\" ; DROP TABLE x; --",
-                   "brand_raw": None, "sku_raw": None, "ean_raw": None, "image_url": None, "price": 10.5 + i, "currency": "EUR",
-                   "stock": "in_stock", "product_id": 1 if i < 5 else None, "match_status": "matched" if i < 5 else "pending",
-                   "match_method": None, "match_confidence": None, "is_active": True, "cat": "aeg", "plats": ["m4"], "variant": False,
-                   "first_seen_at": "2026-10-01T10:00:00+00:00", "last_seen_at": "2026-11-09T02:17:00.12+00:00"} for i in range(1, 30)]
-        pg = FakePG({
-            "shops": [{"id": 1, "slug": "a", "name": "A", "base_url": "x", "country": "PL", "currency": "EUR", "lang": "en",
-                       "ships_to": ["HU", "PL"], "is_active": True, "affiliate_template": None, "scraper_key": "a", "last_scraped_at": None}],
-            "manufacturers": [{"id": 1, "slug": "cyma", "name": "CYMA"}],
-            "manufacturer_aliases": [{"alias_norm": "cyma", "manufacturer_id": 1}],
-            "exchange_rates": [{"currency": "EUR", "rate_date": "2026-11-09", "huf_per_unit": 385.12, "source": "MNB"}],
-            "products": [{"id": 1, "manufacturer_id": 1, "model_code": "CM048", "model_code_norm": "cm048", "name": "CYMA CM048",
-                          "slug": "cyma-cm048", "image_url": None, "name_lang": "en", "category_id": 3, "name_cat": "aeg",
-                          "created_at": "2026-10-01T10:00:00Z"}],
-            "product_codes": [], "match_candidates": [],
-            "offers": offers,
-            "price_history": [{"offer_id": o, "observed_on": f"2026-11-0{d}", "price": 10, "currency": "EUR", "price_huf": 3850,
-                               "price_eur": 10, "stock": "in_stock"} for o in range(1, 30) for d in range(1, 4)],
-        })
-        d1 = LocalD1()
-        m.TABLES = [(t, k, o, 4 if s and s < 10**9 else s) for t, k, o, s in m.TABLES]     # sok kis blokk
-        m.SQL_MAX = 600                                                                    # sok kis utasítás
-        m.apply_schema(d1)                                                                 # újrafuttatható
-        for args in m.TABLES:
-            m.copy_table(pg, d1, *args)
-        for args in m.TABLES:                                                              # második futás: ugyanaz marad
-            m.copy_table(pg, d1, *args)
-        q = d1.query
-        self.assertEqual(q("SELECT count(*) n FROM offers")[0]["n"], 29)
-        self.assertEqual(q("SELECT count(*) n FROM price_history")[0]["n"], 87)
-        o = q("SELECT * FROM offers WHERE id=3")[0]
-        self.assertEqual(o["title_raw"], "O'Brien \"3\" ; DROP TABLE x; --")
-        self.assertEqual((o["is_active"], o["price"]), (1, 13.5))
-        self.assertEqual(o["last_seen_at"], "2026-11-09T02:17:00.120000+00:00")
-        self.assertEqual(q("SELECT ships_to FROM shops")[0]["ships_to"], ",HU,PL,")
-        self.assertNotIn("cat", o)
-        stats = summary.rebuild(d1)
-        self.assertEqual(stats["termekek"], 1)
-        self.assertEqual(q("SELECT best_price_huf FROM product_summary")[0]["best_price_huf"], round(11.5 * 385.12))

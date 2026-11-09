@@ -1,5 +1,5 @@
 """
-A Postgres airsoft_category / airsoft_platforms (supabase/migrations/0010, 0012) pontos Python-megfelelője.
+Kategória- és platform-besorolás (eredetileg Postgres SQL-függvény volt, ennek pontos Python-megfelelője).
 A D1 (SQLite) nem tud regexet, ezért a besorolás itt fut (scraper/summary.py hívja). A mintákat a SQL-ből
 generáltuk (\\y -> \\b); ha a szabály változik, mindkét helyen módosítsd (teszt: test_classify.py).
 """

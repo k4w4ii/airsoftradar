@@ -1,0 +1,24 @@
+name: health
+# Állapot-ellenőrzés: Cloudflare D1 + weboldal (scraper/health_check.py). Kézzel: Actions → health → Run workflow.
+# A napi futás végén is lefut. Ha piros, a GitHub e-mailt küld; a részletek a futás Summary oldalán táblázatban.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+  D1_API_URL: ${{ vars.D1_API_URL }}
+  D1_API_TOKEN: ${{ secrets.D1_API_TOKEN }}
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - run: python scraper/health_check.py

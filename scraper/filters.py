@@ -39,7 +39,7 @@ def is_clothing(*texts: str | None) -> bool:
 # Alkatrész / kiegészítő felismerése a címből. A párosító ezzel akadályozza meg, hogy egy tár vagy
 # alkatrész („Magazine for CM.041K”) a fegyver modellkódja alapján a fegyverhez kerüljön.
 # Szigorú lista: csak egyértelmű szavak (a stock/grip/rail/slide/barrel fegyverneveben is előfordul).
-# Ugyanez a logika SQL-ben: supabase/migrations/0010 (airsoft_category).
+# A kategória-besorolás ugyanezt a logikát követi: classify.py.
 _PART = [
     # tárak, töltények
     r"magazines?", r"mags?", r"hi-?caps?", r"mid-?caps?", r"low-?caps?", r"drum ?mags?", r"t[aá]r(?:ak|at|ral)?",
@@ -125,7 +125,6 @@ def is_part(title: str | None, price_huf: float | None = None) -> bool:
 # ---------------------------------------------------------------------------------------------
 # Egyedi / átépített változat („Evike Custom CYMA CM048 ... with Wolverine Inferno HPA System”):
 # ugyanaz a modellkód, de más termék és más árkategória. Ilyen ajánlat csak ilyen termékhez párosulhat.
-# Ugyanez SQL-ben: supabase/migrations/0011 (airsoft_is_variant).
 VARIANT_RX = re.compile(
     r"(?<![\w])(?:custom|hpa|wolverine|polarstar|inferno|fusion ?engine|jack ?engine|tuned|tuning|upgraded|"
     r"high ?speed ?build|dmr ?build|full ?upgrade|egyedi|tuningolt|felújított|refurbished|used|használt)(?![\w])", re.I)

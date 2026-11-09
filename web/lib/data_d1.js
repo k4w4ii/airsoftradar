@@ -1,4 +1,4 @@
-// Cloudflare D1 adatréteg (a Supabase PostgREST helyett). A lib/data.js hívja, ha DATA_SOURCE=d1.
+// Cloudflare D1 adatréteg. A lib/data.js hívja.
 // A product_summary táblát a scraper építi (scraper/summary.py); itt csak olvasunk.
 // D1 korlát: legfeljebb 100 paraméter / lekérdezés – a szűrők ennél jóval kevesebbet használnak.
 import { CAT_GROUPS, PLATFORMS } from "./catalog";

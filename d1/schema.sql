@@ -1,6 +1,6 @@
 -- =====================================================================
 -- AirsoftHunter – Cloudflare D1 (SQLite) séma. Újrafuttatható (IF NOT EXISTS).
--- A Postgres (Supabase) logikája (besorolás, összesítés, kiugró árak) itt nincs SQL-ben:
+-- A besorolás, az összesítés és a kiugró árak nincsenek SQL-ben:
 -- a scraper Pythonban számolja (scraper/classify.py, scraper/summary.py) és ide írja.
 -- Logikai értékek: 0/1. Időpontok: ISO-8601 szöveg (UTC). Tömbök: vesszővel határolt szöveg (",m4,ak,").
 -- =====================================================================

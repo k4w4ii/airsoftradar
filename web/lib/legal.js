@@ -30,13 +30,8 @@ const operatorLines = (hu) => [
 ];
 const ADS_ON = Boolean(ADS.client);
 const google = (hu) => `Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, ${hu ? "Írország" : "Ireland"} – policies.google.com (${hu ? "hirdetések: Google AdSense" : "advertising: Google AdSense"})`;
-// DATA_SOURCE=d1 után az adatbázis is a Cloudflare-nél van -> a Supabase kikerül a listából
-const ON_D1 = () => process.env.DATA_SOURCE === "d1";
 const hosts = (hu) => [
-  ...(ON_D1() ? [] : [`Supabase Pte. Ltd., 970 Toa Payoh North #07-04, Singapore 318992 – supabase.com (${hu ? "adatbázis; az adatok az EU-ban, Frankfurtban vannak" : "database; data stored in the EU, Frankfurt"})`]),
-  `Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA – cloudflare.com (${
-    ON_D1() ? (hu ? "weboldal tárhely, adatbázis, domain és DNS" : "website hosting, database, domain and DNS")
-            : (hu ? "weboldal tárhely, domain és DNS" : "website hosting, domain and DNS")})`,
+  `Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA – cloudflare.com (${hu ? "weboldal tárhely, adatbázis, domain és DNS" : "website hosting, database, domain and DNS"})`,
   ...(ADS_ON ? [google(hu)] : []),
 ];
 
@@ -61,7 +56,6 @@ const coffeeSection = (hu) => !COFFEE_URL ? [] : [{
 }];
 
 // Egy dokumentum: [{ h: "Cím", p: ["bekezdés", ...], list: ["pont", ...] }]
-// futáskor épül (a DATA_SOURCE változó a kéréskor már biztosan elérhető)
 const buildContent = () => ({
   hu: {
     terms: [

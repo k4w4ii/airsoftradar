@@ -3,18 +3,19 @@
 ## Stack
 | Réteg | Választás |
 |---|---|
-| Frontend | Next.js 16 (App Router) + sima CSS, dark-first, **Cloudflare Workers** (OpenNext adapter; 2026-11-09 előtt Vercel) |
-| DB / Auth | Supabase (Postgres, RLS, Auth) |
+| Frontend | Next.js 16 (App Router) + sima CSS, dark-first, **Cloudflare Workers** (OpenNext adapter) |
+| Adatbázis | **Cloudflare D1** (SQLite), séma: `d1/schema.sql` |
 | Scraper + párosító | **Python, csak stdlib** (urllib, regex, json) – nincs `pip install`; Playwright csak JS/Cloudflare-es boltokra |
 | Ütemezés | GitHub Actions cron (`.github/workflows/daily-scrape.yml`) |
 | Nyelv | HU + EN (`/hu`, `/en` útvonalak, hreflang) |
 
 ## Adatfolyam (naponta 02:17 UTC)
 ```
-mnb_rates.py ─> run_shop.py × 8 bolt (párhuzamosan, max 4) ─> run_shop.py --refresh
-                 felderítés (sitemap / lapozás) -> JSON-LD -> offers upsert
-                 -> matcher -> price_history (HUF + EUR) -> inaktiválás (3 nap)
+mnb_rates.py ─> run_shop.py × 20 bolt (párhuzamosan, max 6) ─> rematch.py ─> health_check.py
+                 felderítés (sitemap / lapozás) -> JSON-LD -> offers upsert      (audit, párosítás, nevek,
+                 -> matcher -> price_history (HUF + EUR) -> inaktiválás            summary.rebuild)
 ```
+A scraper a D1-be a weboldal Workerének titkos végpontján (`/api/db`, Bearer token) ír.
 
 ## Európai kiterjesztés (0003 migráció)
 - **Nyelv:** UI-szövegek Next.js-ben JSON szótárakkal (`web/lib/i18n.js`), külső i18n könyvtár nélkül; a `/` az `Accept-Language` alapján irányít (`next.config.mjs`). Kategóriák: `name_hu` / `name_en`. Terméknév: nyelvsemleges gyártói név; angol nyelvű bolt címe felülírja a magyart/csehet (`products.name_lang`).
@@ -32,16 +33,19 @@ mnb_rates.py ─> run_shop.py × 8 bolt (párhuzamosan, max 4) ─> run_shop.py 
 | `rematch.py` | letöltés nélküli újrapárosítás + névegységesítés (Actions → rematch) |
 | `probe.py` | új bolt felderítése: mit lát a scraper, milyen linkminták vannak |
 | `mnb_rates.py` | MNB SOAP -> `exchange_rates` |
+| `d1db.py` | D1-kliens (a `/api/db` végponton át; PostgREST-stílusú szűrők) |
+| `classify.py`, `summary.py` | kategória/platform-besorolás; `product_summary` + kiugró árak újraépítése (csak a változások) |
+| `health_check.py` | állapot-ellenőrzés: D1 + weboldal (Actions → health, és a napi futás vége) |
 | `shops.json` | boltonkénti konfig (forrás, URL-minta, lapozás, extra fejlécek, `enabled`, `status`) |
 
 ## GitHub Actions (publikus repó)
 - Publikus repó -> korlátlan ingyenes Actions perc.
 - `keepalive.yml`: havonta automatikus commit, mert a GitHub 60 nap commit-inaktivitás után letiltja az ütemezett workflow-kat.
-- Titkok csak GitHub Secrets-ben (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`); forkból indított PR nem kapja meg őket.
+- Titok: `D1_API_TOKEN` (Secret), változó: `D1_API_URL` (a workers.dev cím + `/api/db`); forkból indított PR nem kapja meg őket.
+- Workflow-k: `daily-scrape` (+ `refresh` és `health` job), `rematch`, `health`, `keepalive`; közös `concurrency` csoport (`airsofthunter-db`).
 
-## Migrációk (`supabase/migrations`, `supabase db push` sorrendben)
-`0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó · `0005_web_views` weboldal-nézetek, olvasási jog · `0006_dedupe_search` ismétlődés-szűrés (bolt+URL), valódi boltszám, kódos keresés · `0007_categories_search` fegyvertípus-besorolás + `catalog_search()` RPC · `0008_eu_shops` +12 EU-s bolt · `0009_accessory_brands` +31 kiegészítő/alkatrész-gyártó, ruházat elrejtése · `0010_parts_platforms` alkatrész- és kiegészítő-kategóriák, „mihez jó” platformok, többes kategóriaszűrés, tévesen párosított olcsó alkatrész-ajánlatok leválasztása · `0011_outliers_variants` árkiugrás-jelzés (`v_offer_flags`, `v_offers_clean`), egyedi/custom változatok leválasztása · `0012_parts_multilang` többnyelvű alkatrész-felismerés, „X-hez / for X / pro X” szabály, modellkód alapján összevont termékek szétbontása · `0013_fast_refresh` a besorolás tárolva (`offers.cat/plats/variant`, `products.name_cat/name_plats`), csak a megjelölt sorokra fut újra; a frissítés regex nélkül, egy menetben.
-A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN futtatná.
+## Adatbázis-séma (`d1/schema.sql`)
+2026-11-09-ig Supabase (Postgres, migrációk 0001–0013), azóta Cloudflare D1. A Postgres-logika (regex-besorolás, materializált nézet, triggerek, RPC) Pythonba került: `scraper/classify.py`, `scraper/summary.py`; a kereső a Workerben (`web/lib/data_d1.js`). Új bolt / gyártó: `INSERT` a D1 Console-ban (vagy a zipben kapott `d1/*.sql`).
 
 ## Boltok (20; csak EU, UK nélkül)
 | Bolt | Ország | Forrás | Állapot |
@@ -70,42 +74,41 @@ A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN f
 Lefedettség (2026-11-08 óta): fegyverek + kiegészítők + alkatrészek + védő/taktikai felszerelés; **ruházat és lábbeli kizárva** (`scraper/filters.py`, URL-re letöltés előtt és címre). Boltonként 300 perc / 6000 termék naponta (forgó ablakkal a nagy katalógusok is körbeérnek), sitemapből max. 60 000 URL, a weboldal boltonként frissül. Párosítás: token-előszűrés (6000 termék/gyártó mellett is gyors). A workflow 6 boltot futtat párhuzamosan. Ismeretlen gyártójú termékek `pending` maradnak (nem jelennek meg).
 
 Nagy boltok: ha több termék van, mint `max_products` (6000), naponta forgó ablak; inaktiválás csak `STALE_DAYS + ciklushossz` nap után.
-Hibakeresés: `supabase/allapot.sql` (összesítő), `supabase/diagnozis.sql` (http kódok, példa URL-ek).
+Hibakeresés: `d1/allapot.sql` (összesítő), `d1/diagnozis.sql` (http kódok, példa URL-ek) – D1 Console.
 Kinyerési sorrend: JSON-LD -> microdata (itemscope/itemprop) -> OpenGraph meta.
 Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és alapból 6000 termék; csonka futás után nincs inaktiválás.
-Állapot-lekérdezés: `supabase/allapot.sql`.
+Állapot-lekérdezés: `d1/allapot.sql`, automatikus ellenőrzés: `scraper/health_check.py`.
 
 ## Márka
 **AirsoftHunter** – „vadászd le a legjobb árat”. Logó: osztott szálkereszt (irányzék), sárgaréz középponttal (a találat = a legjobb ár). Domain: `www.airsofthunter.com` (az `airsofthunter.com` 308-cal ide irányít). Scraper User-Agent: `AirsoftHunterBot/1.0 (+https://www.airsofthunter.com/bot)`.
 
-## Cloudflare-átállás (2026-11-09 döntés: lépésenként, Workers Paid 5 $/hó)
-- **1. lépés – weboldal:** `web/wrangler.jsonc` + `web/open-next.config.ts`, `@opennextjs/cloudflare` + `wrangler`; Workers Builds a GitHub-repóból (root `web`, build `npx opennextjs-cloudflare build`, deploy `npx opennextjs-cloudflare deploy`). Az adat továbbra is Supabase (PostgREST fetch). Domain: Custom domain a Workeren, a csupasz domain Redirect Rule-lal a www-re. A forgalom innentől a Cloudflare proxyn megy (WAF, bot-védelem elérhető).
-- **2. lépés – adatbázis (terv):** D1 (SQLite). Ami a Postgresben volt (regex-besorolás, materializált nézet, tömbök, triggerek, RLS, RPC), az átkerül: besorolás/jellemzők/platformok Pythonban a scraperben (eltárolva), `product_summary` sima tábla, amit a scraper a futás végén újraépít, a kereső (`catalog_search`) a Worker JS-kódjában D1-lekérdezésekkel. A scraper egy titkos tokennel védett saját Worker-végponton át ír (a Cloudflare központi D1 API-ja 1200 kérés / 5 perc korlátos). Átállás: Supabase → D1 export-import szkript, párhuzamos futás és összevetés, majd átkapcsolás; végül a Supabase megszűnik. A GitHub Actions marad (a többórás letöltés Workersben nem fut).
-- Korlátok, amik miatt kell a fizetős csomag: D1 ingyen 100 000 sor írás/nap (az éjszakai futás több), Workers ingyen 10 ms CPU/kérés.
+## Cloudflare-átállás (2026-11-09, kész)
+- **1. lépés – weboldal:** `web/wrangler.jsonc` + `web/open-next.config.ts`; Workers Builds a GitHub-repóból (root `web`). Custom domain a Workeren, a csupasz domain Redirect Rule-lal a www-re; proxy + DDoS-védelem automatikus, Bot Fight Mode és rate limiting (100 kérés / 10 mp / IP) bekapcsolva.
+- **2. lépés – adatbázis:** Supabase → D1 egyszeri migrációval; a Supabase és a Vercel megszüntetve, a kódból a Supabase-ág kivéve.
 
-### 2. fázis: D1 (2026-11-09, kód kész)
+### D1 részletek
 - `d1/schema.sql`: SQLite séma. A Postgres-logika (besorolás, kiugró árak, összesítő) Pythonban fut: `scraper/classify.py` (a 0010/0012 SQL-ből generálva) és `scraper/summary.py` (csak a megváltozott `product_summary` sorokat írja, sha1 „sig” alapján).
 - Írás kívülről: `web/app/api/db/route.js`.
   - `POST {statements:[{sql,params}]}`, legfeljebb 100 utasítás, egy D1 batch = egy tranzakció.
   - Bearer `INGEST_TOKEN`, időzítés-független összehasonlítással. Token nélkül 404.
   - A scraper a workers.dev címet használja (a zóna botvédelme miatt).
-- `scraper/d1db.py`: ugyanaz a felület, mint a `db.DB` (PostgREST-szűrők → SQL, rowid-lapozás, 90 paraméteres IN-darabolás). Választás: `DB_BACKEND=d1` (GitHub változó).
-- `web/lib/data_d1.js`: a `catalog_search` RPC megfelelője egy 8 utasításos batch-ben. Választás: `DATA_SOURCE=d1` (Worker változó); visszaállás a változó törlésével.
-- `scraper/migrate_to_d1.py` (Actions: migrate-d1): kulcstartományos lapozás a Supabase-ből; `INSERT OR REPLACE` literálokkal (≤90 KB / utasítás); időpontok egységes ISO-UTC-re; a végén `summary.rebuild`.
-- Tesztek: `scraper/test_d1.py` (helyi sqlite3 a D1 helyett: szűrők, lapozás, teljes folyamat, migráció). A webes oldal bun:sqlite-tal tesztelve (katalógus, ajánlatok, előzmény, `/api/db`).
+- `scraper/d1db.py`: select / insert / upsert / update PostgREST-stílusú szűrőkkel (→ SQL), rowid-lapozás, 90 paraméteres IN-darabolás; `scraper/db.py: get_db()` ezt adja.
+- `web/lib/data_d1.js`: a katalógus (találatok + minden szűrő darabszáma) egy 8 utasításos D1-batch-ben; `web/lib/data.js` csak továbbít.
+- `scraper/d1db.py` a `D1_API_URL`-t kiegészíti (`https://`, `/api/db`), ha hiányos.
+- Tesztek: `scraper/test_d1.py` (helyi sqlite3 a D1 helyett: szűrők, lapozás, teljes folyamat, állapot-ellenőrzés). A webes oldal bun:sqlite-tal tesztelve (katalógus, ajánlatok, előzmény, `/api/db`).
 
 ## Weboldal (`web/`, Next.js 16, Cloudflare Workers)
 - Függőség csak `next`, `react`, `react-dom`; sima CSS (`app/globals.css`), JavaScript (nincs TS-típusellenőrzés, ami buildet törhetne).
-- Adat: PostgREST `fetch`-csel (`lib/data.js`), **publishable** kulccsal (csak olvas), 30 perces cache. Env: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`.
+- Adat: Cloudflare D1 binding (`DB`, `wrangler.jsonc`), `lib/data.js` → `lib/data_d1.js`. Titkos írási végpont: `app/api/db/route.js` (Worker-titok `INGEST_TOKEN`).
 - Jogi oldalak (HU/EN, `app/[locale]/[doc]`, tartalom: `lib/legal.js`): ÁSZF `/hu/aszf` · `/en/terms`, adatvédelem `/hu/adatvedelem` · `/en/privacy`, impresszum `/hu/impresszum` · `/en/imprint`, boltoknak `/hu/boltoknak` · `/en/for-shops`. Üzemeltetői adatok egy helyen: `lib/site.js` → `OPERATOR` (kitöltendő). Lábléc: márka, felelősségkizárás, jogi linkek.
 - Bevétel (alapból kikapcsolva, `lib/site.js` → `MONETIZE` vagy env `ADSENSE_CLIENT`, `ADSENSE_SLOT_LIST`, `ADSENSE_SLOT_PRODUCT`, `COFFEE_URL`): AdSense szkript + `google-adsense-account` meta csak kitöltött kódnál; `/ads.txt` route (különben 404); két kézi, „Hirdetés” feliratú egység (`components/AdSlot.jsx`, lista alja és termékoldal alja), kitöltetlen egység elrejtve (`:has([data-ad-status=unfilled])`); automatikus és átfedő hirdetések az AdSense-ben kikapcsolva; az EU-s hozzájárulást a Google CMP kezeli. Kávé-link a láblécben. Az adatvédelmi szöveg feltételesen bővül.
-- SEO: `app/sitemap.js` (lista- és termékoldalak hu/en hreflang-gal, naponta), `app/robots.js` (`/go/`, `/cur` tiltva), `metadataBase` = `SITE_URL` (`lib/site.js`).
+- SEO: `app/sitemap.js` (lista- és termékoldalak hu/en hreflang-gal, naponta), `app/robots.js` (`/go/`, `/cur`, `/api/` tiltva), `metadataBase` = `SITE_URL` (`lib/site.js`).
 - Útvonalak: `/` -> `/hu` vagy `/en` (Accept-Language, `next.config.mjs` redirect) · `/[locale]` lista + szűrők · `/[locale]/p/[slug]` termékoldal · `/go/[id]` kimenő link (affiliate sablon) · `/cur` pénznem-süti.
-- Nézetek (0005–0012): `product_summary` (+max ár, `category`, `platforms`, `search_code`), `v_product_offers`, `v_price_daily`, `v_manufacturers`. (A `v_site_stats` és a főoldali „X replika Y boltból” szöveg 2026-11-09-től nincs.)
-- Katalógus: **egy RPC-hívás** (`catalog_search`) adja a találatokat és a szűrő-darabszámokat; minden szűrő darabszáma a többi szűrővel számol. Szűrők: típus-fa (`weapons` = minden fegyver; alapértelmezés kereséskor `all`), ársávok (pénznemenként kerek határok, `PRICE_EDGES`) + kétfogantyús csúszka + min/max, márkák (többes választás), raktáron. Mobilon CSS-only lenyitható panel; JS nélkül „Szűrés” gombbal működik.
+- Táblák a weboldalnak: `product_summary` (a scraper építi: legjobb ár, max ár, `category`, `platforms` „,m4,ak,” formában, `search_code`), az ajánlatok és az ártörténet SQL-lel a `offers` / `price_history` táblából.
+- Katalógus: **egy D1-batch** adja a találatokat és a szűrő-darabszámokat; minden szűrő darabszáma a többi szűrővel számol. Szűrők: típus-fa (`weapons` = minden fegyver; alapértelmezés kereséskor `all`), ársávok (pénznemenként kerek határok, `PRICE_EDGES`) + kétfogantyús csúszka + min/max, márkák (többes választás), raktáron. Mobilon CSS-only lenyitható panel; JS nélkül „Szűrés” gombbal működik.
 - Kategóriák (0010): fegyverek (`rifle, pistol, smg, sniper, lmg, shotgun, grenade`), alkatrészek (`part_internal, part_hopup, part_motor, part_external`), kiegészítők (`acc_mag, acc_power, acc_optics, acc_ammo, acc_protect, acc_gear, other`). Csoportok: `weapons`, `parts`, `acc`. A szűrőben pipálható fa, több kategória egyszerre (`?cat=rifle&cat=sniper`); `?cat=all` = minden termék; kategória nélkül a fegyverek az alap (`lib/catalog.js`).
-- Besorolás (`airsoft_category(cím, url, ár)` SQL): ajánlatonként a bolti címből; a termék kategóriája a boltok többségi szavazata (+ a terméknév fél szavazat). Csomag-részek („with battery”, „+ 2 mags”) levágva; alkatrészszó + fegyverszó + fegyverár (>= 30 000 Ft) = fegyver, kivéve „for X / X-hez” alakban. Az URL csak végső tartalék. 46 valós címen tesztelve.
-- „Mihez jó” (`airsoft_platforms()`): M4/AR, AK, G36, MP5, AUG, SCAR, M14, P90, VSR-10, L96, Glock, Hi-Capa/1911, M9, Gearbox V2/V3 – a név és az azonos csoportba sorolt bolti címek alapján; szűrő: `?plat=m4`.
+- Besorolás (`scraper/classify.py: category(cím, url, ár)`, eredetileg SQL): ajánlatonként a bolti címből; a termék kategóriája a boltok többségi szavazata (+ a terméknév fél szavazat). Csomag-részek („with battery”, „+ 2 mags”) levágva; alkatrészszó + fegyverszó + fegyverár (>= 30 000 Ft) = fegyver, kivéve „for X / X-hez” alakban. Az URL csak végső tartalék. 46 valós címen tesztelve.
+- „Mihez jó” (`classify.platforms()`): M4/AR, AK, G36, MP5, AUG, SCAR, M14, P90, VSR-10, L96, Glock, Hi-Capa/1911, M9, Gearbox V2/V3 – a név és az azonos csoportba sorolt bolti címek alapján; szűrő: `?plat=m4`.
 - Párosítás-védelem: alkatrész/kiegészítő ajánlat (`scraper/filters.py: is_part`) nem párosul modellkódra (a „Magazine for CM.041K” kódja a fegyveré), és fuzzy-val is csak alkatrész-termékhez.
 - „Máshoz készült” szabály (`made_for_other`): „for / für / pour / para / -hoz / -hez” vagy kisbetűs „pro / do / per” + modellkód vagy platform = alkatrész/tartozék, akkor is, ha az alkatrészszót nem ismerjük („Upgrade set pro CYMA M24 CM.702”). A „VSR-10 Pro” terméknév nem számít (nagybetűs).
 - Nevek: a cseh/magyar/lengyel/német/francia/olasz alkatrészszavak angolra fordítva (`names.py`: zásobník → Magazine, válec/henger → Cylinder, „M24-HEZ” → „for M24”, „na 20 ran” → „20 rounds”).
@@ -113,22 +116,20 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 - Jellemző-őr (`filters.py: specs / spec_conflict`): BB-súly, kiszerelés (g/kg, db), gázfajta és ml, akku V / mAh / csatlakozó / forma, rugó (M100…), belső cső átmérő és hossz, gumikeménység (°), tárkapacitás és -típus (hi/mid/low-cap), áttétel (18:1), motor tengely és típus, generáció, verzió (V2/V3), fps, csőhossz (″), csomagméret, bio/nyomjelző BB. Ha két cím ugyanabban a jellemzőben eltér, soha nem párosulnak (se kódra, se fuzzy-val); a termékhez került ajánlat jellemzőit a katalógus megjegyzi (`Catalog.learn`).
 - Jellemző-audit (`rematch.py: audit_specs`): egy terméken belül az eltérő jellemzőjű ajánlatok leválnak (a név szerinti, ennek hiányában a leggyakoribb érték marad), majd újrapárosulnak. A napi futás utolsó lépése (`refresh` job → `rematch.py`), így az oldal minden éjjel magától rendbe jön.
 - Egyedi változat (`is_variant`: custom, HPA, Wolverine/Polarstar, tuned, upgraded, használt…): csak ugyanilyen termékhez párosul; ha a kód az alap terméké, cím alapján új termék lesz (pl. „Evike Custom CYMA CM048 … HPA” ≠ „CYMA CM048”).
-- Árkiugrás (0011, `v_offer_flags`): >= 3 boltnál a medián 40%-a alatti / 250%-a feletti ajánlat, 2 boltnál a 4x olcsóbb „eltérő”. Nem számít a legjobb árba, árfolyosóba, boltszámba, ártörténetbe; a termékoldalon lenyitható „Eltérő ár” blokkban látszik.
+- Árkiugrás (`summary.py`, `offers.is_outlier`): >= 3 boltnál a medián 40%-a alatti / 250%-a feletti ajánlat, 2 boltnál a 4x olcsóbb „eltérő”. Nem számít a legjobb árba, árfolyosóba, boltszámba, ártörténetbe; a termékoldalon lenyitható „Eltérő ár” blokkban látszik.
 - Dizájn: palaszürke `#1B2027`, csontfehér `#E9E4D8`, sárgaréz `#C8A24E` (csak ár / legjobb ajánlat), olív = raktáron, tégla = elfogyott; Barlow Condensed + Barlow. Egyedi elem: árfolyosó (legolcsóbb vs. legdrágább bolt) és arányos ajánlat-létra.
 
-## Teljesítmény (0013)
-- Mentéskor a trigger csak megjelöli az új/megváltozott ajánlatot (`cat = null`); a `refresh_product_summary()` előbb besorolja a megjelölteket (`airsoft_classify_pending()`), majd összesít.
-- A besorolók külön utasításban futnak: a PostgreSQL regex-gyorsítótára 32 mintás, a kategória (~25) és a platform (15) együtt egy utasításban 50x lassabb.
-- Mérés 60 000 ajánlaton (helyi PG16): frissítés 20 s → 0,7 s; egyszeri teljes besorolás ~25 s.
+## Teljesítmény
+- A weboldal egy oldalbetöltésnél 1–2 D1-kérést küld (a katalógus egy batch); az összesítő tábla indexelt (`category`, `manufacturer`, népszerűség).
+- A `summary.rebuild` csak a ténylegesen változott `product_summary` sorokat írja (sha1 „sig”), így a napi sorírás kicsi (D1: a sorírás a költség).
 
-## Biztonság (2026-11-09)
-- Titkok: a Supabase secret kulcs csak GitHub Secretsben; a weboldal csak szerveroldalon olvas a publishable kulccsal (a böngésző nem kapja meg). A repóban nincs kulcs.
-- Adatbázis: RLS minden táblán; nyilvános olvasás csak a publikus adatokra (boltok, termékek, ajánlatok, árak); belső táblák (scrape_runs, match_candidates, product_codes, aliasok) olvashatatlanok; írás csak service role-lal; `refresh_product_summary` csak service role. A kereső RPC nem fűz össze SQL-t (nincs injekció).
-- Weboldal: biztonsági fejlécek (`next.config.mjs`: HSTS, nosniff, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy, CSP frame-ancestors/form-action), `X-Powered-By` kikapcsolva; `/go` csak DB-beli bolti URL-re irányít; `/cur` open-redirect-védett.
-- GitHub Actions: `permissions: contents: read`, a kézi `limit` env-ként és számként ellenőrizve (nincs parancs-injekció); forkból nyitott PR nem kap titkot.
-- Hálózat: Cloudflare csak DNS (DNS only) – a forgalom közvetlenül a Vercelhez megy, a DDoS-/bot-védelmet a Vercel adja (a Vercel nem javasol proxyt elé).
+## Biztonság
+- Titkok: Worker → `INGEST_TOKEN` (Secret), GitHub → `D1_API_TOKEN` (Secret). A repóban nincs kulcs. A böngésző soha nem kap kulcsot; a D1 csak a Workerből érhető el.
+- Írási végpont (`/api/db`): token nélkül 404, rossz tokennel 401 (időzítés-független összehasonlítás); legfeljebb 100 utasítás / kérés, egy tranzakció; robots.txt tiltja.
+- Weboldal: SQL csak paraméterezve (a kereső `LIKE ... ESCAPE`, nincs összefűzött felhasználói adat); biztonsági fejlécek (`next.config.mjs`: HSTS, nosniff, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy, CSP frame-ancestors/form-action), `X-Powered-By` ki; `/go` csak DB-beli http(s) bolti URL-re irányít; `/cur` open-redirect-védett.
+- Hálózat: Cloudflare proxy (DDoS automatikus), Bot Fight Mode, rate limiting (100 kérés / 10 mp / IP); a scraper a workers.dev címen ír (oda nem hat a zóna botvédelme).
+- GitHub Actions: `permissions: contents: read`, a kézi `limit` env-ként és számként ellenőrizve; forkból nyitott PR nem kap titkot.
 - Kód: a repó publikus (ingyenes Actions-percek miatt), `LICENSE` = minden jog fenntartva.
-- Üzemeltetés: Vercel Hobby = csak nem kereskedelmi használat; AdSense / partnerlink / adománygomb bekapcsolása előtt Pro csomag vagy másik tárhely kell.
 
 ## Séma – lényeg
 - `products` = kanonikus termék, kulcs: **(manufacturer_id, model_code_norm)**.
@@ -136,7 +137,7 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 - `product_codes` = EAN + alternatív kódok; a kézi összevonások ide kerülnek, így legközelebb automatikus.
 - `price_history` napi 1 sor/ajánlat, HUF a napi árfolyamon rögzítve.
 - `exchange_rates` + `latest_rates` nézet: hétvégén az utolsó MNB árfolyam él.
-- `product_summary` materializált nézet: legjobb raktáron lévő HUF ár, ajánlatszám, összesített készlet.
+- `product_summary` tábla (a scraper építi a napi futás végén): legjobb raktáron lévő HUF ár, ajánlatszám, összesített készlet.
 - `match_status = 'manual'` sort az automatika soha nem írja felül.
 
 ## Párosítási kaszkád (`scraper/matcher.py`)
@@ -154,14 +155,14 @@ Védőkorlátok: szomszédos kódok (CM522/CM523) sosem olvadnak össze; család
 Karbantartás: új regex a `STRONG_PATTERNS`-be = több automatikus párosítás.
 
 ## Fejlesztési terv
-1. ✅ **Séma** – migrációk 0001–0013 (lásd fent).
+1. ✅ **Séma** – `d1/schema.sql` (korábban Supabase-migrációk 0001–0013).
 2. ✅ **MNB árfolyam job** – `mnb_rates.py`, napi cron.
 3. ✅ **Generikus scraper + pipeline** – JSON-LD, sitemap/lapozás, `run_shop.py`, GitHub Actions.
 4. ⏳ **Bolt-konfigok élesítése** – 2. kör kész (fenti táblázat, microdata-támogatás). Hátra: első éles futás `allapot.sql` alapján, Combat-Zone.
 5. ✅ **Párosítás bekötése** – `run_shop.py` hívja, `match_candidates` review-hoz.
-6. ✅ **Frontend MVP** – `web/` (lásd „Weboldal”). Élesben: https://www.airsofthunter.com (Cloudflare DNS → Vercel; tartalék: airsoftradar.vercel.app). Kész: kódos keresés (CM522 = CM.522). Kész: szűrősáv (típus, ár + csúszka, márka, készlet). Kész: sitemap.xml, robots.txt, /bot oldal, saját domain. Hátra: kattintásszámlálás.
-7. **Admin review oldal (1–2 nap)** – pending/review ajánlatok: „összevon X-szel” / „új termék” / „elutasít” (Supabase Auth, admin role).
-8. **Üzemeltetés (1 nap)** – `scrape_runs` monitor, GitHub Actions hiba -> email; ajánlat `is_active=false`, ha 3 napig nem láttuk.
+6. ✅ **Frontend MVP** – `web/` (lásd „Weboldal”). Élesben: https://www.airsofthunter.com (Cloudflare Workers + D1). Kész: kódos keresés (CM522 = CM.522). Kész: szűrősáv (típus, ár + csúszka, márka, készlet). Kész: sitemap.xml, robots.txt, /bot oldal, saját domain. Hátra: kattintásszámlálás.
+7. **Admin review oldal (1–2 nap)** – pending/review ajánlatok: „összevon X-szel” / „új termék” / „elutasít” (Cloudflare Access-szel védett oldal).
+8. ✅ **Üzemeltetés** – `health_check.py` (napi + kézi), GitHub Actions hiba -> e-mail; ajánlat `is_active=false`, ha napokig nem láttuk.
 9. **2. fázis** – árriasztás (`price_alerts` kész), szállítási költség HU-ra boltonként, affiliate XML feedek.
 
 ## Scraping irányelvek

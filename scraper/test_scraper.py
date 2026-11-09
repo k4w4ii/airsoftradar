@@ -221,7 +221,7 @@ class TestPipeline(unittest.TestCase):
     def test_two_shops_merge_into_one_product(self):
         db = FakeDB()
         _seed(db)
-        with mock.patch("db.DB", return_value=db):
+        with mock.patch("db.get_db", return_value=db):
             with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522 AK fekete", "79990", "a1")], [], 3)):
                 run_shop.run("airsoftplaza", None, False)
             with mock.patch.object(run_shop, "scrape", return_value=([_offer("CM.522 Sport Line Gen 2 (CYMA)", "189.90", "b1"),
@@ -268,12 +268,12 @@ class TestBudget(unittest.TestCase):
         _seed(db)
         db.t["offers"].append({"id": 999, "shop_id": 1, "external_id": "old", "last_seen_at": "2000-01-01", "is_active": True,
                                "match_status": "auto", "product_id": None})
-        with mock.patch("db.DB", return_value=db):
+        with mock.patch("db.get_db", return_value=db):
             with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522", "189.90", "n1")], [{"error": "időkorlát"}], None)):
                 run_shop.run("taiwangun", None, False)
         self.assertTrue(next(o for o in db.t["offers"] if o["id"] == 999)["is_active"])
         self.assertEqual(db.t["scrape_runs"][-1]["status"], "partial")
-        with mock.patch("db.DB", return_value=db):
+        with mock.patch("db.get_db", return_value=db):
             with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA CM.522", "189.90", "n1")], [], 3)):
                 run_shop.run("taiwangun", None, False)
         self.assertFalse(next(o for o in db.t["offers"] if o["id"] == 999)["is_active"])
@@ -370,7 +370,7 @@ class TestTitleProductPipeline(unittest.TestCase):
     def test_codeless_offers_from_two_shops_merge(self):
         db = FakeDB()
         _seed(db)
-        with mock.patch("db.DB", return_value=db):
+        with mock.patch("db.get_db", return_value=db):
             with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA Platinum AKS-74U replica", "60000", "c1")], [], 3)):
                 run_shop.run("airsoftplaza", None, False)
             with mock.patch.object(run_shop, "scrape", return_value=([_offer("CYMA Platinum AKS-74U replica - Black", "150", "c2")], [], 3)):
@@ -399,7 +399,7 @@ class TestRound4(unittest.TestCase):
         _seed(db)
         db.t["shops"][1]["name"] = "AirsoftPlaza"
         db.t["shops"][0]["name"] = "Taiwangun"
-        with mock.patch("db.DB", return_value=db), mock.patch.object(run_shop, "scrape",
+        with mock.patch("db.get_db", return_value=db), mock.patch.object(run_shop, "scrape",
                 return_value=([_offer("WE GLOCK 18 GEN.3 GÁZ GBB - FEKETE - Airsoftplaza", "53900", "g1")], [], 3)):
             run_shop.run("airsoftplaza", None, False)
         self.assertEqual(db.t["offers"][0]["title_raw"], "WE GLOCK 18 GEN.3 GÁZ GBB - FEKETE")
@@ -436,7 +436,7 @@ class TestNames(unittest.TestCase):
         db = FakeDB()
         _seed(db)
         db.t["shops"][1]["name"] = "AirsoftPlaza"
-        with mock.patch("db.DB", return_value=db), mock.patch.object(run_shop, "scrape",
+        with mock.patch("db.get_db", return_value=db), mock.patch.object(run_shop, "scrape",
                 return_value=([_offer("CYMA CM.522 AK fekete", "79990", "a1")], [], 3)):
             run_shop.run("airsoftplaza", None, False)
             name1 = db.t["products"][0]["name"]

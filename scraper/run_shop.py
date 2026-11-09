@@ -284,10 +284,7 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
                               "offers_seen": len(saved), "offers_new": stats.get("new", 0),
                               "errors": errors[:50]}, id=f"eq.{run_id}")
     db.update("shops", {"last_scraped_at": now}, id=f"eq.{shop['id']}")
-    try:                                   # a weboldal boltonként frissül, nem csak a teljes futás végén
-        db.rpc("refresh_product_summary")
-    except RuntimeError as e:
-        print(f"[{slug}] refresh hiba: {e}", file=sys.stderr)
+    # a weboldal (product_summary) a napi futás végén frissül: rematch.py -> summary.rebuild
     print(f"[{slug}] {status}: {len(saved)} ajánlat, párosítás: {dict(stats)}, hibák: {len(errors)}")
     if status == "failed":
         sys.exit(1)
@@ -303,11 +300,8 @@ if __name__ == "__main__":
     if a.refresh:
         from db import get_db
         db = get_db()
-        if hasattr(db, "execute"):
-            import summary
-            summary.rebuild(db)
-        else:
-            db.rpc("refresh_product_summary")
+        import summary
+        summary.rebuild(db)
         print("product_summary frissítve")
     elif a.shop:
         run(a.shop, a.limit, a.dry_run)

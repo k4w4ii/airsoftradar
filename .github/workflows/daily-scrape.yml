@@ -21,10 +21,7 @@ concurrency:
 
 env:
   PYTHONUNBUFFERED: "1"       # a napló azonnal látszik (nem pufferelve)
-  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-  SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-  # Cloudflare D1: a GitHub „DB_BACKEND” változó d1-re állításával vált át a scraper (TELEPITES.md 20. pont)
-  DB_BACKEND: ${{ vars.DB_BACKEND }}
+  # Cloudflare D1 (a weboldal titkos /api/db végpontján át)
   D1_API_URL: ${{ vars.D1_API_URL }}
   D1_API_TOKEN: ${{ secrets.D1_API_TOKEN }}
 
@@ -80,3 +77,15 @@ jobs:
         with: { python-version: "3.12" }
       - run: python scraper/rematch.py
       # Next.js ISR újraépítés (opcionális): curl -X POST "$REVALIDATE_URL?secret=$REVALIDATE_SECRET"
+
+  # legvégül: állapot-ellenőrzés (adatbázis + weboldal); ha piros, a GitHub e-mailt küld
+  health:
+    needs: refresh
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - run: python scraper/health_check.py

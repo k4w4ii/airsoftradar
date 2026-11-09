@@ -1,6 +1,6 @@
 """
-Cloudflare D1 kliens a scrapernek – ugyanaz a felület, mint a db.DB (Supabase/PostgREST), így a scraper többi része
-változatlan. A D1-et kívülről a weboldal Workerének titkos végpontján érjük el (web/app/api/db/route.js), mert a
+Cloudflare D1 kliens a scrapernek (select / insert / upsert / update, PostgREST-stílusú szűrőkkel – a scraper
+eredetileg Supabase-re készült, így a hívások változatlanok maradtak). A D1-et kívülről a weboldal Workerének titkos végpontján érjük el (web/app/api/db/route.js), mert a
 Cloudflare központi D1 API-ja kérésszám-korlátos. Csak stdlib.
 
 Env: D1_API_URL (pl. https://airsofthunter.<fiók>.workers.dev/api/db), D1_API_TOKEN (ugyanaz, mint a Worker INGEST_TOKEN titka).
@@ -166,9 +166,3 @@ class D1DB:
             return
         w, args = where(filters)
         self.execute([(f"UPDATE {table} SET {','.join(f'{c}=?' for c in values)}{w}", list(values.values()) + args)])
-
-    def rpc(self, fn: str, args: dict | None = None):
-        # A D1-ben nincs tárolt eljárás: a product_summary-t a napi futás végén a summary.py építi újra (rematch.py).
-        if fn == "refresh_product_summary":
-            return None
-        raise RuntimeError(f"D1: ismeretlen rpc: {fn}")

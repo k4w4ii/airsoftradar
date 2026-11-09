@@ -1,261 +1,115 @@
-# AirsoftHunter – telepítési útmutató (kezdőknek)
+# AirsoftHunter – telepítési és üzemeltetési útmutató (kezdőknek)
 
 Minden parancsot **PowerShellben**, az `E:\airsoftradar` mappában futtass (`cd E:\airsoftradar`).
+Felépítés: weboldal és adatbázis a **Cloudflare**-en (Workers + D1), a napi letöltés a **GitHub Actions**-ben fut.
 
-## 1. Fájlok frissítése
-Az `airsoftradar.zip` tartalmát csomagold ki az `E:\airsoftradar` mappába → „Fájlok cseréje” mindenre.
+## 1. Frissítés (amikor új zipet kapsz)
+1. Az `airsoftradar.zip` tartalmát csomagold ki az `E:\airsoftradar` mappába → „Fájlok cseréje” mindenre.
+2. Ellenőrizd a `web\wrangler.jsonc` végén a `database_id`-t. Ha ott `IDE_MASOLD_A_D1_DATABASE_ID-T` áll, írd vissza a saját D1 Database ID-det (3.3 pont).
+3. Feltöltés:
+   ```powershell
+   git add -A
+   git commit -m "Frissítés"
+   git push
+   ```
+4. A Cloudflare magától újraépíti az oldalt (Workers & Pages → `airsofthunter` → Deployments, 3–6 perc, zöld = kész).
 
-## 2. Git bemutatkozás (egyszer kell)
+## 2. Git és GitHub (egyszer kell)
 ```powershell
 git config --global user.name "A neved"
 git config --global user.email "a-github-email-cimed@pelda.hu"
+winget install --id GitHub.cli
 ```
+Zárd be a PowerShellt, nyiss újat, `cd E:\airsoftradar`, majd `gh auth login` (GitHub.com → HTTPS → Y → Login with a web browser).
+Első feltöltés: `git add .` → `git commit -m "Első verzió"` → `gh repo create airsoftradar --public --source . --push`.
 
-## 3. GitHub
-1. Ha nincs fiókod: https://github.com → Sign up.
-2. GitHub parancssori eszköz telepítése:
-   ```powershell
-   winget install --id GitHub.cli
-   ```
-3. **Zárd be a PowerShellt, nyiss újat**, majd `cd E:\airsoftradar`.
-4. Bejelentkezés:
-   ```powershell
-   gh auth login
-   ```
-   Válaszok: `GitHub.com` → `HTTPS` → `Y` → `Login with a web browser` → a kiírt kódot írd be a megnyíló böngészőben.
-5. Feltöltés publikus repóba:
-   ```powershell
-   git add .
-   git commit -m "Első verzió"
-   gh repo create airsoftradar --public --source . --push
-   ```
-
-## 4. Supabase (adatbázis)
-1. https://supabase.com → **Start your project** → belépés GitHubbal.
-2. **New project**: név `airsoftradar`, adatbázis-jelszó (mentsd el), Region: **Central EU (Frankfurt)**. Várj ~2 percet.
-3. Bal menü **SQL Editor** → **New query**. Nyisd meg Jegyzettömbbel a `supabase\telepites_egyben.sql`-t, **Ctrl+A, Ctrl+C**, illeszd be az üres query-be, **Run**.
-   - Ha felugrik egy „destructive operation” figyelmeztetés: **Run this query** (csak a saját árkereső-tábláinkat törli és hozza létre újra).
-   - Várt eredmény alul egy sor: `boltok 20 | gyartok 81 | kategoriak 6`.
-4. Ez a fájl az összes migrációt (0001–0013) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
-5. Bal lent **Project Settings** → **API Keys** → másold ki a **Secret key**-t (`sb_secret_...`).
-   **Project Settings → Data API** (vagy a projekt főoldala) → másold ki a **Project URL**-t (`https://xxxx.supabase.co`).
-
-## 5. Kulcsok a GitHubra (titkosan)
-```powershell
-gh secret set SUPABASE_URL
-gh secret set SUPABASE_SERVICE_KEY
-```
-Mindkettő után illeszd be az értéket (jobb klikk) és Enter. A titkos kulcs **soha** ne kerüljön fájlba!
-
-## 6. Első próbafutás
-1. https://github.com → a repód → **Actions** fül → bal oldalt **daily-scrape** → **Run workflow** → `limit` mezőbe: `10` → **Run workflow**.
-2. ~5–10 perc múlva zöld pipa = siker. Piros X esetén kattints rá, és küldd el a hibaüzenetet.
-3. Supabase → **SQL Editor** → futtasd a `supabase\allapot.sql`-t: boltonként mutatja, hány ajánlat jött le, mennyi párosodott, és az első hibát.
-
-## 7. Frissítés (amikor új fájlokat kapsz)
-Zip kicsomagolása az `E:\airsoftradar` mappába (felülírás), majd:
-```powershell
-git add .
-git commit -m "Frissítés"
-git push
-```
-
-## 8. Weboldal (Vercel) – egyszer kell
-1. **Supabase → SQL Editor → +**: futtasd a `supabase\migrations\0005_web_views.sql`-t (adatot nem töröl). Várt eredmény: `kész | <termékszám>`.
-2. **Supabase → Project Settings → API Keys**: másold ki a **Publishable key**-t (`sb_publishable_...`). Ez nyilvános olvasókulcs, a weboldal ezzel olvas.
-3. Új fájlok feltöltése (7. pont: kicsomagolás, `git add .`, `git commit`, `git push`).
-4. **vercel.com → Add New… → Project** → GitHub összekötése (ha kéri) → az `airsoftradar` repó mellett **Import**.
-5. A beállító oldalon:
-   - **Root Directory** → **Edit** → válaszd a `web` mappát → **Continue**.
-   - **Environment Variables** – két sor:
-     - `SUPABASE_URL` = `https://xxxx.supabase.co`
-     - `SUPABASE_PUBLISHABLE_KEY` = `sb_publishable_...`
-   - **Deploy**.
-6. 1–2 perc múlva kész: a kapott címen (pl. `airsoftradar.vercel.app`) él az oldal. Ezután minden `git push` után magától frissül.
-
-## 9. Adatbázis-frissítés (amikor új `migrations/000N_...sql` fájlt kapsz)
-Supabase → **SQL Editor** → **+** → az új fájl tartalma → **Run**. Ezek adatot nem törölnek. (A `telepites_egyben.sql`-t ilyenkor **ne** futtasd!)
-
-## 10. Saját domain (Cloudflare → Vercel)
-1. **Vercel → Project → Settings → Domains**: add hozzá az `airsofthunter.com`-ot (a `www` változat magától jön, a csupasz domain 308-cal a `www`-re irányít).
-2. **Cloudflare → airsofthunter.com → DNS → Records**: töröld a meglévő `@` és `www` A/AAAA/CNAME rekordokat (ha vannak).
-3. **Add record** kétszer (az értéket a Vercel mutatja, „View DNS configuration”):
-   - Type `CNAME`, Name `@`, Target `<…>.vercel-dns-017.com`, **Proxy status: DNS only (szürke felhő)**
-   - Type `CNAME`, Name `www`, Target ugyanaz (vagy amit a Vercel a www-hez ír), **DNS only**
-4. Vercel → **Refresh**. Pár perc – néhány óra, amíg „Valid Configuration” lesz; az SSL-t a Vercel adja.
-
-## 11. Üzemeltetői adatok (ÁSZF, adatvédelem, impresszum)
-1. Nyisd meg Jegyzettömbbel: `web\lib\site.js`.
-2. Az `OPERATOR` részben írd át a `[szögletes zárójeles]` értékeket: név, cím, e-mail (cég / egyéni vállalkozó esetén adószám és nyilvántartási szám is). Az idézőjelek maradjanak!
-3. Mentés, majd `git add .` → `git commit -m "Uzemelteto adatai"` → `git push`. A jogi oldalak 1–2 perc múlva frissülnek.
-
-## 12. Bevétel: Google AdSense és „Hívj meg egy kávéra” (később, ha kéred)
-Alapból **minden ki van kapcsolva**, az oldalon semmi nem látszik. A beállítások a `web\lib\site.js` alján, a `MONETIZE` részben vannak (vagy Vercelen környezeti változóként, utána Redeploy).
-
-**Kávé:** regisztrálj a ko-fi.com vagy a buymeacoffee.com oldalon, és a saját oldalad címét írd be a `coffeeUrl` mezőbe. A lábléc jobb alsó sarkában megjelenik egy halk link.
-
-**AdSense, 1. lépés (jóváhagyás):**
-1. Regisztrálj: adsense.google.com, webhelyként add meg az `airsofthunter.com`-ot.
-2. A kapott `ca-pub-…` kódot írd be az `adsenseClient` mezőbe, majd push. Ettől betöltődik az ellenőrző kód, és elérhető lesz a `www.airsofthunter.com/ads.txt`. Hirdetés még nem jelenik meg.
-3. Az AdSense felületén: **Hirdetések → Webhelyek szerint → Automatikus hirdetések: KI** (ez alapból be van kapcsolva, ezért kell kikapcsolni!). Az átfedő formátumokat (rögzített sáv, teljes képernyős „vignette”) is kapcsold ki.
-4. **Adatvédelem és üzenetek → Európai szabályozás → üzenet létrehozása.** Ez a Google hitelesített hozzájárulás-kérő ablaka, az EU-ban kötelező. Nélküle az EU-s látogatóknak az AdSense nem vagy csak korlátozottan mutat hirdetést. Ez az egyetlen dolog, ami első látogatáskor felugrik, és ezt nem lehet kihagyni.
-5. Várd meg a jóváhagyást (néhány nap – pár hét).
-
-**AdSense, 2. lépés (hirdetések bekapcsolása):** Hirdetések → Hirdetési egység szerint → **Display hirdetés**, „vízszintes” formában. Két egység kell: egy a lista aljára, egy a termékoldal aljára. A kapott `data-ad-slot` számokat írd be az `adsenseSlotList` és az `adsenseSlotProduct` mezőbe, majd push.
-
-Az adatvédelmi tájékoztató a beállításoktól függően automatikusan kiegészül (Google AdSense, hozzájárulás, kávé-szolgáltató).
-
-## 13. Frissítés 2026-11-09: alkatrész-kategóriák, többes szűrés
-1. Zip kicsomagolása, `git add .` → `git commit -m "Alkatresz kategoriak"` → `git push`.
-2. **Supabase → SQL Editor → +**: futtasd a `supabase\migrations\0010_parts_platforms.sql`-t (adatot nem töröl). A végén kategóriánként kiírja a termékszámot (rifle, pistol, part_internal, acc_mag…).
-   - Ha a 0007–0009 még nincs lefuttatva, előbb azokat, sorrendben.
-3. A weboldal 1–2 perc múlva az új szűrőkkel jelenik meg. A tévesen fegyverhez kötött olcsó tárak/alkatrészek ajánlatai átmenetileg eltűnnek; a következő éjszakai futás a helyes termékhez párosítja őket.
-
-## 14. Partnerprogramok (affiliate) bekötése
-Ha egy bolt partnerlinket ad, a `/go/…` kimenő link automatikusan azt használja:
-**Supabase → Table Editor → `shops`** → a bolt sorában az `affiliate_template` mezőbe írd a sablont, ahol `{url}` a termékoldal címe, pl. `https://partner.pelda.com/klikk?id=123&url={url}`. Mentés – azonnal él, push sem kell.
-
-## 15. Frissítés 2026-11-09 (2): gyanús árak, custom változatok, biztonság
-1. Zip kicsomagolása, `git add .` → `git commit -m "Gyanus arak, biztonsag"` → `git push`.
-2. **Supabase → SQL Editor → +**: előbb a `0010_parts_platforms.sql` (ha még nem futott), utána a `0011_outliers_variants.sql`. A végén kiírja, hány „eltérő” ajánlatot talált, és hányat választott le újrapárosításra.
-3. Biztonsági beállítások (egyszer, kézzel – kód nélkül):
-   - **Kétlépcsős azonosítás (2FA)** mindenhol: GitHub (Settings → Password and authentication), Cloudflare (My Profile → Authentication), Vercel (Account Settings → Authentication), Supabase (Account → Security), Google.
-   - **GitHub → a repó → Settings → Code security**: Dependabot alerts és Secret scanning: **Enable**.
-   - **Cloudflare → airsofthunter.com → DNS → Settings → DNSSEC: Enable** (a Cloudflare-nél vett domainnél egy kattintás).
-
-## 16. Frissítés 2026-11-09 (3): összekevert termékek szétbontása
-1. Zip kicsomagolása, `git add .` → `git commit -m "Termekek szetbontasa"` → `git push`.
-2. **Supabase → SQL Editor**, mindegyik új lapon, ebben a sorrendben (amelyik már lefutott, az kihagyható, de újrafuttatni sem baj): `0010_parts_platforms.sql` → `0011_outliers_variants.sql` → `0012_parts_multilang.sql`.
-3. **GitHub → a repód → Actions → bal oldalt „rematch” → Run workflow.** Pár perc alatt újrapárosítja a leválasztott ajánlatokat, angolra egységesíti a termékneveket és frissíti az oldalt. (Ha épp fut az éjszakai letöltés, megvárja.)
-
-## 17. Frissítés 2026-11-09 (4): gyors weboldal-frissítés
-1. **Supabase → SQL Editor → +**: futtasd a `0013_fast_refresh.sql`-t (kb. fél–egy perc). A végén: `termekek | besorolatlan_ajanlat` – az utóbbi legyen 0.
-2. Zip kicsomagolása, `git add .` → `git commit -m "Gyors frissites"` → `git push`.
-Miért: a weboldal-frissítés túllépte a Supabase 8 mp-es időkorlátját („statement timeout”). Most a besorolás ajánlatonként egyszer fut, a frissítés kb. 1 mp.
-
-## 18. Frissítés 2026-11-09 (5): BB-súlyok, gázok, akkuk, rugók szétválasztása
-1. Zip kicsomagolása, `git add .` → `git commit -m "Jellemzo-or"` → `git push`.
-2. **GitHub → Actions → rematch → Run workflow** (most egyszer kézzel; pár perc). A naplóban: `eltérő jellemző miatt leválasztva: N`, utána párosítás, átnevezés, frissítés.
-3. Ezután minden éjjel automatikusan lefut a napi letöltés végén – kézzel nem kell.
-
-## 19. Átköltözés a Cloudflare-re – 1. lépés: a weboldal (Vercel helyett Cloudflare Workers)
-Az adat egyelőre a Supabase-ből jön; a 2. lépésben az adatbázis is átkerül (D1). Közben az oldal végig működik.
-
-**A) Cloudflare fizetős csomag (havi 5 $):** Cloudflare → bal menü **Workers & Pages** → **Plans** (vagy „Upgrade”) → **Workers Paid** → fizetés megadása.
-
-**B) Fájlok:** zip kicsomagolása, `git add .` → `git commit -m "Cloudflare Workers"` → `git push`. (A Vercel ettől még fut tovább, az átállásig az él.)
-
-**C) Worker létrehozása a GitHub-repóból:**
-1. **Workers & Pages → Create → Import a repository** → GitHub összekötése (ha kéri) → válaszd az `airsoftradar` repót.
-2. **Project name:** `airsofthunter` (pontosan így – ez szerepel a `web/wrangler.jsonc`-ben).
-3. **Build settings / Advanced:**
+## 3. Cloudflare (egyszer kell)
+1. **Fizetős csomag (havi 5 $):** Workers & Pages → Plans → **Workers Paid**.
+2. **Worker a GitHub-repóból:** Workers & Pages → Create → **Import a repository** → `airsoftradar`.
+   - Project name: `airsofthunter`
    - Root directory (Path): `web`
    - Build command: `npx opennextjs-cloudflare build`
    - Deploy command: `npx opennextjs-cloudflare deploy`
-   - Build variables: `SUPABASE_URL` és `SUPABASE_PUBLISHABLE_KEY` (ugyanazok, mint a Vercelen)
-4. **Create and deploy.** Az első fordítás 3–6 perc. Ha piros, küldd el a build naplót (Deployments → a sikertelen → View build log).
+3. **Adatbázis:** Storage & databases → D1 SQL database → **Create**.
+   - Name: `airsofthunter`, Location: Eastern Europe (EEUR).
+   - A **Database ID**-t írd be a `web\wrangler.jsonc`-be az `IDE_MASOLD_A_D1_DATABASE_ID-T` helyére, majd push (1. pont).
+   - A táblákat: D1 → Console → a `d1\schema.sql` teljes tartalma → Run.
+4. **Titkos kulcs:** PowerShellben generáld:
+   ```powershell
+   [guid]::NewGuid().ToString("N") + [guid]::NewGuid().ToString("N")
+   ```
+   Worker → Settings → Variables and Secrets → Add: Type **Secret**, Name `INGEST_TOKEN`, Value: a kulcs → Deploy.
+   A kulcsot ne küldd el senkinek, ne mentsd fájlba, és ne legyen rajta képernyőképen.
+5. **Domain:** Worker → Settings → Domains & Routes → Add → Custom domain: `www.airsofthunter.com`, majd `airsofthunter.com`.
+   Csupasz domain → www: airsofthunter.com → Rules → Redirect Rules → *Hostname equals* `airsofthunter.com` → Dynamic: `concat("https://www.airsofthunter.com", http.request.uri.path)`, 301, Preserve query string.
+6. **Védelem:** a proxy és a DDoS-védelem a Custom domainnel automatikus.
+   - Security → Settings → **Bot fight mode: On**.
+   - Security → Security rules → Create rule ▾ → **Rate limiting rules**: URI Path starts with `/`, IP szerint, 100 kérés / 10 mp → Block 10 mp.
+   - Az **AI Labyrinth** és a **Precursor** maradjon kikapcsolva.
 
-**D) Futásidejű változók:** a Worker oldalán **Settings → Variables and Secrets → Add**:
-   - `SUPABASE_URL` – Type: **Secret** – érték: `https://xxxx.supabase.co`
-   - `SUPABASE_PUBLISHABLE_KEY` – Type: **Secret** – érték: `sb_publishable_...`
-   - **Deploy**. Ezután a `https://airsofthunter.<valami>.workers.dev` címen már működnie kell az oldalnak. Próbáld ki: lista, szűrők, termékoldal, ÁSZF, „Megnézem a boltban”.
+## 4. GitHub titkok és változók (egyszer kell)
+Repó → Settings → Secrets and variables → Actions:
+- **Secrets** fül → `D1_API_TOKEN` = ugyanaz a kulcs, mint a Worker `INGEST_TOKEN`-je.
+- **Variables** fül → `D1_API_URL` = `https://airsofthunter.<fiókod>.workers.dev/api/db`.
+  - A pontos cím: Worker → Settings → Domains & Routes → `workers.dev` sor; ha „Disabled”, kapcsold be.
 
-**E) A domain átállítása (ha a D) pontban minden jó):**
-1. **Cloudflare → airsofthunter.com → DNS → Records:** töröld a két `CNAME` rekordot, ami a `vercel-dns`-re mutat (`@` és `www`).
-2. **Workers & Pages → airsofthunter → Settings → Domains & Routes → Add → Custom domain:** `www.airsofthunter.com` → Add. Majd ugyanígy: `airsofthunter.com`.
-3. **Csupasz domain → www átirányítás:** airsofthunter.com → **Rules → Redirect Rules → Create rule**:
-   - Ha: *Hostname* *equals* `airsofthunter.com`
-   - Akkor: *Dynamic*, kifejezés: `concat("https://www.airsofthunter.com", http.request.uri.path)`, Status: **301**, *Preserve query string*: bepipálva → **Deploy**.
-4. Pár perc múlva a `https://www.airsofthunter.com` már a Cloudflare-ről jön (a böngészőben semmi nem látszik másnak).
+## 5. Napi működés és ellenőrzés
+- **daily-scrape** (minden éjjel 02:17 UTC):
+  1. MNB-árfolyam.
+  2. Boltok letöltése.
+  3. Újrapárosítás és a weboldal frissítése.
+  4. **Állapot-ellenőrzés**.
+  
+  Ha bármi hibás, a futás piros lesz, és a GitHub e-mailt küld.
+- **Kézi ellenőrzés bármikor:** Actions → **health** → Run workflow (fél perc).
+  - A futás **Summary** oldalán táblázat jelenik meg: ✅ rendben, ⚠️ figyelmeztetés (pl. egy bolt nem sikerült), ❌ hiba.
+  - Ellenőrzi: adatbázis, termékszám, árfolyam frissessége, napi letöltés, boltok, főoldal, szűrés, termékoldal, bolti link, sitemap, jogi oldal, a titkos végpont védelme.
+- **Kézi újrapárosítás:** Actions → **rematch** → Run workflow (pár perc).
+- **Boltonkénti állapot:** D1 → Console → a `d1\allapot.sql` tartalma → Run.
+- **Miért ad egy bolt 0 terméket:** ugyanott a `d1\diagnozis.sql`.
 
-**F) Vercel megszüntetése (1–2 nap hibátlan működés után):** Vercel → a projekt → Settings → Advanced → **Delete Project**; GitHub → Settings → Applications → Vercel → Uninstall.
+## 6. Üzemeltetői adatok (ÁSZF, adatvédelem, impresszum)
+`web\lib\site.js` → `OPERATOR` rész (név, e-mail; cím, adószám, nyilvántartási szám csak ha kitöltöd). Mentés → push.
 
-## 20. Átköltözés a Cloudflare-re – 2. lépés: az adatbázis (Supabase helyett Cloudflare D1)
-Mit kapsz: a weboldal és az adatbázis is a Cloudflare-nél lesz, egy helyen. A scraper egy titkos, jelszóval védett címen (`/api/db`) ír a D1-be. Visszaállás bármikor egy változóval lehetséges, amíg a Supabase-t nem törlöd.
+## 7. Bevétel: Google AdSense és „Hívj meg egy kávéra” (alapból kikapcsolva)
+A beállítások a `web\lib\site.js` alján, a `MONETIZE` részben vannak, vagy a Workeren változóként: `ADSENSE_CLIENT`, `ADSENSE_SLOT_LIST`, `ADSENSE_SLOT_PRODUCT`, `COFFEE_URL` → Deploy.
 
-**A) D1 adatbázis létrehozása:**
-1. Cloudflare → **Storage & databases → D1 SQL database → Create database**.
-2. Name: `airsofthunter`. Location: **Eastern Europe (EEUR)**. → **Create**.
-3. Másold ki a **Database ID**-t (hosszú azonosító, pl. `3f2a…-…`).
-4. Nyisd meg Jegyzettömbbel: `E:\airsoftradar\web\wrangler.jsonc`, és cseréld ki az `IDE_MASOLD_A_D1_DATABASE_ID-T` szöveget erre az ID-re (az idézőjelek maradjanak). Mentés.
-   > Ha ez kimarad, a Cloudflare build piros lesz. Ilyenkor az oldal a régi verzión fut tovább, nem áll le.
+**Kávé:** ko-fi.com vagy buymeacoffee.com → a saját oldalad címe a `coffeeUrl` mezőbe. A láblécben halk link jelenik meg.
 
-**B) Titkos kulcs generálása** (PowerShell):
-```powershell
-[guid]::NewGuid().ToString("N") + [guid]::NewGuid().ToString("N")
+**AdSense:**
+1. adsense.google.com → webhely: `airsofthunter.com`.
+2. A `ca-pub-…` kód az `adsenseClient` mezőbe → push. Ekkor él az ellenőrző kód és a `/ads.txt`, hirdetés még nincs.
+3. AdSense: Automatikus hirdetések **KI**, az átfedő formátumok is.
+4. Adatvédelem és üzenetek → Európai szabályozás → üzenet létrehozása. Ez az EU-ban kötelező hozzájárulás-kérő, és ez az egyetlen dolog, ami első látogatáskor felugrik.
+5. Jóváhagyás után két „Display” egység (lista alja, termékoldal alja), a `data-ad-slot` számok az `adsenseSlotList` és az `adsenseSlotProduct` mezőbe → push.
+
+Az adatvédelmi tájékoztató magától kiegészül.
+
+## 8. Partnerprogram (affiliate) bekötése
+Ha egy bolt partnerlinket ad, a „Megnézem a boltban” gomb azt használja. D1 → Console:
+```sql
+UPDATE shops SET affiliate_template = 'https://partner.pelda.com/klikk?id=123&url={url}' WHERE slug = 'gunfire';
 ```
-Az eredmény egy 64 karakteres sor. Ezt ne küldd el senkinek, és ne mentsd fájlba: csak a következő két helyre másold be.
+A `{url}` helyére kerül a termékoldal címe. Azonnal él (legfeljebb fél óra gyorsítótár).
 
-**C) A kulcs a Workerbe:** Workers & Pages → `airsofthunter` → **Settings → Variables and Secrets → Add**.
-- Type: **Secret**
-- Name: `INGEST_TOKEN`
-- Value: a B) pont kulcsa
-- → **Deploy**
-
-**D) A kulcs és a cím a GitHubba:** repó → **Settings → Secrets and variables → Actions**.
-- **Secrets** fül → New repository secret: `D1_API_TOKEN` = ugyanaz a kulcs.
-- **Variables** fül → New repository variable: `D1_API_URL` = `https://airsofthunter.<valami>.workers.dev/api/db`.
-  - A pontos workers.dev címet itt találod: Worker → Settings → Domains & Routes → `workers.dev` sor.
-  - Ha a sor „Disabled”, kapcsold be (**Enable**). A scraper ezen a címen éri el a végpontot, mert a domain botvédelme nem engedné át.
-
-**E) Feltöltés:** zip kibontása `E:\airsoftradar`-ba (felülírás), majd:
-```powershell
-cd E:\airsoftradar
-git add -A
-git commit -m "Cloudflare D1"
-git push
-```
-Várd meg, amíg a Cloudflare-en a Deployments zöld lesz. Az oldal ekkor még a Supabase-ből olvas: semmi nem változik.
-
-**F) Adatok átmásolása:** GitHub → **Actions → migrate-d1 → Run workflow**.
-- Futási idő: 10–40 perc. A végén ez áll: `KÉSZ – a D1-ben minden adat megvan`.
-- Újrafuttatható: ha hibával megáll, egyszerűen indítsd újra.
-- Ellenőrzés: D1 → `airsofthunter` → **Console** → `SELECT count(*) FROM product_summary;` → nagyjából annyi termék, amennyi a weboldalon.
-
-**G) A weboldal átkapcsolása:** Worker → Settings → Variables and Secrets → Add.
-- Type: **Text**
-- Name: `DATA_SOURCE`
-- Value: `d1`
-- → **Deploy**
-
-Próbáld ki az oldalt: lista, szűrők, keresés, termékoldal, árgrafikon, „Megnézem a boltban”.
-> **Visszaállás:** töröld a `DATA_SOURCE` változót → Deploy. Az oldal azonnal újra a Supabase-ből olvas.
-
-**H) A scraper átkapcsolása:** GitHub → Settings → Secrets and variables → Actions → **Variables** → New: `DB_BACKEND` = `d1`.
-- A következő éjszakai futás már a D1-be ír.
-- Ellenőrzéshez indítsd el egyszer kézzel: **Actions → rematch → Run workflow** (pár perc, a végén `[summary] {...}` sor).
-> Fontos: az F–H pontot lehetőleg egy nap alatt csináld meg, 02:17 UTC (03:17 magyar idő) előtt. Ha közben lefutott egy éjszakai letöltés, futtasd újra a **migrate-d1**-et a H pont előtt, mert addig az új árak még a Supabase-be kerültek.
-
-**I) Supabase megszüntetése (kb. egy hét hibátlan működés után):**
-1. Supabase → Project Settings → General → **Delete project**.
-2. GitHub Secrets: töröld a `SUPABASE_URL` és `SUPABASE_SERVICE_KEY` titkokat.
-3. Worker változók: töröld a `SUPABASE_URL` és `SUPABASE_PUBLISHABLE_KEY` változókat.
-
-Az Adatvédelmi tájékoztatóból a Supabase a G) pont után magától kikerül.
-
-**Állapot lekérdezése D1-ben:** a `d1/allapot.sql` tartalmát másold a D1 Console-ba → Run (boltonként az utolsó futás, a hibák és a párosítás).
-
-**Költség:** a Workers Paid csomag (5 $/hó) havonta 50 millió sorírást és 25 milliárd sorolvasást tartalmaz.
-- Az átmásolás egyszeri, néhány millió írás.
-- Egy napi futás nagyjából 0,5 millió írás.
-- Ez bőven belefér; a forgalom a D1 oldal **Metrics** fülén látszik.
+## 9. Biztonság (egyszer, kézzel)
+- **Kétlépcsős azonosítás (2FA):** GitHub, Cloudflare, Google.
+- **GitHub → repó → Settings → Code security:** Dependabot alerts és Secret scanning: **Enable**.
+- **Cloudflare → airsofthunter.com → DNS → Settings → DNSSEC: Enable.**
+- A Workeren a titkok mindig **Secret** típusúak legyenek, ne „Variable”.
 
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|
 | `LF will be replaced by CRLF` | Csak figyelmeztetés, nem hiba. |
-| `Author identity unknown` | 2. lépés kimaradt. |
-| `gh is not recognized` | 3.2 után nem nyitottál új PowerShellt. |
-| `null value in column "name_en"` | A migrációk rossz sorrendben futottak -> futtasd a `telepites_egyben.sql`-t. |
-| PowerShell „nem áll le” probe közben | Még dolgozik (sok oldalt tölt le). A `[probe] ...` sorok mutatják, hol tart; a végén `[probe] KÉSZ`. Leállítás: **Ctrl+C**. |
-| Vercel: „Hiányzik a SUPABASE_URL…” | A 8.5 környezeti változók hiányoznak; Vercel → Settings → Environment Variables, utána Deployments → Redeploy. |
-| Vercel: „Supabase 404 … product_summary/v_product_offers” | A 8.1 lépés (`0005_web_views.sql`) kimaradt. |
-| Vercel domain: „Invalid Configuration” | Cloudflare-ben a felhő narancssárga (proxy) → kattints rá, legyen szürke (DNS only); vagy még terjed a DNS (várj, majd Refresh). |
-| `canceling statement due to statement timeout` | A 0013 (`0013_fast_refresh.sql`) még nem futott le. |
-| Cloudflare build: „Your Worker exceeded the size limit” | A Workers Paid csomag nincs bekapcsolva (A pont). |
-| Cloudflare oldal: „Hiányzik a SUPABASE_URL…” | A D pont változói hiányoznak (Settings → Variables and Secrets), utána Deploy. |
-| `Invalid JWT` | Rossz kulcs: a **Secret key**-t (`sb_secret_...`) add meg, ne a publishable-t. |
-| Cloudflare build: „database_id” / „D1 database not found” | A 20. A) 4. lépés kimaradt: a `wrangler.jsonc`-be az igazi Database ID kell. |
-| migrate-d1 / scraper: `D1 401` | A GitHub `D1_API_TOKEN` és a Worker `INGEST_TOKEN` nem egyezik (szóköz is számít). Generálj újat, és mindkét helyre ugyanazt írd. |
-| migrate-d1 / scraper: `D1 404` | A Workerben nincs `INGEST_TOKEN` (20. C), vagy a `D1_API_URL` rossz (a végén `/api/db` kell). |
-| Oldal: „Hiányzik a D1 kötés (DB)” | A `wrangler.jsonc` d1_databases része hiányzik, vagy a build még a régi; push után várd meg a zöld Deploymentet. |
+| `Author identity unknown` | A 2. pont `git config` sorai kimaradtak. |
+| `gh is not recognized` | A `winget` után nem nyitottál új PowerShellt. |
+| Push: „Everything up-to-date” | Nem változott fájl (a zip nem lett kibontva, vagy már fent van). |
+| Cloudflare build piros: „database_id” / „D1 database not found” | A `web\wrangler.jsonc`-ben nem a saját Database ID áll (1.2 pont). |
+| Cloudflare build: „Your Worker exceeded the size limit” | A Workers Paid csomag nincs bekapcsolva (3.1). |
+| Oldal: „Az adatok most nem érhetők el” | Worker → **Observability** → a legfrissebb piros sor mutatja az okot. Gyakori: hiányzó D1 binding (Settings → Bindings: `DB` → `airsofthunter`). |
+| Actions: `D1 401` | A GitHub `D1_API_TOKEN` és a Worker `INGEST_TOKEN` nem egyezik. Generálj újat, és mindkét helyre ugyanazt írd. |
+| Actions: `D1 404` | A Workerben nincs `INGEST_TOKEN`, vagy a `D1_API_URL` rossz (a vége `/api/db`). |
+| Actions: `unknown url type` | A `D1_API_URL` értéke hibás; helyesen: `https://airsofthunter.<fiókod>.workers.dev/api/db`. |
+| health: ⚠️ „Saját domain … kihívást adott” | Normális: a botvédelem a GitHub gépét ellenőrizte. Nézd meg böngészőben, hogy az oldal megy-e. |
+| health: ❌ „Napi letöltés” | Az éjszakai daily-scrape nem futott vagy elakadt: Actions → daily-scrape → a piros futás naplója. |
