@@ -114,11 +114,17 @@ def create_product(db, cat: Catalog, np: dict, lang: str, image: str | None) -> 
     raw_name = np["name"]
     np = {**np, "name": clean_name(raw_name, cat.manufacturers[mid][1], set(cat.aliases))}
     slug, pid = slugify(np["name"], f"{mid}:{code or raw_name.lower()}"), None
+    fast = hasattr(db, "execute")                  # D1: a termék és a kódjai egy kérésben (egy tranzakció)
     for attempt in range(4):
         try:
-            pid = db.insert("products", [{
-                "manufacturer_id": mid, "model_code": code, "model_code_norm": code, "name": np["name"],
-                "slug": slug, "name_lang": lang, "image_url": image}])[0]["id"]
+            row = {"manufacturer_id": mid, "model_code": code, "model_code_norm": code, "name": np["name"],
+                   "slug": slug, "name_lang": lang, "image_url": image}
+            if fast:
+                pid = _insert_product_d1(db, row, np)
+                cat.add_product(Product(pid, mid, np["name"], code), np.get("alt_codes", []),
+                                [np["ean"]] if np.get("ean") else [])
+                return pid
+            pid = db.insert("products", [row])[0]["id"]
             break
         except RuntimeError as e:
             if "23505" not in str(e):
@@ -152,6 +158,27 @@ def create_product(db, cat: Catalog, np: dict, lang: str, image: str | None) -> 
     return pid
 
 
+def _insert_product_d1(db, row: dict, np: dict) -> int:
+    """D1: products + product_codes egy kötegben. Ütköző kód: kihagyva (INSERT OR IGNORE); foglalt webcím: hiba (23505)."""
+    cols = list(row)
+    stmts = [(f"INSERT INTO products ({','.join(cols)}) VALUES ({','.join('?' * len(cols))}) RETURNING id",
+              [row[c] for c in cols])]
+    mid = row["manufacturer_id"]
+    for c in [row["model_code_norm"], *np.get("alt_codes", [])]:
+        if c:
+            stmts.append(("INSERT OR IGNORE INTO product_codes (product_id, code_type, code_norm, manufacturer_id) "
+                          "SELECT max(id), 'model', ?, ? FROM products WHERE slug = ?", [c, mid, row["slug"]]))
+    if np.get("ean"):
+        stmts.append(("INSERT OR IGNORE INTO product_codes (product_id, code_type, code_norm, manufacturer_id) "
+                      "SELECT max(id), 'ean', ?, NULL FROM products WHERE slug = ?", [np["ean"], row["slug"]]))
+    try:
+        return db.execute(stmts)[0][0]["id"]
+    except RuntimeError as e:
+        if "UNIQUE constraint failed" in str(e):
+            raise RuntimeError(f"23505 duplicate key ({e}) slug") from None
+        raise
+
+
 OFFER_COLS = "id,shop_id,title_raw,brand_raw,sku_raw,ean_raw,price,currency,image_url,product_id,match_status"
 
 
@@ -159,7 +186,26 @@ def match_offers(db, cat: Catalog, offers: list[dict], rates: dict, lang_of, off
     """Pending ajánlatok párosítása (a run_shop és a rematch is ezt használja). offer_pid-be írja az eredményt."""
     stats, batch = defaultdict(int), defaultdict(list)     # azonos frissítések csoportosítva (1 kérés / 200 ajánlat)
 
+    d1 = hasattr(db, "execute")
+
     def flush(force: bool = False) -> None:
+        if d1:                                                # D1: kötegelt UPDATE-ek (100 utasítás / kérés)
+            if not force and sum(map(len, batch.values())) < 100:
+                return
+            stmts = []
+            for key, ids in batch.items():
+                cols, vals = [k for k, _ in key], [v for _, v in key]
+                for i in range(0, len(ids), 80):
+                    chunk = ids[i:i + 80]
+                    stmts.append((f"UPDATE offers SET {','.join(c + '=?' for c in cols)} WHERE id IN ({','.join('?' * len(chunk))})",
+                                  vals + chunk))
+            try:
+                db.execute(stmts)
+            except Exception as e:
+                stats["hiba"] += sum(map(len, batch.values()))
+                print(f"[match] frissítési hiba: {e}", file=sys.stderr)
+            batch.clear()
+            return
         for key in list(batch):
             ids = batch[key]
             while ids and (force or len(ids) >= 200):

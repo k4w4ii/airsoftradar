@@ -8,6 +8,7 @@ PostgREST-szűrők, amiket ismer: eq.X, lt.X, in.(a,b), is.null, not.is.null; se
 """
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import time
@@ -17,7 +18,7 @@ from decimal import Decimal
 
 PAGE = 1000
 MAX_PARAMS = 90                 # a D1 egy utasításban legfeljebb 100 paramétert enged
-STMTS_PER_REQUEST = 100
+STMTS_PER_REQUEST = 50          # kisebb kérés: rövidebb Worker-futás, ritkább megszakadás
 VIEWS = {"latest_rates"}        # nézet: nincs rowid, nincs lapozás (kicsi)
 
 
@@ -85,8 +86,12 @@ class D1DB:
         return out
 
     def _post(self, body: dict):
+        """Egy kérés a /api/db végpontra. Hálózati hiba / megszakadt kapcsolat / 5xx esetén 6-szor újrapróbálja
+        (növekvő várakozással). Az írások ismételhetők: upsert / update / INSERT OR IGNORE, az új termék
+        slug-ütközését a create_product kezeli."""
         data = json.dumps(body, default=str).encode()
-        for attempt in range(4):
+        tries = 6
+        for attempt in range(tries):
             req = urllib.request.Request(self.url, data=data, method="POST", headers={
                 "Authorization": f"Bearer {self.token}", "Content-Type": "application/json",
                 "User-Agent": "AirsoftHunterBot/1.0 (+https://www.airsofthunter.com/bot)"})
@@ -95,15 +100,17 @@ class D1DB:
                     return json.loads(r.read())
             except urllib.error.HTTPError as e:
                 msg = e.read().decode(errors="replace")[:500]
-                if e.code in (429, 500, 502, 503, 504) and attempt < 3:
-                    time.sleep(2 * (attempt + 1))
+                if e.code in (429, 500, 502, 503, 504, 520, 522, 524) and attempt < tries - 1:
+                    time.sleep(min(60, 3 * 2 ** attempt))
                     continue
                 raise RuntimeError(f"D1 {e.code}: {msg}") from None
-            except urllib.error.URLError:
-                if attempt < 3:
-                    time.sleep(2 * (attempt + 1))
+            except (urllib.error.URLError, http.client.HTTPException, ConnectionError, TimeoutError, json.JSONDecodeError) as e:
+                # pl. „Remote end closed connection without response”, időtúllépés, félbeszakadt válasz
+                if attempt < tries - 1:
+                    print(f"[d1] kapcsolati hiba ({type(e).__name__}), újrapróbálás {attempt + 1}/{tries - 1}…", flush=True)
+                    time.sleep(min(60, 3 * 2 ** attempt))
                     continue
-                raise
+                raise RuntimeError(f"D1 kapcsolati hiba: {e}") from None
 
     def query(self, sql: str, params: list | None = None) -> list[dict]:
         return self.execute([(sql, params or [])])[0]
