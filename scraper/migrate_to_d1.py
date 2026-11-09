@@ -68,7 +68,7 @@ def pg_rows(pg: DB, table: str, cols: list[str], key: str | None, order: str, st
         if not top:
             return
         hi = int(top[0][key])
-        ranges = [(lo, lo + step) for lo in range(0, hi + 1, step)]
+        ranges = [(lo, min(lo + step, hi + 1)) for lo in range(0, hi + 1, step)]   # a felső határ ne lépje túl a valós max-ot (smallint id)
     for rg in ranges:
         off = 0
         while True:
