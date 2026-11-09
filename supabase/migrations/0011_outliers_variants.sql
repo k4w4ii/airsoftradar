@@ -7,9 +7,12 @@
 --     leválasztjuk; a következő éjszakai futás külön termékként párosítja (scraper/filters.py: is_variant).
 -- =====================================================================
 
+-- A függvények egymásra hivatkoznak: a létrehozáskori ellenőrzés kikapcsolva (mint a pg_dump-nál), így a sorrend nem számít.
+set check_function_bodies = off;
+
 create or replace function airsoft_is_variant(t text) returns boolean
 language sql immutable as $$
-  select airsoft_core(t) ~ '\y(custom|hpa|wolverine|polarstar|inferno|fusion ?engine|jack ?engine|tuned|tuning|upgraded|high ?speed ?build|dmr ?build|full ?upgrade|egyedi|tuningolt|felújított|refurbished|used|használt)\y'
+  select regexp_replace(lower(coalesce(t, '')), '(\s\+|\sw/|\y(with|incl|including|included|mit|avec|con|com|včetně|vcetne|vč|plus|és|w zestawie|z zestawem|set with)\y).*$', '') ~ '\y(custom|hpa|wolverine|polarstar|inferno|fusion ?engine|jack ?engine|tuned|tuning|upgraded|high ?speed ?build|dmr ?build|full ?upgrade|egyedi|tuningolt|felújított|refurbished|used|használt)\y'
 $$;
 
 -- ajánlatonkénti jelzők (a weboldal és a product_summary is ebből dolgozik)

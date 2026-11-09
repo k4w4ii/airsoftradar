@@ -84,7 +84,7 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 - Bevétel (alapból kikapcsolva, `lib/site.js` → `MONETIZE` vagy env `ADSENSE_CLIENT`, `ADSENSE_SLOT_LIST`, `ADSENSE_SLOT_PRODUCT`, `COFFEE_URL`): AdSense szkript + `google-adsense-account` meta csak kitöltött kódnál; `/ads.txt` route (különben 404); két kézi, „Hirdetés” feliratú egység (`components/AdSlot.jsx`, lista alja és termékoldal alja), kitöltetlen egység elrejtve (`:has([data-ad-status=unfilled])`); automatikus és átfedő hirdetések az AdSense-ben kikapcsolva; az EU-s hozzájárulást a Google CMP kezeli. Kávé-link a láblécben. Az adatvédelmi szöveg feltételesen bővül.
 - SEO: `app/sitemap.js` (lista- és termékoldalak hu/en hreflang-gal, naponta), `app/robots.js` (`/go/`, `/cur` tiltva), `metadataBase` = `SITE_URL` (`lib/site.js`).
 - Útvonalak: `/` -> `/hu` vagy `/en` (Accept-Language, `next.config.mjs` redirect) · `/[locale]` lista + szűrők · `/[locale]/p/[slug]` termékoldal · `/go/[id]` kimenő link (affiliate sablon) · `/cur` pénznem-süti.
-- Nézetek (0005–0010): `product_summary` (+max ár, `category`, `platforms`, `search_code`), `v_product_offers`, `v_price_daily`, `v_manufacturers`. (A `v_site_stats` és a főoldali „X replika Y boltból” szöveg 2026-11-09-től nincs.)
+- Nézetek (0005–0011): `product_summary` (+max ár, `category`, `platforms`, `search_code`), `v_product_offers`, `v_price_daily`, `v_manufacturers`. (A `v_site_stats` és a főoldali „X replika Y boltból” szöveg 2026-11-09-től nincs.)
 - Katalógus: **egy RPC-hívás** (`catalog_search`) adja a találatokat és a szűrő-darabszámokat; minden szűrő darabszáma a többi szűrővel számol. Szűrők: típus-fa (`weapons` = minden fegyver; alapértelmezés kereséskor `all`), ársávok (pénznemenként kerek határok, `PRICE_EDGES`) + kétfogantyús csúszka + min/max, márkák (többes választás), raktáron. Mobilon CSS-only lenyitható panel; JS nélkül „Szűrés” gombbal működik.
 - Kategóriák (0010): fegyverek (`rifle, pistol, smg, sniper, lmg, shotgun, grenade`), alkatrészek (`part_internal, part_hopup, part_motor, part_external`), kiegészítők (`acc_mag, acc_power, acc_optics, acc_ammo, acc_protect, acc_gear, other`). Csoportok: `weapons`, `parts`, `acc`. A szűrőben pipálható fa, több kategória egyszerre (`?cat=rifle&cat=sniper`); `?cat=all` = minden termék; kategória nélkül a fegyverek az alap (`lib/catalog.js`).
 - Besorolás (`airsoft_category(cím, url, ár)` SQL): ajánlatonként a bolti címből; a termék kategóriája a boltok többségi szavazata (+ a terméknév fél szavazat). Csomag-részek („with battery”, „+ 2 mags”) levágva; alkatrészszó + fegyverszó + fegyverár (>= 30 000 Ft) = fegyver, kivéve „for X / X-hez” alakban. Az URL csak végső tartalék. 46 valós címen tesztelve.
@@ -127,7 +127,7 @@ Védőkorlátok: szomszédos kódok (CM522/CM523) sosem olvadnak össze; család
 Karbantartás: új regex a `STRONG_PATTERNS`-be = több automatikus párosítás.
 
 ## Fejlesztési terv
-1. ✅ **Séma** – migrációk 0001–0010 (lásd fent).
+1. ✅ **Séma** – migrációk 0001–0011 (lásd fent).
 2. ✅ **MNB árfolyam job** – `mnb_rates.py`, napi cron.
 3. ✅ **Generikus scraper + pipeline** – JSON-LD, sitemap/lapozás, `run_shop.py`, GitHub Actions.
 4. ⏳ **Bolt-konfigok élesítése** – 2. kör kész (fenti táblázat, microdata-támogatás). Hátra: első éles futás `allapot.sql` alapján, Combat-Zone.

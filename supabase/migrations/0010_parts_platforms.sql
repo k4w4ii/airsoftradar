@@ -15,6 +15,9 @@
 -- Ugyanez a logika Pythonban: scraper/filters.py (is_part) – a párosító ezzel dolgozik.
 -- =====================================================================
 
+-- A függvények egymásra hivatkoznak: a létrehozáskori ellenőrzés kikapcsolva (mint a pg_dump-nál), így a sorrend nem számít.
+set check_function_bodies = off;
+
 -- „vele járó” részek levágása: „M4 AEG with battery and charger”, „Glock 17 + 2 magazines”
 create or replace function airsoft_core(t text) returns text
 language sql immutable as $$
@@ -25,7 +28,7 @@ $$;
 create or replace function airsoft_category(title text, url text, price numeric) returns text
 language sql immutable as $$
   with x as (
-    select airsoft_core(title) as c, lower(coalesce(url, '')) as u, coalesce(price, 0) as p,
+    select regexp_replace(lower(coalesce(title, '')), '(\s\+|\sw/|\y(with|incl|including|included|mit|avec|con|com|včetně|vcetne|vč|plus|és|w zestawie|z zestawem|set with)\y).*$', '') as c, lower(coalesce(url, '')) as u, coalesce(price, 0) as p,
       -- fegyverre utaló szó (főnév vagy rendszer)
       '\y(aeg|aep|gbbr?|nbb|hpa|ebb|rifles?|carbines?|karabély\w*|karabin\w*|puska\w*|pušk\w*|pusk\w*|pistols?|pistole\w*|pistolet\w*|pistola\w*|pisztoly(?!tok)\w*|replica\w*|replik\w*|réplique\w*|gewehr\w*|fusil\w*|zbraň\w*|zbran\w*|shotguns?|sörétes|brokovnic\w*|samopal\w*|submachine|smg|lmg|sniper|revolver\w*)\y' as w,
       -- „X-hez / for X”: biztosan alkatrész vagy kiegészítő
