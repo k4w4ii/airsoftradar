@@ -243,6 +243,17 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual({c["code_norm"] for c in db.t["product_codes"]}, {"CM522"})
 
 
+class TestFixUrl(unittest.TestCase):
+    def test_double_scheme(self):
+        from jsonld import extract, fix_url
+        self.assertEqual(fix_url("https://gunfire.comhttps//gunfire.com/en/products/x-1.html"), "https://gunfire.com/en/products/x-1.html")
+        self.assertEqual(fix_url("https://shop.cz/p?u=https://x"), "https://shop.cz/p?u=https://x")
+        page = ('<script type="application/ld+json">{"@type":"Product","name":"AM-009 Carbine","offers":{"@type":"Offer",'
+                '"price":"227.5","priceCurrency":"EUR","url":"https://gunfire.comhttps//gunfire.com/en/products/am-009-1.html"}}</script>')
+        o = extract(page, "https://gunfire.com/en/menu/rifles.html")[0]
+        self.assertEqual(o.url, "https://gunfire.com/en/products/am-009-1.html")
+
+
 if __name__ == "__main__":
     unittest.main()
 

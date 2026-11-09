@@ -131,6 +131,21 @@ def _offer_nodes(product: dict) -> list[dict]:
     return [n for n in flat if isinstance(n, dict)]
 
 
+_DOUBLE_SCHEME = re.compile(r"^https?://[^/]*?(https?):?/{1,2}(.*)$", re.I)
+_VALID_URL = re.compile(r"^https?://[^/\s:]+(:\d+)?(/|$)", re.I)
+
+
+def fix_url(url: str | None, fallback: str | None = None) -> str | None:
+    """Hibás bolti URL javítása. A Gunfire JSON-LD-je pl. „https://gunfire.comhttps//gunfire.com/en/...” címet ad
+    (a domain kétszer, a második „:” nélkül) – ebből „https://gunfire.com/en/...” lesz. Ha így sem érvényes: fallback."""
+    if not url:
+        return fallback
+    m = _DOUBLE_SCHEME.match(url.strip())
+    if m:
+        url = f"{m.group(1).lower()}://{m.group(2)}"
+    return url if _VALID_URL.match(url) else (fallback or url)
+
+
 def _ext_id(url: str, variant: str | None) -> str:
     p = urlsplit(url)
     return hashlib.sha1(f"{p.netloc}{p.path}#{variant or ''}".encode()).hexdigest()[:20]
@@ -149,10 +164,11 @@ def _from_product(p: dict, page_url: str, parent: dict | None = None) -> list[Sc
         if not (title and price):
             continue
         own = _text(o.get("url")) or _text(p.get("url"))
-        url = urljoin(page_url, own or page_url)
+        raw = urljoin(page_url, own or page_url)
+        url = fix_url(raw, page_url)
         variant = _text(o.get("sku")) or sku
         out.append(ScrapedOffer(
-            external_id=_ext_id(url, variant), url=url, title=title, price=price,
+            external_id=_ext_id(raw, variant), url=url, title=title, price=price,     # az ID a nyers címből: stabil marad
             currency=(_text(o.get("priceCurrency")) or "").upper() or None, stock=map_stock(o.get("availability")),
             brand=brand, sku=variant, mpn=mpn, ean=ean, image=urljoin(page_url, image) if image else None,
             has_own_url=bool(own)))
@@ -162,7 +178,7 @@ def _from_product(p: dict, page_url: str, parent: dict | None = None) -> list[Sc
 def extract(page: str, page_url: str) -> list[ScrapedOffer]:
     """Egy termékoldal ajánlatai (variánsonként külön, ha a bolt variánsonként ad árat)."""
     if m := _CANON_RX.search(page):
-        page_url = urljoin(page_url, html.unescape(m.group(1)))
+        page_url = fix_url(urljoin(page_url, html.unescape(m.group(1))), page_url)
     results: list[ScrapedOffer] = []
     for block in _load_blocks(page):
         for node in _walk(block):
