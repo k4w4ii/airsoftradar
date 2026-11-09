@@ -40,7 +40,7 @@ mnb_rates.py ─> run_shop.py × 8 bolt (párhuzamosan, max 4) ─> run_shop.py 
 - Titkok csak GitHub Secrets-ben (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`); forkból indított PR nem kapja meg őket.
 
 ## Migrációk (`supabase/migrations`, `supabase db push` sorrendben)
-`0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó · `0005_web_views` weboldal-nézetek, olvasási jog · `0006_dedupe_search` ismétlődés-szűrés (bolt+URL), valódi boltszám, kódos keresés · `0007_categories_search` fegyvertípus-besorolás + `catalog_search()` RPC · `0008_eu_shops` +12 EU-s bolt · `0009_accessory_brands` +31 kiegészítő/alkatrész-gyártó, ruházat elrejtése · `0010_parts_platforms` alkatrész- és kiegészítő-kategóriák, „mihez jó” platformok, többes kategóriaszűrés, tévesen párosított olcsó alkatrész-ajánlatok leválasztása · `0011_outliers_variants` árkiugrás-jelzés (`v_offer_flags`, `v_offers_clean`), egyedi/custom változatok leválasztása · `0012_parts_multilang` többnyelvű alkatrész-felismerés, „X-hez / for X / pro X” szabály, modellkód alapján összevont termékek szétbontása.
+`0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó · `0005_web_views` weboldal-nézetek, olvasási jog · `0006_dedupe_search` ismétlődés-szűrés (bolt+URL), valódi boltszám, kódos keresés · `0007_categories_search` fegyvertípus-besorolás + `catalog_search()` RPC · `0008_eu_shops` +12 EU-s bolt · `0009_accessory_brands` +31 kiegészítő/alkatrész-gyártó, ruházat elrejtése · `0010_parts_platforms` alkatrész- és kiegészítő-kategóriák, „mihez jó” platformok, többes kategóriaszűrés, tévesen párosított olcsó alkatrész-ajánlatok leválasztása · `0011_outliers_variants` árkiugrás-jelzés (`v_offer_flags`, `v_offers_clean`), egyedi/custom változatok leválasztása · `0012_parts_multilang` többnyelvű alkatrész-felismerés, „X-hez / for X / pro X” szabály, modellkód alapján összevont termékek szétbontása · `0013_fast_refresh` a besorolás tárolva (`offers.cat/plats/variant`, `products.name_cat/name_plats`), csak a megjelölt sorokra fut újra; a frissítés regex nélkül, egy menetben.
 A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN futtatná.
 
 ## Boltok (20; csak EU, UK nélkül)
@@ -98,6 +98,11 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 - Árkiugrás (0011, `v_offer_flags`): >= 3 boltnál a medián 40%-a alatti / 250%-a feletti ajánlat, 2 boltnál a 4x olcsóbb „eltérő”. Nem számít a legjobb árba, árfolyosóba, boltszámba, ártörténetbe; a termékoldalon lenyitható „Eltérő ár” blokkban látszik.
 - Dizájn: palaszürke `#1B2027`, csontfehér `#E9E4D8`, sárgaréz `#C8A24E` (csak ár / legjobb ajánlat), olív = raktáron, tégla = elfogyott; Barlow Condensed + Barlow. Egyedi elem: árfolyosó (legolcsóbb vs. legdrágább bolt) és arányos ajánlat-létra.
 
+## Teljesítmény (0013)
+- Mentéskor a trigger csak megjelöli az új/megváltozott ajánlatot (`cat = null`); a `refresh_product_summary()` előbb besorolja a megjelölteket (`airsoft_classify_pending()`), majd összesít.
+- A besorolók külön utasításban futnak: a PostgreSQL regex-gyorsítótára 32 mintás, a kategória (~25) és a platform (15) együtt egy utasításban 50x lassabb.
+- Mérés 60 000 ajánlaton (helyi PG16): frissítés 20 s → 0,7 s; egyszeri teljes besorolás ~25 s.
+
 ## Biztonság (2026-11-09)
 - Titkok: a Supabase secret kulcs csak GitHub Secretsben; a weboldal csak szerveroldalon olvas a publishable kulccsal (a böngésző nem kapja meg). A repóban nincs kulcs.
 - Adatbázis: RLS minden táblán; nyilvános olvasás csak a publikus adatokra (boltok, termékek, ajánlatok, árak); belső táblák (scrape_runs, match_candidates, product_codes, aliasok) olvashatatlanok; írás csak service role-lal; `refresh_product_summary` csak service role. A kereső RPC nem fűz össze SQL-t (nincs injekció).
@@ -131,7 +136,7 @@ Védőkorlátok: szomszédos kódok (CM522/CM523) sosem olvadnak össze; család
 Karbantartás: új regex a `STRONG_PATTERNS`-be = több automatikus párosítás.
 
 ## Fejlesztési terv
-1. ✅ **Séma** – migrációk 0001–0012 (lásd fent).
+1. ✅ **Séma** – migrációk 0001–0013 (lásd fent).
 2. ✅ **MNB árfolyam job** – `mnb_rates.py`, napi cron.
 3. ✅ **Generikus scraper + pipeline** – JSON-LD, sitemap/lapozás, `run_shop.py`, GitHub Actions.
 4. ⏳ **Bolt-konfigok élesítése** – 2. kör kész (fenti táblázat, microdata-támogatás). Hátra: első éles futás `allapot.sql` alapján, Combat-Zone.

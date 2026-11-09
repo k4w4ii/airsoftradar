@@ -36,7 +36,7 @@ git config --global user.email "a-github-email-cimed@pelda.hu"
 3. Bal menü **SQL Editor** → **New query**. Nyisd meg Jegyzettömbbel a `supabase\telepites_egyben.sql`-t, **Ctrl+A, Ctrl+C**, illeszd be az üres query-be, **Run**.
    - Ha felugrik egy „destructive operation” figyelmeztetés: **Run this query** (csak a saját árkereső-tábláinkat törli és hozza létre újra).
    - Várt eredmény alul egy sor: `boltok 20 | gyartok 81 | kategoriak 6`.
-4. Ez a fájl az összes migrációt (0001–0012) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
+4. Ez a fájl az összes migrációt (0001–0013) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
 5. Bal lent **Project Settings** → **API Keys** → másold ki a **Secret key**-t (`sb_secret_...`).
    **Project Settings → Data API** (vagy a projekt főoldala) → másold ki a **Project URL**-t (`https://xxxx.supabase.co`).
 
@@ -128,6 +128,11 @@ Ha egy bolt partnerlinket ad, a `/go/…` kimenő link automatikusan azt haszná
 2. **Supabase → SQL Editor**, mindegyik új lapon, ebben a sorrendben (amelyik már lefutott, az kihagyható, de újrafuttatni sem baj): `0010_parts_platforms.sql` → `0011_outliers_variants.sql` → `0012_parts_multilang.sql`.
 3. **GitHub → a repód → Actions → bal oldalt „rematch” → Run workflow.** Pár perc alatt újrapárosítja a leválasztott ajánlatokat, angolra egységesíti a termékneveket és frissíti az oldalt. (Ha épp fut az éjszakai letöltés, megvárja.)
 
+## 17. Frissítés 2026-11-09 (4): gyors weboldal-frissítés
+1. **Supabase → SQL Editor → +**: futtasd a `0013_fast_refresh.sql`-t (kb. fél–egy perc). A végén: `termekek | besorolatlan_ajanlat` – az utóbbi legyen 0.
+2. Zip kicsomagolása, `git add .` → `git commit -m "Gyors frissites"` → `git push`.
+Miért: a weboldal-frissítés túllépte a Supabase 8 mp-es időkorlátját („statement timeout”). Most a besorolás ajánlatonként egyszer fut, a frissítés kb. 1 mp.
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|
@@ -139,4 +144,5 @@ Ha egy bolt partnerlinket ad, a `/go/…` kimenő link automatikusan azt haszná
 | Vercel: „Hiányzik a SUPABASE_URL…” | A 8.5 környezeti változók hiányoznak; Vercel → Settings → Environment Variables, utána Deployments → Redeploy. |
 | Vercel: „Supabase 404 … product_summary/v_product_offers” | A 8.1 lépés (`0005_web_views.sql`) kimaradt. |
 | Vercel domain: „Invalid Configuration” | Cloudflare-ben a felhő narancssárga (proxy) → kattints rá, legyen szürke (DNS only); vagy még terjed a DNS (várj, majd Refresh). |
+| `canceling statement due to statement timeout` | A 0013 (`0013_fast_refresh.sql`) még nem futott le. |
 | `Invalid JWT` | Rossz kulcs: a **Secret key**-t (`sb_secret_...`) add meg, ne a publishable-t. |

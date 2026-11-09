@@ -22,18 +22,21 @@ def main() -> None:
 
     cat, _ = load_catalog(db)
     pending = db.select("offers", select=OFFER_COLS, match_status="eq.pending", is_active="eq.true")
-    print(f"[rematch] {len(pending)} párosításra váró ajánlat")
+    print(f"[rematch] {len(pending)} párosításra váró ajánlat", flush=True)
     stats = match_offers(db, cat, pending, rates, lambda o: lang.get(o["shop_id"], "en"), {})
-    print(f"[rematch] párosítás: {dict(stats)}")
+    print(f"[rematch] párosítás: {dict(stats)}", flush=True)
 
     # terméknevek egységesítése (idempotens: csak a ténylegesen változókat írja)
     aliases, renamed = set(cat.aliases), 0
+    print(f"[rematch] terméknevek egységesítése ({len(cat.products)} termék)...", flush=True)
     for pid, prod in cat.products.items():
         new = clean_name(prod.name, cat.manufacturers[prod.manufacturer_id][1], aliases)
         if new != prod.name:
             db.update("products", {"name": new}, id=f"eq.{pid}")
             renamed += 1
-    print(f"[rematch] átnevezve: {renamed}")
+            if renamed % 500 == 0:
+                print(f"[rematch] átnevezve eddig: {renamed}", flush=True)
+    print(f"[rematch] átnevezve: {renamed}", flush=True)
 
     db.rpc("refresh_product_summary")
     print("[rematch] kész, a weboldal frissítve")
