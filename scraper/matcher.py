@@ -12,6 +12,7 @@ Függőség: csak stdlib.
 """
 from __future__ import annotations
 
+import html
 import re
 import unicodedata
 from dataclasses import dataclass, field
@@ -48,10 +49,22 @@ _TITLE_STOP = {
 }
 
 _SHORT_ALIAS_MAX = 2  # 'tm', 'we', 'el', 'db', 'gg': címben csak NAGYBETŰS tokenként fogadjuk el
+# „&”-es márkák, amelyek & nélkül platformnevet / gyakori rövidítést adnának: a címben csak „A&K”, „S&T” alakban
+_AMP_ONLY = {"ak", "st"}
+
+
+def unescape_all(s: str) -> str:
+    """HTML-entitások feloldása akár többszörösen kódolva is (néhány bolt: „G&amp;amp;G”)."""
+    for _ in range(3):
+        u = html.unescape(s)
+        if u == s:
+            break
+        s = u
+    return s
 
 
 def norm_alias(s: str) -> str:
-    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    s = unicodedata.normalize("NFKD", unescape_all(s)).encode("ascii", "ignore").decode()
     return re.sub(r"[^a-z0-9]", "", s.lower())
 
 
@@ -88,7 +101,7 @@ def detect_manufacturer(brand_raw: str | None, title: str, aliases: dict[str, in
     """aliases: alias_norm -> manufacturer_id. Előbb a brand mező, aztán a cím 3/2/1 szavas n-gramjai."""
     if brand_raw and (mid := aliases.get(norm_alias(brand_raw))):
         return mid
-    tokens = re.findall(r"[\w&]+", title)
+    tokens = re.findall(r"[\w&]+", unescape_all(title or ""))
     for n in (3, 2, 1):
         for i in range(len(tokens) - n + 1):
             chunk = tokens[i:i + n]
@@ -97,6 +110,8 @@ def detect_manufacturer(brand_raw: str | None, title: str, aliases: dict[str, in
             if not mid:
                 continue
             if len(key) <= _SHORT_ALIAS_MAX and not (n == 1 and chunk[0].isupper() or "&" in chunk[0]):
+                continue
+            if key in _AMP_ONLY and not (n == 1 and "&" in chunk[0]):
                 continue
             return mid
     return None

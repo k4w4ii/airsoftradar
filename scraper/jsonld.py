@@ -94,7 +94,15 @@ def _text(v) -> str | None:
         v = v[0] if v else None
     if isinstance(v, dict):
         v = v.get("name") or v.get("url") or v.get("@id")
-    return html.unescape(str(v)).strip() if v not in (None, "") else None
+    if v in (None, ""):
+        return None
+    s = str(v)
+    for _ in range(3):                       # néhány bolt kétszer kódolja: „G&amp;amp;G”
+        u = html.unescape(s)
+        if u == s:
+            break
+        s = u
+    return s.strip()
 
 
 def _load_blocks(page: str) -> list:

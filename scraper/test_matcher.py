@@ -118,8 +118,6 @@ class TestMatcher(unittest.TestCase):
         self.assertEqual(norm_alias("G&G Armament"), "ggarmament")
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class TestPartGate(unittest.TestCase):
@@ -206,3 +204,19 @@ class TestSpecGuard(unittest.TestCase):
         self.cat.learn(62, {"bb_g": "0.2"})
         r = match_offer(OfferIn("Specna Arms FLEX precision BBs 0.32g", price_huf=2500), self.cat)
         self.assertNotEqual(r.product_id, 62)
+
+
+class TestBrandEntities(unittest.TestCase):
+    def test_html_entities_and_amp_only(self):
+        from matcher import detect_manufacturer
+        al = {"gg": 1, "ak": 2, "st": 3, "cyma": 4}
+        self.assertEqual(detect_manufacturer("G&amp;amp;G", "x", al), 1)          # kétszer kódolt márkamező
+        self.assertEqual(detect_manufacturer(None, "PALLINI BIO - G&amp;G", al), 1)
+        self.assertEqual(detect_manufacturer(None, "A&K M249 Minimi", al), 2)
+        self.assertIsNone(detect_manufacturer(None, "AK 47 magazine", al))          # AK = platform, nem A&K
+        self.assertIsNone(detect_manufacturer(None, "ST CNC Magwell", al))
+        self.assertEqual(detect_manufacturer(None, "CYMA AK47", al), 4)
+
+
+if __name__ == "__main__":
+    unittest.main()

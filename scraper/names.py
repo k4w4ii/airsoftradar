@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 
-from matcher import norm_alias
+from matcher import norm_alias, unescape_all
 
 # Többnyelvű általános szavak (a kategóriát külön mutatjuk, a „replika/airsoft” üres töltelék)
 _GENERIC = [
@@ -118,7 +118,7 @@ def _fix_case(words: list[str]) -> list[str]:
 def clean_name(title: str, brand: str, aliases: set[str] | None = None) -> str:
     """aliases: az összes gyártó-alias (norm_alias formában) – a zárójeles/farok-márkák felismeréséhez."""
     aliases = aliases or set()
-    original = re.sub(r"\s+", " ", title or "").strip()
+    original = re.sub(r"\s+", " ", unescape_all(title or "")).strip()
     if not original:
         return brand
     brand_norm = norm_alias(brand)

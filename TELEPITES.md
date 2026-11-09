@@ -66,6 +66,7 @@ Repó → Settings → Secrets and variables → Actions:
   - Ellenőrzi: adatbázis, termékszám, árfolyam frissessége, napi letöltés, boltok, főoldal, szűrés, termékoldal, bolti link, sitemap, jogi oldal, a titkos végpont védelme.
 - **Kézi újrapárosítás:** Actions → **rematch** → Run workflow (pár perc).
 - **Ismeretlen márkák listája:** Actions → **brands** → Run workflow → a futás oldalán alul az `ismeretlen-markak` csatolmány (CSV) letölthető.
+- **SQL-fájl futtatása** (új márkák, boltok): Actions → **d1-sql** → Run workflow → fájlnév (pl. `d1/uj_markak_2026-11-09.sql`). Utána magától lefut a rematch is.
 - **Boltonkénti állapot:** D1 → Console → a `d1\allapot.sql` tartalma → Run.
 - **Miért ad egy bolt 0 terméket:** ugyanott a `d1\diagnozis.sql`.
 

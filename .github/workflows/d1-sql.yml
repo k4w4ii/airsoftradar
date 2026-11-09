@@ -1,0 +1,38 @@
+name: d1-sql
+# Egy d1/*.sql fájl lefuttatása a D1-en, utána újrapárosítás és weboldal-frissítés (rematch).
+# Kézzel: Actions → d1-sql → Run workflow → fájlnév (pl. d1/uj_markak_2026-11-09.sql).
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "SQL-fájl (d1/....sql)"
+        required: true
+        default: "d1/uj_markak_2026-11-09.sql"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: airsofthunter-db
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+  D1_API_URL: ${{ vars.D1_API_URL }}
+  D1_API_TOKEN: ${{ secrets.D1_API_TOKEN }}
+
+jobs:
+  sql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      # a fájlnév env-ként megy át (nem kerül közvetlenül a parancsba); a szkript is ellenőrzi
+      - env:
+          SQL_FILE: ${{ inputs.file }}
+        run: python scraper/run_sql.py "$SQL_FILE"
+      - run: python scraper/rematch.py
