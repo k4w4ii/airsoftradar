@@ -179,3 +179,30 @@ class TestRematchAfterCleanup(unittest.TestCase):
             r = match_offer(OfferIn(t, price_huf=p), cat)
             self.assertNotEqual(r.product_id, 400, t)
             self.assertNotEqual(r.method, "code", t)
+
+
+class TestSpecGuard(unittest.TestCase):
+    """Eltérő jellemző (BB-súly, gáz, rugó...) = külön termék."""
+    def setUp(self):
+        self.cat = Catalog({norm_alias("Specna Arms"): 2, norm_alias("Nimrod"): 3},
+                           {2: ("specna-arms", "Specna Arms"), 3: ("nimrod", "Nimrod")})
+        self.cat.add_product(Product(60, 2, "Specna Arms FLEX precision BBs 0.20g 1kg", None))
+        self.cat.add_product(Product(61, 3, "Nimrod Green Gas 500ml", None))
+
+    def test_bb_weights_stay_apart(self):
+        r = match_offer(OfferIn("Specna Arms FLEX™ precision BBs 0.28g - 1kg", price_huf=2300), self.cat)
+        self.assertNotEqual(r.product_id, 60)
+
+    def test_same_bb_matches(self):
+        r = match_offer(OfferIn("Specna Arms FLEX precision BBs 0.20g - 1kg", price_huf=2200), self.cat)
+        self.assertEqual(r.product_id, 60)
+
+    def test_gas_volume_and_type(self):
+        self.assertNotEqual(match_offer(OfferIn("Nimrod Green Gas 1000ml", price_huf=4000), self.cat).product_id, 61)
+        self.assertNotEqual(match_offer(OfferIn("Nimrod Top Gas 500ml", price_huf=3000), self.cat).product_id, 61)
+
+    def test_learned_spec_blocks_next(self):
+        self.cat.add_product(Product(62, 2, "Specna Arms FLEX precision BBs", None))     # névben nincs súly
+        self.cat.learn(62, {"bb_g": "0.2"})
+        r = match_offer(OfferIn("Specna Arms FLEX precision BBs 0.32g", price_huf=2500), self.cat)
+        self.assertNotEqual(r.product_id, 62)

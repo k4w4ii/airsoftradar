@@ -24,7 +24,7 @@ from pathlib import Path
 from crawl import from_listing, from_sitemap
 from urllib.parse import urlsplit
 from fetcher import Fetcher
-from filters import is_clothing
+from filters import is_clothing, specs
 from jsonld import ScrapedOffer, extract
 from matcher import Catalog, OfferIn, Product, match_offer
 from names import clean_name
@@ -194,6 +194,7 @@ def _match_one(db, cat: Catalog, o: dict, rates: dict, lang_of, offer_pid: dict,
     if r.status == "auto":
         pid = r.product_id or create_product(db, cat, r.new_product, lang_of(o), o["image_url"])
         offer_pid[o["id"]] = pid
+        cat.learn(pid, specs(o["title_raw"]))
         batch[(("product_id", pid), ("match_status", "auto"), ("match_method", r.method),
                ("match_confidence", round(r.confidence, 2)))].append(o["id"])
     elif r.status == "review":

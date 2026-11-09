@@ -63,14 +63,16 @@ jobs:
             python scraper/run_shop.py "$SHOP"
           fi
 
+  # a végén: jellemző-audit (BB-súly, gáz, rugó...), a leválasztott ajánlatok újrapárosítása,
+  # névegységesítés és a weboldal frissítése (scraper/rematch.py)
   refresh:
     needs: scrape
     if: always()
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
-      - run: python scraper/run_shop.py --refresh
+      - run: python scraper/rematch.py
       # Next.js ISR újraépítés (opcionális): curl -X POST "$REVALIDATE_URL?secret=$REVALIDATE_SECRET"

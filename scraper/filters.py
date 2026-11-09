@@ -133,3 +133,92 @@ VARIANT_RX = re.compile(
 
 def is_variant(title: str | None) -> bool:
     return bool(title and VARIANT_RX.search(BUNDLE_RX.sub("", title)))
+
+
+# ---------------------------------------------------------------------------------------------
+# Termékjellemzők a címből (BB-súly, kiszerelés, gázfajta és -térfogat, akku feszültség/kapacitás/csatlakozó,
+# rugóerősség, csőhossz/-átmérő, gumikeménység, tárkapacitás, generáció, verzió, fps, csőhossz hüvelykben).
+# Ha két cím ugyanabban a jellemzőben eltér (0.20g vs 0.28g), az két külön termék – soha nem párosítjuk össze.
+_NUM = r"(\d+(?:[.,]\d+)?)"
+_SPEC_RULES = [
+    ("bb_g",  re.compile(r"(?<![\d.,])(0[.,]\d{1,2})\s*g(?:r|ram)?(?![a-z])", re.I)),
+    ("mass",  re.compile(_NUM + r"\s*(kg|g)(?![a-z])", re.I)),
+    ("ml",    re.compile(_NUM + r"\s*ml(?![a-z])", re.I)),
+    ("volt",  re.compile(r"(\d{1,2}[.,]\d)\s*v(?![a-z])", re.I)),
+    ("mah",   re.compile(r"(\d{3,5})\s*mah", re.I)),
+    ("deg",   re.compile(r"(\d{2,3})\s*(?:°|deg|fok)", re.I)),
+    ("inner_d", re.compile(r"(?<![\d.,])(6[.,]0\d|6[.,]1\d)(?![\d])(?!\s*(?:v|g|kg|ml|mm))", re.I)),
+    ("mm",    re.compile(r"(\d{2,3})\s*mm(?![a-z])", re.I)),
+    ("inch",  re.compile(r"(\d{1,2}(?:[.,]\d)?)\s*(?:\"|″|''|inch|in(?![a-z]))", re.I)),
+    ("fps",   re.compile(r"(\d{3})\s*fps", re.I)),
+    ("gen",   re.compile(r"(?<![a-z])gen(?:eration)?\.?\s*(\d)(?!\d)", re.I)),
+    ("ver",   re.compile(r"(?<![\w.])v\s?(\d)(?![\d.,]|\s*(?:v|mm))", re.I)),
+    ("rounds", re.compile(r"(\d{2,4})\s*(?:rounds?|rds|ran|lövetű|lövés\w*|kulek|kulí\w*|billes|colpi|schuss|bb(?!s?\s*(?:0|bag))s?(?=\s|$|[,)]))", re.I)),
+    ("count", re.compile(r"(\d{3,6})\s*(?:pcs|db|ks|szt|bbs|darab|stück|kusů|pieces|kul\w*)(?![a-z])", re.I)),
+    ("pack",  re.compile(r"(?:(?<![\w.])(\d{1,2})\s*(?:pcs|db|ks|szt|pack|pk|darab|stück|kusy)(?![a-z])|(?<![\w])x\s?(\d{1,2})(?![\d]))", re.I)),
+]
+_SPRING_RX = re.compile(r"(?<![a-z0-9])(?:m|sp)\s?(9\d|1\d\d|2\d\d)(?!\d)", re.I)
+_SPRING_CTX = re.compile(r"spring|rug[oó]|pru[zž]in|spr[eę][zż]yn|feder|ressort|molla|muelle", re.I)
+_GAS_CTX = re.compile(r"(?<![a-z])(gas|gáz|gaz|plyn|propan\w*)(?![a-z])", re.I)
+_GAS_TYPE = re.compile(r"(?<![a-z])(green|top|red|black|blue|ultra|white|grey|gray|purple|zöld|zelen\w*|zielon\w*)(?![a-z])", re.I)
+_GAS_NORM = {"zöld": "green", "gray": "grey"}
+_CONN = re.compile(r"(?<![a-z])(deans|t-?plug|tamiya|mini ?tamiya|xt-?30|xt-?60)(?![a-z])", re.I)
+_CAP = re.compile(r"(?<![a-z])(hi|mid|low|real)-?\s?cap(?![a-z])", re.I)
+_RATIO = re.compile(r"(?<![\d.])(\d{2}(?:[.,]\d{1,2})?)\s*:\s*1(?!\d)")
+_MOTOR_CTX = re.compile(r"(?<![a-z])motor\w*", re.I)
+_AXLE = re.compile(r"(?<![a-z])(long|short|medium|mid)\s*(?:type|axle|shaft|tengely\w*)?(?![a-z])", re.I)
+_MOTOR_TYPE = re.compile(r"(?<![a-z])(ultra high torque|super high torque|high torque|ultra high speed|super high speed|high speed|balanced?)(?![a-z])", re.I)
+_BATT_CTX = re.compile(r"(?<![a-z])(li-?po|li-?ion|li-?fe|nimh|akku\w*|batter\w*|bateri\w*|akumul\w*)(?![a-z])", re.I)
+_BATT_FORM = re.compile(r"(?<![a-z])(stick|butterfly|nunchu(?:c)?k|split|buffer ?tube|crane ?stock|mini|large)(?![a-z])", re.I)
+_AMMO_CTX = re.compile(r"(?<![a-z])(bbs?|golyó\w*|kuli\w*|kulki|billes|pallini|ammo)(?![a-z])", re.I)
+
+
+def _num(s: str) -> str:
+    v = float(s.replace(",", "."))
+    return f"{v:g}"
+
+
+def specs(title: str | None) -> dict[str, str]:
+    """Normalizált jellemzők: {'bb_g': '0.2', 'kg': '1', 'ml': '500', 'gas': 'green', 'spring': 'M120', ...}"""
+    if not title:
+        return {}
+    t = BUNDLE_RX.sub("", title)
+    out: dict[str, str] = {}
+    for key, rx in _SPEC_RULES:
+        if key == "mass":          # a „0.25g 1kg” első találata a BB-súly: az első >= 1 g értéket keressük
+            for m in rx.finditer(t):
+                grams = float(m.group(1).replace(",", ".")) * (1000 if m.group(2).lower() == "kg" else 1)
+                if grams >= 1:
+                    out.setdefault("mass_g", f"{grams:g}")
+                    break
+            continue
+        m = rx.search(t)
+        if m:
+            out.setdefault(key, _num(next(g for g in m.groups() if g)))
+    if _SPRING_CTX.search(t) and (m := _SPRING_RX.search(t)):
+        out["spring"] = m.group(1)
+    if _GAS_CTX.search(t) and (m := _GAS_TYPE.search(t)):
+        g = m.group(1).lower()
+        out["gas"] = _GAS_NORM.get(g, "green" if g.startswith(("zelen", "zielon")) else g)
+    if m := _RATIO.search(t):
+        out["ratio"] = _num(m.group(1))
+    if _MOTOR_CTX.search(t):
+        if m := _AXLE.search(t):
+            out["axle"] = {"mid": "medium"}.get(m.group(1).lower(), m.group(1).lower())
+        if m := _MOTOR_TYPE.search(t):
+            out["motor"] = m.group(1).lower().replace("balanced", "balance")
+    if _BATT_CTX.search(t) and (m := _BATT_FORM.search(t)):
+        out["form"] = re.sub(r"\s", "", m.group(1).lower()).replace("nunchuck", "nunchuk")
+    if m := _CONN.search(t):
+        out["conn"] = re.sub(r"[\s-]", "", m.group(1).lower())
+    if m := _CAP.search(t):
+        out["cap"] = m.group(1).lower()
+    if "bb_g" in out and _AMMO_CTX.search(t):     # BB-zacskó: bio / nyomjelző / sima – külön termékek
+        out["bio"] = "bio" if re.search(r"(?<![a-z])bio", t, re.I) else "no"
+        out["tracer"] = "tracer" if re.search(r"tracer|nyomjelz|svíti|fluo", t, re.I) else "no"
+    return out
+
+
+def spec_conflict(a: dict[str, str], b: dict[str, str]) -> bool:
+    """Igaz, ha van olyan jellemző, ami mindkettőben szerepel, de eltér."""
+    return any(k in b and b[k] != v for k, v in a.items())

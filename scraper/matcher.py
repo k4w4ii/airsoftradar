@@ -17,7 +17,7 @@ import unicodedata
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 
-from filters import is_part, is_variant
+from filters import is_part, is_variant, spec_conflict, specs
 
 AUTO_FUZZY = 0.92
 REVIEW_FUZZY = 0.75
@@ -149,6 +149,13 @@ class Catalog:
     _tok_index: dict[tuple[int, str], set[int]] = field(default_factory=dict)     # (mfr, token) -> product_ids
     part_ids: set[int] = field(default_factory=set)                               # alkatrész/kiegészítő termékek
     variant_ids: set[int] = field(default_factory=set)                            # egyedi/átépített (custom, HPA) termékek
+    specs: dict[int, dict] = field(default_factory=dict)                          # termékjellemzők (BB-súly, ml, V, M120...)
+
+    def learn(self, pid: int, sp: dict) -> None:
+        """A termékhez került ajánlat jellemzőit megjegyezzük (ha a névből hiányoztak), így a következő eltérő nem kerül mellé."""
+        known = self.specs.setdefault(pid, {})
+        for k, v in sp.items():
+            known.setdefault(k, v)
 
     def fuzzy_candidates(self, mid: int, key: str, top: int = 40) -> list[tuple[int, str]]:
         """Előszűrés: csak a közös szót tartalmazó termékek (a legtöbb közös szóval elöl). Kis gyártónál mind."""
@@ -179,6 +186,7 @@ class Catalog:
             self.part_ids.add(p.id)
         if is_variant(p.name):
             self.variant_ids.add(p.id)
+        self.specs[p.id] = specs(p.name)
         for tok in set(k.split()):
             self._tok_index.setdefault((p.manufacturer_id, tok), set()).add(p.id)
 
@@ -222,7 +230,9 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
 
     # Egyedi/átépített változat (custom, HPA...) csak ugyanilyen termékhez kerülhet.
     variant = is_variant(o.title)
-    same_kind = lambda pid: (pid in cat.part_ids) == part and (pid in cat.variant_ids) == variant
+    osp = specs(o.title)              # 0.20g ≠ 0.28g, 500 ml ≠ 1000 ml, M100 ≠ M120: eltérő jellemző = más termék
+    same_kind = lambda pid: ((pid in cat.part_ids) == part and (pid in cat.variant_ids) == variant
+                             and not spec_conflict(osp, cat.specs.get(pid, {})))
 
     # 2. erős kód -> meglévő termék
     for c in strong:

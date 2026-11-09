@@ -133,6 +133,11 @@ Ha egy bolt partnerlinket ad, a `/go/…` kimenő link automatikusan azt haszná
 2. Zip kicsomagolása, `git add .` → `git commit -m "Gyors frissites"` → `git push`.
 Miért: a weboldal-frissítés túllépte a Supabase 8 mp-es időkorlátját („statement timeout”). Most a besorolás ajánlatonként egyszer fut, a frissítés kb. 1 mp.
 
+## 18. Frissítés 2026-11-09 (5): BB-súlyok, gázok, akkuk, rugók szétválasztása
+1. Zip kicsomagolása, `git add .` → `git commit -m "Jellemzo-or"` → `git push`.
+2. **GitHub → Actions → rematch → Run workflow** (most egyszer kézzel; pár perc). A naplóban: `eltérő jellemző miatt leválasztva: N`, utána párosítás, átnevezés, frissítés.
+3. Ezután minden éjjel automatikusan lefut a napi letöltés végén – kézzel nem kell.
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|
