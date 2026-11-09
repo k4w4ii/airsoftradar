@@ -8,6 +8,11 @@ on:
       limit:
         description: "Max termék / bolt (teszthez)"
         required: false
+        type: number
+
+# a GITHUB_TOKEN csak olvashat (a scraper nem ír a repóba)
+permissions:
+  contents: read
 
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -40,7 +45,17 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
-      - run: python scraper/run_shop.py ${{ matrix.shop }} ${{ inputs.limit && format('--limit {0}', inputs.limit) || '' }}
+      # a kézi „limit” érték környezeti változóként megy át, nem kerül közvetlenül a parancssorba
+      - env:
+          SHOP: ${{ matrix.shop }}
+          LIMIT: ${{ inputs.limit }}
+        run: |
+          if [ -n "$LIMIT" ] && [ "$LIMIT" != "0" ]; then
+            case "$LIMIT" in (*[!0-9]*) echo "hibás limit"; exit 1;; esac
+            python scraper/run_shop.py "$SHOP" --limit "$LIMIT"
+          else
+            python scraper/run_shop.py "$SHOP"
+          fi
 
   refresh:
     needs: scrape

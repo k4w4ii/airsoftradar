@@ -17,7 +17,7 @@ import unicodedata
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 
-from filters import is_part
+from filters import is_part, is_variant
 
 AUTO_FUZZY = 0.92
 REVIEW_FUZZY = 0.75
@@ -148,6 +148,7 @@ class Catalog:
     _key_of: dict[int, str] = field(default_factory=dict)                         # product_id -> title key
     _tok_index: dict[tuple[int, str], set[int]] = field(default_factory=dict)     # (mfr, token) -> product_ids
     part_ids: set[int] = field(default_factory=set)                               # alkatrész/kiegészítő termékek
+    variant_ids: set[int] = field(default_factory=set)                            # egyedi/átépített (custom, HPA) termékek
 
     def fuzzy_candidates(self, mid: int, key: str, top: int = 40) -> list[tuple[int, str]]:
         """Előszűrés: csak a közös szót tartalmazó termékek (a legtöbb közös szóval elöl). Kis gyártónál mind."""
@@ -176,6 +177,8 @@ class Catalog:
         self._key_of[p.id] = k
         if is_part(p.name):
             self.part_ids.add(p.id)
+        if is_variant(p.name):
+            self.variant_ids.add(p.id)
         for tok in set(k.split()):
             self._tok_index.setdefault((p.manufacturer_id, tok), set()).add(p.id)
 
@@ -217,10 +220,17 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
     text = f"{o.title} {o.sku_raw or ''}"
     strong, weak = ([], []) if part else extract_codes(text, slug)
 
+    # Egyedi/átépített változat (custom, HPA...) csak ugyanilyen termékhez kerülhet.
+    variant = is_variant(o.title)
+    same_kind = lambda pid: (pid in cat.part_ids) == part and (pid in cat.variant_ids) == variant
+
     # 2. erős kód -> meglévő termék
     for c in strong:
-        if pid := cat.code_index.get((mid, c)):
+        if (pid := cat.code_index.get((mid, c))) and same_kind(pid):
             return MatchResult("auto", "code", 0.97, pid, manufacturer_id=mid)
+    # a kód foglalt, de más fajta termék (pl. az alap fegyver) -> nem kódra, hanem cím alapján megy tovább
+    if any((mid, c) in cat.code_index for c in strong):
+        strong, weak = [], []
 
     # 3. erős kód, de még nincs termék -> létrehozzuk
     if strong:
@@ -230,7 +240,7 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
             manufacturer_id=mid)
 
     # 4. gyenge kód csak akkor, ha pontosan EGY termékre illik
-    hits = {cat.code_index[(mid, c)] for c in weak if (mid, c) in cat.code_index}
+    hits = {cat.code_index[(mid, c)] for c in weak if (mid, c) in cat.code_index and same_kind(cat.code_index[(mid, c)])}
     if len(hits) == 1:
         return MatchResult("auto", "weak_code", 0.85, hits.pop(), manufacturer_id=mid)
 
@@ -238,7 +248,7 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
     key = title_key(o.title, mname)
     scored = sorted(
         ((pid, SequenceMatcher(None, key, pk).ratio()) for pid, pk in cat.fuzzy_candidates(mid, key)
-         if (pid in cat.part_ids) == part),          # alkatrész csak alkatrészhez, fegyver csak fegyverhez
+         if same_kind(pid)),          # alkatrész csak alkatrészhez, custom csak customhoz
         key=lambda x: x[1], reverse=True)[:5]
     if scored:
         best_pid, best = scored[0]

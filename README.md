@@ -1,4 +1,6 @@
-# Airsoft árkereső
+# AirsoftHunter – airsoft árkereső
+
+**Minden jog fenntartva – lásd [LICENSE](LICENSE). A kód nem szabadon felhasználható.**
 
 Európai airsoft ár- és készletfigyelő (HU / EN). Részletek: [ARCHITEKTURA.md](ARCHITEKTURA.md).
 

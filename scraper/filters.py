@@ -100,3 +100,16 @@ def is_part(title: str | None, price_huf: float | None = None) -> bool:
     if WEAPON_RX.search(core) and price_huf is not None and price_huf >= WEAPON_MIN_HUF:
         return False
     return True
+
+
+# ---------------------------------------------------------------------------------------------
+# Egyedi / átépített változat („Evike Custom CYMA CM048 ... with Wolverine Inferno HPA System”):
+# ugyanaz a modellkód, de más termék és más árkategória. Ilyen ajánlat csak ilyen termékhez párosulhat.
+# Ugyanez SQL-ben: supabase/migrations/0011 (airsoft_is_variant).
+VARIANT_RX = re.compile(
+    r"(?<![\w])(?:custom|hpa|wolverine|polarstar|inferno|fusion ?engine|jack ?engine|tuned|tuning|upgraded|"
+    r"high ?speed ?build|dmr ?build|full ?upgrade|egyedi|tuningolt|felújított|refurbished|used|használt)(?![\w])", re.I)
+
+
+def is_variant(title: str | None) -> bool:
+    return bool(title and VARIANT_RX.search(BUNDLE_RX.sub("", title)))

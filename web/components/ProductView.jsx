@@ -34,22 +34,22 @@ export function PriceChart({ points, currency, rates, locale }) {
   );
 }
 
-function OfferLadder({ offers, currency, rates, locale }) {
+function OfferLadder({ offers, currency, rates, locale, odd = false, scaleMax }) {
   const tr = t(locale);
-  const max = Math.max(...offers.map((o) => Number(o.price_huf)));
+  const max = scaleMax || Math.max(...offers.map((o) => Number(o.price_huf)));
   const perShop = offers.reduce((m, o) => ({ ...m, [o.shop_name]: (m[o.shop_name] || 0) + 1 }), {});
   return (
     <ol className="ladder">
       {offers.map((o, i) => (
-        <li key={o.id} className={i === 0 && o.stock === "in_stock" ? "rung best" : "rung"}>
+        <li key={o.id} className={odd ? "rung odd" : i === 0 && o.stock === "in_stock" ? "rung best" : "rung"}>
           <div className="rung-shop">
             <span className="shop-name">{o.shop_name}</span>
             <span className="cc">{o.shop_country}</span>
             <StockBadge stock={o.stock} locale={locale} />
-            {perShop[o.shop_name] > 1 ? <span className="variant muted">{o.title_raw}</span> : null}
+            {perShop[o.shop_name] > 1 || odd ? <span className="variant muted">{o.title_raw}</span> : null}
           </div>
           <div className="rung-bar" aria-hidden="true">
-            <div style={{ width: `${Math.max(4, (Number(o.price_huf) / max) * 100)}%` }} />
+            <div style={{ width: `${Math.min(100, Math.max(4, (Number(o.price_huf) / max) * 100))}%` }} />
           </div>
           <div className="rung-price">
             <Price huf={o.price_huf} currency={currency} rates={rates} locale={locale} />
@@ -64,8 +64,12 @@ function OfferLadder({ offers, currency, rates, locale }) {
   );
 }
 
-export default function ProductView({ locale, currency, rates, product, offers, history }) {
+export default function ProductView({ locale, currency, rates, product, offers: all, history }) {
   const tr = t(locale);
+  // gyanús ár (alkatrész vagy átépített változat): külön, a legjobb árba nem számít bele
+  const offers = all.filter((o) => !o.is_outlier);
+  const odd = all.filter((o) => o.is_outlier);
+  const scale = Math.max(1, ...offers.map((o) => Number(o.price_huf)));
   const best = product.best_price_huf ?? product.min_price_any_huf;
   const pct = product.max_price_huf && best ? Math.round((1 - best / product.max_price_huf) * 100) : 0;
   return (
@@ -92,6 +96,13 @@ export default function ProductView({ locale, currency, rates, product, offers, 
         <h2>{tr.offers}</h2>
         <p className="muted">{tr.offersIntro(offers.length)}</p>
         <OfferLadder offers={offers} currency={currency} rates={rates} locale={locale} />
+        {odd.length ? (
+          <details className="odd-offers">
+            <summary>{tr.oddOffers(odd.length)}</summary>
+            <p className="muted small">{tr.oddOffersNote}</p>
+            <OfferLadder offers={odd} currency={currency} rates={rates} locale={locale} odd scaleMax={scale} />
+          </details>
+        ) : null}
       </section>
 
       <section className="block">

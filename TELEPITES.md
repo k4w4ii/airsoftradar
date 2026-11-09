@@ -115,6 +115,14 @@ Az adatvédelmi tájékoztató a beállításoktól függően automatikusan kieg
 Ha egy bolt partnerlinket ad, a `/go/…` kimenő link automatikusan azt használja:
 **Supabase → Table Editor → `shops`** → a bolt sorában az `affiliate_template` mezőbe írd a sablont, ahol `{url}` a termékoldal címe, pl. `https://partner.pelda.com/klikk?id=123&url={url}`. Mentés – azonnal él, push sem kell.
 
+## 15. Frissítés 2026-11-09 (2): gyanús árak, custom változatok, biztonság
+1. Zip kicsomagolása, `git add .` → `git commit -m "Gyanus arak, biztonsag"` → `git push`.
+2. **Supabase → SQL Editor → +**: előbb a `0010_parts_platforms.sql` (ha még nem futott), utána a `0011_outliers_variants.sql`. A végén kiírja, hány „eltérő” ajánlatot talált, és hányat választott le újrapárosításra.
+3. Biztonsági beállítások (egyszer, kézzel – kód nélkül):
+   - **Kétlépcsős azonosítás (2FA)** mindenhol: GitHub (Settings → Password and authentication), Cloudflare (My Profile → Authentication), Vercel (Account Settings → Authentication), Supabase (Account → Security), Google.
+   - **GitHub → a repó → Settings → Code security**: Dependabot alerts és Secret scanning: **Enable**.
+   - **Cloudflare → airsofthunter.com → DNS → Settings → DNSSEC: Enable** (a Cloudflare-nél vett domainnél egy kattintás).
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|

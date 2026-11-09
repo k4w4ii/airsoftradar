@@ -39,7 +39,7 @@ mnb_rates.py ─> run_shop.py × 8 bolt (párhuzamosan, max 4) ─> run_shop.py 
 - Titkok csak GitHub Secrets-ben (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`); forkból indított PR nem kapja meg őket.
 
 ## Migrációk (`supabase/migrations`, `supabase db push` sorrendben)
-`0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó · `0005_web_views` weboldal-nézetek, olvasási jog · `0006_dedupe_search` ismétlődés-szűrés (bolt+URL), valódi boltszám, kódos keresés · `0007_categories_search` fegyvertípus-besorolás + `catalog_search()` RPC · `0008_eu_shops` +12 EU-s bolt · `0009_accessory_brands` +31 kiegészítő/alkatrész-gyártó, ruházat elrejtése · `0010_parts_platforms` alkatrész- és kiegészítő-kategóriák, „mihez jó” platformok, többes kategóriaszűrés, tévesen párosított olcsó alkatrész-ajánlatok leválasztása.
+`0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó · `0005_web_views` weboldal-nézetek, olvasási jog · `0006_dedupe_search` ismétlődés-szűrés (bolt+URL), valódi boltszám, kódos keresés · `0007_categories_search` fegyvertípus-besorolás + `catalog_search()` RPC · `0008_eu_shops` +12 EU-s bolt · `0009_accessory_brands` +31 kiegészítő/alkatrész-gyártó, ruházat elrejtése · `0010_parts_platforms` alkatrész- és kiegészítő-kategóriák, „mihez jó” platformok, többes kategóriaszűrés, tévesen párosított olcsó alkatrész-ajánlatok leválasztása · `0011_outliers_variants` árkiugrás-jelzés (`v_offer_flags`, `v_offers_clean`), egyedi/custom változatok leválasztása.
 A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN futtatná.
 
 ## Boltok (20; csak EU, UK nélkül)
@@ -90,7 +90,18 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 - Besorolás (`airsoft_category(cím, url, ár)` SQL): ajánlatonként a bolti címből; a termék kategóriája a boltok többségi szavazata (+ a terméknév fél szavazat). Csomag-részek („with battery”, „+ 2 mags”) levágva; alkatrészszó + fegyverszó + fegyverár (>= 30 000 Ft) = fegyver, kivéve „for X / X-hez” alakban. Az URL csak végső tartalék. 46 valós címen tesztelve.
 - „Mihez jó” (`airsoft_platforms()`): M4/AR, AK, G36, MP5, AUG, SCAR, M14, P90, VSR-10, L96, Glock, Hi-Capa/1911, M9, Gearbox V2/V3 – a név és az azonos csoportba sorolt bolti címek alapján; szűrő: `?plat=m4`.
 - Párosítás-védelem: alkatrész/kiegészítő ajánlat (`scraper/filters.py: is_part`) nem párosul modellkódra (a „Magazine for CM.041K” kódja a fegyveré), és fuzzy-val is csak alkatrész-termékhez.
+- Egyedi változat (`is_variant`: custom, HPA, Wolverine/Polarstar, tuned, upgraded, használt…): csak ugyanilyen termékhez párosul; ha a kód az alap terméké, cím alapján új termék lesz (pl. „Evike Custom CYMA CM048 … HPA” ≠ „CYMA CM048”).
+- Árkiugrás (0011, `v_offer_flags`): >= 3 boltnál a medián 40%-a alatti / 250%-a feletti ajánlat, 2 boltnál a 4x olcsóbb „eltérő”. Nem számít a legjobb árba, árfolyosóba, boltszámba, ártörténetbe; a termékoldalon lenyitható „Eltérő ár” blokkban látszik.
 - Dizájn: palaszürke `#1B2027`, csontfehér `#E9E4D8`, sárgaréz `#C8A24E` (csak ár / legjobb ajánlat), olív = raktáron, tégla = elfogyott; Barlow Condensed + Barlow. Egyedi elem: árfolyosó (legolcsóbb vs. legdrágább bolt) és arányos ajánlat-létra.
+
+## Biztonság (2026-11-09)
+- Titkok: a Supabase secret kulcs csak GitHub Secretsben; a weboldal csak szerveroldalon olvas a publishable kulccsal (a böngésző nem kapja meg). A repóban nincs kulcs.
+- Adatbázis: RLS minden táblán; nyilvános olvasás csak a publikus adatokra (boltok, termékek, ajánlatok, árak); belső táblák (scrape_runs, match_candidates, product_codes, aliasok) olvashatatlanok; írás csak service role-lal; `refresh_product_summary` csak service role. A kereső RPC nem fűz össze SQL-t (nincs injekció).
+- Weboldal: biztonsági fejlécek (`next.config.mjs`: HSTS, nosniff, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy, CSP frame-ancestors/form-action), `X-Powered-By` kikapcsolva; `/go` csak DB-beli bolti URL-re irányít; `/cur` open-redirect-védett.
+- GitHub Actions: `permissions: contents: read`, a kézi `limit` env-ként és számként ellenőrizve (nincs parancs-injekció); forkból nyitott PR nem kap titkot.
+- Hálózat: Cloudflare csak DNS (DNS only) – a forgalom közvetlenül a Vercelhez megy, a DDoS-/bot-védelmet a Vercel adja (a Vercel nem javasol proxyt elé).
+- Kód: a repó publikus (ingyenes Actions-percek miatt), `LICENSE` = minden jog fenntartva.
+- Üzemeltetés: Vercel Hobby = csak nem kereskedelmi használat; AdSense / partnerlink / adománygomb bekapcsolása előtt Pro csomag vagy másik tárhely kell.
 
 ## Séma – lényeg
 - `products` = kanonikus termék, kulcs: **(manufacturer_id, model_code_norm)**.

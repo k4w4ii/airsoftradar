@@ -140,3 +140,25 @@ class TestPartGate(unittest.TestCase):
     def test_bundle_is_gun(self):
         r = match_offer(OfferIn("CYMA CM.041K MP5K AEG with battery and charger", price_huf=52000), self.cat)
         self.assertEqual(r.product_id, 10)
+
+
+class TestVariantGate(unittest.TestCase):
+    """Az átépített (custom/HPA) változat nem kerülhet az alap fegyverhez, és fordítva."""
+    def setUp(self):
+        self.cat = Catalog({"cyma": 1}, {1: ("cyma", "CYMA")})
+        self.cat.add_product(Product(20, 1, "CYMA CM048", "CM048"))
+
+    def test_custom_hpa_not_matched_to_base(self):
+        r = match_offer(OfferIn("Evike Custom CYMA CM048 AKM Rifle with Wolverine Inferno HPA System (Model: Fixed Stock)",
+                                price_huf=325000), self.cat)
+        self.assertNotEqual(r.product_id, 20)
+        self.assertIsNone((r.new_product or {}).get("model_code_norm"))   # a kód az alap termékké marad
+
+    def test_base_still_matches(self):
+        r = match_offer(OfferIn("CYMA CM.048 AKM AEG - Wood", price_huf=85000), self.cat)
+        self.assertEqual(r.product_id, 20)
+
+    def test_hungarian_spring_part(self):
+        self.cat.add_product(Product(21, 1, "CYMA VSR10 sniper spring CM.701B", "CM701B"))
+        r = match_offer(OfferIn("CYMA VSR-10 SNIPER RUGÓ (CM.701B) - Airsoftpláza", price_huf=3700), self.cat)
+        self.assertNotEqual(r.product_id, 21)

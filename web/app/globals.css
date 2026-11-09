@@ -317,3 +317,9 @@ img { display: block; max-width: 100%; }
   .field select { min-width: 140px; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+
+/* eltérő (gyanús) árak a termékoldalon */
+.odd-offers { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+.odd-offers summary { cursor: pointer; color: var(--muted); font-size: 14px; padding: 4px 0; }
+.odd-offers .rung.odd { opacity: .75; }
+.odd-offers .rung.odd .rung-bar div { background: #4a5260; }
