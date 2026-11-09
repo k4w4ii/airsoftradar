@@ -28,10 +28,14 @@ def main(name: str) -> int:
     db = get_db()
     stmts = statements(path.read_text(encoding="utf-8"))
     print(f"[sql] {name}: {len(stmts)} utasítás", flush=True)
-    for i, s in enumerate(stmts, 1):
-        rows = db.query(s)
-        head = " ".join(s.split())[:90]
-        print(f"[sql] {i}/{len(stmts)} kész: {head}{' → ' + str(rows[:5]) if rows else ''}", flush=True)
+    for start in range(0, len(stmts), 50):                 # 50 utasítás / kérés (kérésenként egy tranzakció)
+        chunk = stmts[start:start + 50]
+        results = db.execute([(s, []) for s in chunk])
+        for i, (s, rows) in enumerate(zip(chunk, results), start + 1):
+            if rows or i == len(stmts) or i <= 5:
+                head = " ".join(s.split())[:90]
+                print(f"[sql] {i}/{len(stmts)} kész: {head}{' → ' + str(rows[:5]) if rows else ''}", flush=True)
+        print(f"[sql] {min(start + 50, len(stmts))}/{len(stmts)}", flush=True)
     return 0
 
 

@@ -57,7 +57,7 @@ function OfferLadder({ offers, currency, rates, locale, odd = false, scaleMax })
               <span className="orig muted" title={tr.original}>{shopMoney(o.price, o.currency, locale)}</span>
             ) : null}
           </div>
-          <a className="btn go" href={`/go/${o.id}`} rel="nofollow sponsored noopener" target="_blank">{tr.goToShop}</a>
+          <a className="btn go" href={`/go/${o.id}`} rel="nofollow sponsored noopener noreferrer" target="_blank">{tr.goToShop}</a>
         </li>
       ))}
     </ol>
