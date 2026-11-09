@@ -1,26 +1,11 @@
 import Link from "next/link";
-import { plainMoney, t, WEAPON_CATS } from "../lib/i18n";
+import { CAT_GROUPS, defaultCats, hrefFor, PLATFORMS, withoutCat } from "../lib/catalog";
+import { plainMoney, t } from "../lib/i18n";
 import AutoSubmit from "./AutoSubmit";
 import PriceSlider from "./PriceSlider";
-import { Price, SpreadBar, StockBadge, Ad } from "./ui";
+import { Ad, Price, SpreadBar, StockBadge } from "./ui";
 
-export const defaultCat = (q) => (q ? "all" : "weapons");
-
-/** URL a jelenlegi szűrőkből, felülírásokkal. Lapozás minden szűrőváltozásnál az elejére ugrik. */
-export function hrefFor(locale, params, over = {}) {
-  const p = { ...params, page: 1, ...over };
-  const sp = new URLSearchParams();
-  if (p.q) sp.set("q", p.q);
-  if (p.cat && p.cat !== defaultCat(p.q)) sp.set("cat", p.cat);
-  for (const b of p.brands || []) sp.append("brand", b);
-  if (p.min > 0) sp.set("min", String(p.min));
-  if (p.max > 0) sp.set("max", String(p.max));
-  if (p.stock) sp.set("stock", "1");
-  if (p.sort && p.sort !== "popular") sp.set("sort", p.sort);
-  if (p.page > 1) sp.set("page", String(p.page));
-  const s = sp.toString();
-  return `/${locale}${s ? `?${s}` : ""}`;
-}
+export { hrefFor } from "../lib/catalog";
 
 function niceStep(range) {
   const raw = range / 100;
@@ -60,25 +45,71 @@ function ProductRow({ p, locale, currency, rates }) {
 
 function CategoryTree({ locale, params, counts }) {
   const tr = t(locale);
-  const weapons = WEAPON_CATS.reduce((s, c) => s + (counts[c] || 0), 0);
-  const all = weapons + (counts.other || 0);
-  const item = (cat, n, cls = "") => (
-    <li key={cat} className={cls}>
-      <Link href={hrefFor(locale, params, { cat })} className={params.cat === cat ? "facet on" : n ? "facet" : "facet zero"}
-            aria-current={params.cat === cat ? "true" : undefined}>
-        <span>{tr.cats[cat]}</span><span className="n">{n}</span>
-      </Link>
-    </li>
+  const sel = new Set(params.cats);
+  const total = Object.values(counts).reduce((x, y) => x + y, 0);
+  const box = (name, value, label, n, on, data) => (
+    <label className={n || on ? "facet check" : "facet check zero"}>
+      <input type="checkbox" name={name} value={value} defaultChecked={on} {...data} />
+      <span className="box" aria-hidden="true" /><span>{label}</span><span className="n">{n}</span>
+    </label>
   );
   return (
     <ul className="cat-tree">
-      {item("all", all)}
-      {item("weapons", weapons, "group")}
       <li>
-        <ul className="sub">{WEAPON_CATS.map((c) => item(c, counts[c] || 0))}</ul>
+        <Link href={hrefFor(locale, params, { cats: [] })} className={params.cats.length ? "facet" : "facet on"}
+              aria-current={params.cats.length ? undefined : "true"}>
+          <span>{tr.cats.all}</span><span className="n">{total}</span>
+        </Link>
       </li>
-      {item("other", counts.other || 0)}
+      {CAT_GROUPS.map((g) => {
+        const n = g.leaves.reduce((x, l) => x + (counts[l] || 0), 0);
+        const gOn = sel.has(g.id);
+        const open = gOn || g.leaves.some((l) => sel.has(l)) || (g.id === "weapons" && !params.cats.length);
+        return (
+          <li key={g.id} className={open ? "group open" : "group"}>
+            <div className="group-row">
+              {box("cat", g.id, tr.cats[g.id], n, gOn, { "data-group": g.id })}
+              <button type="button" className="twisty" data-twisty aria-expanded={open ? "true" : "false"}
+                      aria-label={tr.cats[g.id]} />
+            </div>
+            <ul className="sub">
+              {g.leaves.map((l) => (
+                <li key={l}>{box("cat", l, tr.cats[l], counts[l] || 0, gOn || sel.has(l), { "data-parent": g.id })}</li>
+              ))}
+            </ul>
+          </li>
+        );
+      })}
     </ul>
+  );
+}
+
+function PlatformFilter({ locale, params, counts }) {
+  const tr = t(locale);
+  const sel = new Set(params.plats);
+  const items = PLATFORMS.filter((p) => counts[p] || sel.has(p)).sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+  if (!items.length) return null;
+  const top = items.filter((p, i) => i < 6 || sel.has(p));
+  const rest = items.filter((p, i) => i >= 6 && !sel.has(p));
+  const box = (p) => (
+    <li key={p}>
+      <label className={counts[p] || sel.has(p) ? "facet check" : "facet check zero"}>
+        <input type="checkbox" name="plat" value={p} defaultChecked={sel.has(p)} />
+        <span className="box" aria-hidden="true" /><span>{tr.plats[p]}</span><span className="n">{counts[p] || 0}</span>
+      </label>
+    </li>
+  );
+  return (
+    <section className="fgroup">
+      <h2>{tr.platform}</h2>
+      <ul className="facet-list">{top.map(box)}</ul>
+      {rest.length ? (
+        <details className="more">
+          <summary>{tr.morePlatforms(items.length)}</summary>
+          <ul className="facet-list">{rest.map(box)}</ul>
+        </details>
+      ) : null}
+    </section>
   );
 }
 
@@ -154,8 +185,10 @@ function BrandFilter({ locale, params, brands }) {
 function Chips({ locale, params, currency }) {
   const tr = t(locale);
   const chips = [];
-  if (params.q) chips.push({ label: `„${params.q}”`, href: hrefFor(locale, params, { q: "", cat: params.cat === "all" ? "weapons" : params.cat }) });
-  if (params.cat !== defaultCat(params.q)) chips.push({ label: tr.cats[params.cat], href: hrefFor(locale, params, { cat: defaultCat(params.q) }) });
+  if (params.q) chips.push({ label: `„${params.q}”`, href: hrefFor(locale, params, { q: "", cats: params.cats.length ? params.cats : defaultCats("") }) });
+  const isDefault = params.cats.join() === defaultCats(params.q).join();
+  if (!isDefault) for (const c of params.cats) chips.push({ label: tr.cats[c], href: hrefFor(locale, params, { cats: withoutCat(params.cats, c) }) });
+  for (const p of params.plats) chips.push({ label: tr.plats[p], href: hrefFor(locale, params, { plats: params.plats.filter((x) => x !== p) }) });
   for (const b of params.brands) chips.push({ label: b, href: hrefFor(locale, params, { brands: params.brands.filter((x) => x !== b) }) });
   if (params.min || params.max) {
     const lbl = `${params.min ? plainMoney(params.min, currency, locale) : "0"} – ${params.max ? plainMoney(params.max, currency, locale) : "∞"}`;
@@ -173,16 +206,19 @@ function Chips({ locale, params, currency }) {
   );
 }
 
-export default function HomeView({ locale, currency, rates, stats, data, params }) {
+export default function HomeView({ locale, currency, rates, data, params }) {
   const tr = t(locale);
   const facets = data.facets || {};
-  const heading = params.q ? `„${params.q}”` : params.cat === "weapons" && !params.brands.length ? tr.tagline(stats) : tr.cats[params.cat];
+  const names = params.cats.map((c) => tr.cats[c]);
+  const heading = params.q ? `„${params.q}”` : !names.length ? tr.cats.all
+    : names.length > 2 ? `${names.slice(0, 2).join(", ")} +${names.length - 2}` : names.join(", ");
 
   return (
     <form id="filters" action={`/${locale}`} className="catalog">
       <AutoSubmit />
       {params.q ? <input type="hidden" name="q" value={params.q} /> : null}
-      {params.cat !== defaultCat(params.q) ? <input type="hidden" name="cat" value={params.cat} /> : null}
+      {/* ha minden kategória-pipa üres: „minden termék” (nem az alapértelmezés) */}
+      <input type="hidden" name="cat" value="all" />
 
       <input type="checkbox" id="ft" className="ft-toggle" />
       <label htmlFor="ft" className="ft-btn btn">{tr.filters}</label>
@@ -192,6 +228,7 @@ export default function HomeView({ locale, currency, rates, stats, data, params 
           <h2>{tr.category}</h2>
           <CategoryTree locale={locale} params={params} counts={facets.categories || {}} />
         </section>
+        <PlatformFilter locale={locale} params={params} counts={facets.platforms || {}} />
         <section className="fgroup">
           <h2>{tr.availability}</h2>
           <ul className="facet-list">

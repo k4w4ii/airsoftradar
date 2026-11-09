@@ -36,7 +36,7 @@ git config --global user.email "a-github-email-cimed@pelda.hu"
 3. Bal menü **SQL Editor** → **New query**. Nyisd meg Jegyzettömbbel a `supabase\telepites_egyben.sql`-t, **Ctrl+A, Ctrl+C**, illeszd be az üres query-be, **Run**.
    - Ha felugrik egy „destructive operation” figyelmeztetés: **Run this query** (csak a saját árkereső-tábláinkat törli és hozza létre újra).
    - Várt eredmény alul egy sor: `boltok 20 | gyartok 81 | kategoriak 6`.
-4. Ez a fájl az összes migrációt (0001–0009) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
+4. Ez a fájl az összes migrációt (0001–0010) helyes sorrendben tartalmazza. Újrafuttatható, de **minden összegyűjtött ajánlatot töröl** – csak új telepítéskor vagy végső esetben használd.
 5. Bal lent **Project Settings** → **API Keys** → másold ki a **Secret key**-t (`sb_secret_...`).
    **Project Settings → Data API** (vagy a projekt főoldala) → másold ki a **Project URL**-t (`https://xxxx.supabase.co`).
 
@@ -104,6 +104,16 @@ Alapból **minden ki van kapcsolva**, az oldalon semmi nem látszik. A beállít
 **AdSense, 2. lépés (hirdetések bekapcsolása):** Hirdetések → Hirdetési egység szerint → **Display hirdetés**, „vízszintes” formában. Két egység kell: egy a lista aljára, egy a termékoldal aljára. A kapott `data-ad-slot` számokat írd be az `adsenseSlotList` és az `adsenseSlotProduct` mezőbe, majd push.
 
 Az adatvédelmi tájékoztató a beállításoktól függően automatikusan kiegészül (Google AdSense, hozzájárulás, kávé-szolgáltató).
+
+## 13. Frissítés 2026-11-09: alkatrész-kategóriák, többes szűrés
+1. Zip kicsomagolása, `git add .` → `git commit -m "Alkatresz kategoriak"` → `git push`.
+2. **Supabase → SQL Editor → +**: futtasd a `supabase\migrations\0010_parts_platforms.sql`-t (adatot nem töröl). A végén kategóriánként kiírja a termékszámot (rifle, pistol, part_internal, acc_mag…).
+   - Ha a 0007–0009 még nincs lefuttatva, előbb azokat, sorrendben.
+3. A weboldal 1–2 perc múlva az új szűrőkkel jelenik meg. A tévesen fegyverhez kötött olcsó tárak/alkatrészek ajánlatai átmenetileg eltűnnek; a következő éjszakai futás a helyes termékhez párosítja őket.
+
+## 14. Partnerprogramok (affiliate) bekötése
+Ha egy bolt partnerlinket ad, a `/go/…` kimenő link automatikusan azt használja:
+**Supabase → Table Editor → `shops`** → a bolt sorában az `affiliate_template` mezőbe írd a sablont, ahol `{url}` a termékoldal címe, pl. `https://partner.pelda.com/klikk?id=123&url={url}`. Mentés – azonnal él, push sem kell.
 
 ## Hibák
 | Üzenet | Megoldás |

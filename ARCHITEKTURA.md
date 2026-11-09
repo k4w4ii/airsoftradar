@@ -39,7 +39,7 @@ mnb_rates.py ─> run_shop.py × 8 bolt (párhuzamosan, max 4) ─> run_shop.py 
 - Titkok csak GitHub Secrets-ben (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`); forkból indított PR nem kapja meg őket.
 
 ## Migrációk (`supabase/migrations`, `supabase db push` sorrendben)
-`0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó · `0005_web_views` weboldal-nézetek, olvasási jog · `0006_dedupe_search` ismétlődés-szűrés (bolt+URL), valódi boltszám, kódos keresés · `0007_categories_search` fegyvertípus-besorolás + `catalog_search()` RPC · `0008_eu_shops` +12 EU-s bolt · `0009_accessory_brands` +31 kiegészítő/alkatrész-gyártó, ruházat elrejtése.
+`0001_init` séma · `0002_seed` boltok/gyártók/kategóriák · `0003_i18n_multicurrency` HU/EN, EUR, ships_to · `0004_more_manufacturers` +28 gyártó · `0005_web_views` weboldal-nézetek, olvasási jog · `0006_dedupe_search` ismétlődés-szűrés (bolt+URL), valódi boltszám, kódos keresés · `0007_categories_search` fegyvertípus-besorolás + `catalog_search()` RPC · `0008_eu_shops` +12 EU-s bolt · `0009_accessory_brands` +31 kiegészítő/alkatrész-gyártó, ruházat elrejtése · `0010_parts_platforms` alkatrész- és kiegészítő-kategóriák, „mihez jó” platformok, többes kategóriaszűrés, tévesen párosított olcsó alkatrész-ajánlatok leválasztása.
 A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN futtatná.
 
 ## Boltok (20; csak EU, UK nélkül)
@@ -56,13 +56,13 @@ A törzsadat is migráció, mert a Supabase a `seed.sql`-t a migrációk UTÁN f
 | Begadi | DE | sitemap, csak `airsoftwaffen` | ÚJ (2026-11-08) – ellenőrizendő |
 | Airsoft Sports | DE | sitemap, általános minta | ÚJ – ellenőrizendő |
 | AirsoftGuns.eu | CZ | sitemap, általános minta | ÚJ – ellenőrizendő |
-| Airsoftmania | IT | Shopify sitemap `/products/` | ÚJ – ellenőrizendő |
+| Airsoftmania | IT | – | ❌ letiltva (nincs sitemap, elutasítja a robotot) |
 | Gunshot | IT | sitemap, általános minta | ÚJ – ellenőrizendő |
-| VSGUN | ES | sitemap, általános minta | ÚJ – ellenőrizendő |
+| VSGUN | ES | – | ❌ letiltva (bot-védelem) |
 | Airsoft Legends | NL | sitemap, csak `/en/` | ÚJ – ellenőrizendő |
 | Bunker501 | NL | sitemap, általános minta | ÚJ – ellenőrizendő |
-| Phenix Airsoft | FR | sitemap, általános minta | ÚJ – ellenőrizendő |
-| Militaria.pl | PL | sitemap, általános minta | ÚJ – ellenőrizendő |
+| Phenix Airsoft | FR | angol sitemap (`1_en_0`), PrestaShop minta | javítva 2026-11-09 – ellenőrizendő |
+| Militaria.pl | PL | – | ❌ letiltva (nincs sitemap, JS-lista; később lapozós konfig) |
 | Red Beret | PL | sitemap, általános minta | ÚJ – ellenőrizendő |
 | Atom Airsoft | FI | Shopify sitemap `/products/` | ÚJ – ellenőrizendő |
 
@@ -84,9 +84,12 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 - Bevétel (alapból kikapcsolva, `lib/site.js` → `MONETIZE` vagy env `ADSENSE_CLIENT`, `ADSENSE_SLOT_LIST`, `ADSENSE_SLOT_PRODUCT`, `COFFEE_URL`): AdSense szkript + `google-adsense-account` meta csak kitöltött kódnál; `/ads.txt` route (különben 404); két kézi, „Hirdetés” feliratú egység (`components/AdSlot.jsx`, lista alja és termékoldal alja), kitöltetlen egység elrejtve (`:has([data-ad-status=unfilled])`); automatikus és átfedő hirdetések az AdSense-ben kikapcsolva; az EU-s hozzájárulást a Google CMP kezeli. Kávé-link a láblécben. Az adatvédelmi szöveg feltételesen bővül.
 - SEO: `app/sitemap.js` (lista- és termékoldalak hu/en hreflang-gal, naponta), `app/robots.js` (`/go/`, `/cur` tiltva), `metadataBase` = `SITE_URL` (`lib/site.js`).
 - Útvonalak: `/` -> `/hu` vagy `/en` (Accept-Language, `next.config.mjs` redirect) · `/[locale]` lista + szűrők · `/[locale]/p/[slug]` termékoldal · `/go/[id]` kimenő link (affiliate sablon) · `/cur` pénznem-süti.
-- Nézetek (0005–0007): `product_summary` (+max ár, `category`, `search_code`), `v_product_offers`, `v_price_daily`, `v_manufacturers`, `v_site_stats`.
+- Nézetek (0005–0010): `product_summary` (+max ár, `category`, `platforms`, `search_code`), `v_product_offers`, `v_price_daily`, `v_manufacturers`. (A `v_site_stats` és a főoldali „X replika Y boltból” szöveg 2026-11-09-től nincs.)
 - Katalógus: **egy RPC-hívás** (`catalog_search`) adja a találatokat és a szűrő-darabszámokat; minden szűrő darabszáma a többi szűrővel számol. Szűrők: típus-fa (`weapons` = minden fegyver; alapértelmezés kereséskor `all`), ársávok (pénznemenként kerek határok, `PRICE_EDGES`) + kétfogantyús csúszka + min/max, márkák (többes választás), raktáron. Mobilon CSS-only lenyitható panel; JS nélkül „Szűrés” gombbal működik.
-- Kategória-besorolás (`airsoft_category()` SQL): név + bolti címek + bolti URL-ek kulcsszavai, kiegészítő-felismerés árküszöbbel (< 25 000 Ft). 30 valós címen tesztelve.
+- Kategóriák (0010): fegyverek (`rifle, pistol, smg, sniper, lmg, shotgun, grenade`), alkatrészek (`part_internal, part_hopup, part_motor, part_external`), kiegészítők (`acc_mag, acc_power, acc_optics, acc_ammo, acc_protect, acc_gear, other`). Csoportok: `weapons`, `parts`, `acc`. A szűrőben pipálható fa, több kategória egyszerre (`?cat=rifle&cat=sniper`); `?cat=all` = minden termék; kategória nélkül a fegyverek az alap (`lib/catalog.js`).
+- Besorolás (`airsoft_category(cím, url, ár)` SQL): ajánlatonként a bolti címből; a termék kategóriája a boltok többségi szavazata (+ a terméknév fél szavazat). Csomag-részek („with battery”, „+ 2 mags”) levágva; alkatrészszó + fegyverszó + fegyverár (>= 30 000 Ft) = fegyver, kivéve „for X / X-hez” alakban. Az URL csak végső tartalék. 46 valós címen tesztelve.
+- „Mihez jó” (`airsoft_platforms()`): M4/AR, AK, G36, MP5, AUG, SCAR, M14, P90, VSR-10, L96, Glock, Hi-Capa/1911, M9, Gearbox V2/V3 – a név és az azonos csoportba sorolt bolti címek alapján; szűrő: `?plat=m4`.
+- Párosítás-védelem: alkatrész/kiegészítő ajánlat (`scraper/filters.py: is_part`) nem párosul modellkódra (a „Magazine for CM.041K” kódja a fegyveré), és fuzzy-val is csak alkatrész-termékhez.
 - Dizájn: palaszürke `#1B2027`, csontfehér `#E9E4D8`, sárgaréz `#C8A24E` (csak ár / legjobb ajánlat), olív = raktáron, tégla = elfogyott; Barlow Condensed + Barlow. Egyedi elem: árfolyosó (legolcsóbb vs. legdrágább bolt) és arányos ajánlat-létra.
 
 ## Séma – lényeg
@@ -113,7 +116,7 @@ Védőkorlátok: szomszédos kódok (CM522/CM523) sosem olvadnak össze; család
 Karbantartás: új regex a `STRONG_PATTERNS`-be = több automatikus párosítás.
 
 ## Fejlesztési terv
-1. ✅ **Séma** – migrációk 0001–0009 (lásd fent).
+1. ✅ **Séma** – migrációk 0001–0010 (lásd fent).
 2. ✅ **MNB árfolyam job** – `mnb_rates.py`, napi cron.
 3. ✅ **Generikus scraper + pipeline** – JSON-LD, sitemap/lapozás, `run_shop.py`, GitHub Actions.
 4. ⏳ **Bolt-konfigok élesítése** – 2. kör kész (fenti táblázat, microdata-támogatás). Hátra: első éles futás `allapot.sql` alapján, Combat-Zone.

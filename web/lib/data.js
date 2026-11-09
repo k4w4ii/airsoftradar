@@ -78,11 +78,6 @@ export async function getManufacturers() {
   return q("v_manufacturers?order=manufacturer.asc");
 }
 
-export async function getStats() {
-  const rows = await q("v_site_stats");
-  return rows[0] || { products: 0, offers: 0, shops: 0 };
-}
-
 export async function getRates() {
   const rows = await q("latest_rates?select=currency,huf_per_unit");
   return Object.fromEntries(rows.map((r) => [r.currency, Number(r.huf_per_unit)]));
@@ -100,7 +95,7 @@ export function pgArray(values) {
 
 /**
  * Lista + szűrő-darabszámok egy hívásban (SQL: catalog_search).
- * params: { q, cat, brands[], min, max (a választott pénznemben), stock, sort, page }
+ * params: { q, cats[], plats[], brands[], min, max (a választott pénznemben), stock, sort, page }
  */
 export function buildSearchQuery(params, currency, rates) {
   const rate = currency === "HUF" ? 1 : rates?.[currency];
@@ -109,7 +104,8 @@ export function buildSearchQuery(params, currency, rates) {
   const p = new URLSearchParams();
   const term = cleanQuery(params.q);
   if (term) p.set("q", term);
-  p.set("cat", params.cat === "all" ? "" : params.cat || "");
+  if (params.cats?.length) p.set("cats", pgArray(params.cats));
+  if (params.plats?.length) p.set("plats", pgArray(params.plats));
   if (params.brands?.length) p.set("brands", pgArray(params.brands.slice(0, 30)));
   if (params.min > 0) p.set("pmin", String(Math.floor(params.min * r)));
   if (params.max > 0) p.set("pmax", String(Math.ceil(params.max * r)));

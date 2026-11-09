@@ -17,6 +17,8 @@ import unicodedata
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 
+from filters import is_part
+
 AUTO_FUZZY = 0.92
 REVIEW_FUZZY = 0.75
 
@@ -145,6 +147,7 @@ class Catalog:
     _title_keys: dict[int, list[tuple[int, str]]] = field(default_factory=dict)
     _key_of: dict[int, str] = field(default_factory=dict)                         # product_id -> title key
     _tok_index: dict[tuple[int, str], set[int]] = field(default_factory=dict)     # (mfr, token) -> product_ids
+    part_ids: set[int] = field(default_factory=set)                               # alkatrész/kiegészítő termékek
 
     def fuzzy_candidates(self, mid: int, key: str, top: int = 40) -> list[tuple[int, str]]:
         """Előszűrés: csak a közös szót tartalmazó termékek (a legtöbb közös szóval elöl). Kis gyártónál mind."""
@@ -171,6 +174,8 @@ class Catalog:
         k = title_key(p.name, mname)
         self._title_keys.setdefault(p.manufacturer_id, []).append((p.id, k))
         self._key_of[p.id] = k
+        if is_part(p.name):
+            self.part_ids.add(p.id)
         for tok in set(k.split()):
             self._tok_index.setdefault((p.manufacturer_id, tok), set()).add(p.id)
 
@@ -181,6 +186,7 @@ class OfferIn:
     brand_raw: str | None = None
     sku_raw: str | None = None
     ean_raw: str | None = None
+    price_huf: float | None = None    # az alkatrész/fegyver döntéshez (olcsó + alkatrészszó = alkatrész)
 
 
 @dataclass
@@ -205,8 +211,11 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
         return MatchResult("pending", None, 0.0)
     slug, mname = cat.manufacturers[mid]
 
+    # Alkatrész/kiegészítő (tár, rugó, akku...): a címben lévő modellkód a FEGYVERÉ, amihez készült,
+    # ezért kódra nem párosítjuk (különben a „Magazine for CM.041K” a CM.041K fegyverhez kerülne).
+    part = is_part(o.title, o.price_huf)
     text = f"{o.title} {o.sku_raw or ''}"
-    strong, weak = extract_codes(text, slug)
+    strong, weak = ([], []) if part else extract_codes(text, slug)
 
     # 2. erős kód -> meglévő termék
     for c in strong:
@@ -228,7 +237,8 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
     # 5. fuzzy a gyártó termékein belül
     key = title_key(o.title, mname)
     scored = sorted(
-        ((pid, SequenceMatcher(None, key, pk).ratio()) for pid, pk in cat.fuzzy_candidates(mid, key)),
+        ((pid, SequenceMatcher(None, key, pk).ratio()) for pid, pk in cat.fuzzy_candidates(mid, key)
+         if (pid in cat.part_ids) == part),          # alkatrész csak alkatrészhez, fegyver csak fegyverhez
         key=lambda x: x[1], reverse=True)[:5]
     if scored:
         best_pid, best = scored[0]

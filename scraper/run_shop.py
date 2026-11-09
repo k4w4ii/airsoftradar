@@ -170,7 +170,9 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
     stats = defaultdict(int)
     offer_pid = {o["id"]: o["product_id"] for o in saved if o.get("product_id")}
     for o in (o for o in saved if o["match_status"] == "pending"):
-        r = match_offer(OfferIn(o["title_raw"], o["brand_raw"], o["sku_raw"], o["ean_raw"]), cat)
+        rate = rates.get(o["currency"])
+        huf = float(Decimal(str(o["price"])) * rate) if rate and o.get("price") is not None else None
+        r = match_offer(OfferIn(o["title_raw"], o["brand_raw"], o["sku_raw"], o["ean_raw"], huf), cat)
         stats[r.method or r.status] += 1
         if r.status == "auto":
             pid = r.product_id or create_product(db, cat, r.new_product, shop["lang"], o["image_url"])

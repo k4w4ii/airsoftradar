@@ -10,6 +10,7 @@ export const PRICE_EDGES = {
   CZK: [2000, 4000, 6500, 13000],
   GBP: [65, 130, 220, 440],
 };
+export { CAT_GROUPS, LEAVES, PLATFORMS } from "./catalog";
 export const WEAPON_CATS = ["rifle", "pistol", "smg", "sniper", "lmg", "shotgun", "grenade"];
 
 export function isLocale(x) {
@@ -20,7 +21,6 @@ const DICT = {
   hu: {
     title: "AirsoftHunter – airsoft árösszehasonlító",
     description: "Airsoft replikák és kiegészítők árai európai boltokból, naponta frissítve. Vadászd le a legjobb árat.",
-    tagline: (s) => `${s.products} replika ${s.shops} európai boltból, naponta frissítve`,
     searchPlaceholder: "Keresés: típus, gyártó vagy kód (pl. CM.522, Specna, EVOLT)",
     search: "Keresés",
     manufacturer: "Gyártó",
@@ -58,7 +58,17 @@ const DICT = {
     cats: {
       all: "Minden termék", weapons: "Airsoft fegyverek", rifle: "Gépkarabélyok (AR, AK)", pistol: "Pisztolyok",
       smg: "Géppisztolyok", sniper: "Mesterlövész, DMR", lmg: "Géppuskák", shotgun: "Sörétes puskák",
-      grenade: "Gránátok, gránátvetők", other: "Kiegészítők, egyéb",
+      grenade: "Gránátok, gránátvetők",
+      parts: "Alkatrészek", part_internal: "Gearbox, belső alkatrészek", part_hopup: "Hop-up, belső cső",
+      part_motor: "Motor, elektronika", part_external: "Külső alkatrészek",
+      acc: "Kiegészítők", acc_mag: "Tárak", acc_power: "Akkumulátor, töltő", acc_optics: "Optika, lámpa, lézer",
+      acc_ammo: "BB, gáz", acc_protect: "Védőfelszerelés", acc_gear: "Taktikai felszerelés, tokok", other: "Egyéb",
+    },
+    platform: "Mihez jó (platform)",
+    plats: {
+      m4: "M4 / AR-15", ak: "AK", g36: "G36", mp5: "MP5", aug: "AUG", scar: "SCAR", m14: "M14", p90: "P90",
+      vsr: "VSR-10", l96: "L96 / AWP", glock: "Glock", hicapa: "Hi-Capa / 1911", m9: "M9 / Beretta 92",
+      gb_v2: "Gearbox V2", gb_v3: "Gearbox V3",
     },
     price: "Ár",
     under: (v) => `${v} alatt`,
@@ -69,6 +79,7 @@ const DICT = {
     ok: "OK",
     brands: "Gyártó",
     moreBrands: (n) => `Összes gyártó (${n})`,
+    morePlatforms: (n) => `Összes platform (${n})`,
     availability: "Elérhetőség",
     activeFilters: "Aktív szűrők",
     remove: (x) => `${x} szűrő törlése`,
@@ -76,7 +87,6 @@ const DICT = {
   en: {
     title: "AirsoftHunter – airsoft price comparison",
     description: "Airsoft replica and gear prices from European shops, updated daily. Hunt down the best price.",
-    tagline: (s) => `${s.products} replicas from ${s.shops} European shops, updated daily`,
     searchPlaceholder: "Search by model, brand or code (e.g. CM.522, Specna, EVOLT)",
     search: "Search",
     manufacturer: "Brand",
@@ -114,7 +124,17 @@ const DICT = {
     cats: {
       all: "All products", weapons: "Airsoft guns", rifle: "Assault rifles (AR, AK)", pistol: "Pistols",
       smg: "SMGs", sniper: "Sniper rifles, DMR", lmg: "Machine guns", shotgun: "Shotguns",
-      grenade: "Grenades, launchers", other: "Accessories, other",
+      grenade: "Grenades, launchers",
+      parts: "Parts", part_internal: "Gearbox & internals", part_hopup: "Hop-up & inner barrels",
+      part_motor: "Motors & electronics", part_external: "External parts",
+      acc: "Accessories", acc_mag: "Magazines", acc_power: "Batteries & chargers", acc_optics: "Optics, lights, lasers",
+      acc_ammo: "BBs & gas", acc_protect: "Protective gear", acc_gear: "Tactical gear & holsters", other: "Other",
+    },
+    platform: "Fits (platform)",
+    plats: {
+      m4: "M4 / AR-15", ak: "AK", g36: "G36", mp5: "MP5", aug: "AUG", scar: "SCAR", m14: "M14", p90: "P90",
+      vsr: "VSR-10", l96: "L96 / AWP", glock: "Glock", hicapa: "Hi-Capa / 1911", m9: "M9 / Beretta 92",
+      gb_v2: "Gearbox V2", gb_v3: "Gearbox V3",
     },
     price: "Price",
     under: (v) => `Under ${v}`,
@@ -125,6 +145,7 @@ const DICT = {
     ok: "OK",
     brands: "Brand",
     moreBrands: (n) => `All brands (${n})`,
+    morePlatforms: (n) => `All platforms (${n})`,
     availability: "Availability",
     activeFilters: "Active filters",
     remove: (x) => `Remove ${x}`,

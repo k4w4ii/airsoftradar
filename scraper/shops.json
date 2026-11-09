@@ -125,7 +125,8 @@
     "product_pattern": "/products/[a-z0-9][a-z0-9-]*$",
     "note": "Shopify",
     "max_products": 1500,
-    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+    "status": "letiltva 2026-11-09: nincs sitemap, a bolt elutasítja az automatikus kéréseket",
+    "enabled": false
   },
   "gunshot": {
     "source": "sitemap",
@@ -141,7 +142,8 @@
     "base_url": "https://www.vsgun.com",
     "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
     "max_products": 1500,
-    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+    "status": "letiltva 2026-11-09: a bolt minden automatikus kérést elutasít (bot-védelem)",
+    "enabled": false
   },
   "airsoft-legends": {
     "source": "sitemap",
@@ -162,11 +164,11 @@
   },
   "phenixairsoft": {
     "source": "sitemap",
-    "sitemap": "auto",
+    "sitemap": "https://www.phenixairsoft.com/1_en_0_sitemap.xml",
     "base_url": "https://www.phenixairsoft.com",
-    "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
+    "product_pattern": "/en/[a-z0-9-]+/\\d+-[a-z0-9-]+\\.html$",
     "max_products": 1500,
-    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+    "status": "javítva 2026-11-09: csak az angol sitemap (1_en_0), PrestaShop termék-URL minta"
   },
   "militaria": {
     "source": "sitemap",
@@ -174,7 +176,8 @@
     "base_url": "https://militaria.pl",
     "product_pattern": "(\\.html$|/products?/|/produkt|/prodotto/|/producto/|/produit|/p/|-p\\d+|/termek/|/[a-z0-9-]+-\\d{3,}$)",
     "max_products": 1500,
-    "status": "ÚJ: robots.txt sitemap, általános minta – az első éjszakai futás után ellenőrizendő (allapot.sql)"
+    "status": "letiltva 2026-11-09: nincs sitemap, JS-es lista (213 oldal) – később lapozós konfiggal",
+    "enabled": false
   },
   "redberet": {
     "source": "sitemap",

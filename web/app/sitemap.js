@@ -1,5 +1,5 @@
 import { getAllSlugs } from "../lib/data";
-import { WEAPON_CATS } from "../lib/i18n";
+import { GROUP_IDS, LEAVES } from "../lib/catalog";
 import { SITE_URL } from "../lib/site";
 import { DOCS } from "../lib/legal";
 
@@ -8,7 +8,7 @@ export const revalidate = 86400; // naponta újraépül
 const both = (path) => ({ languages: { hu: `${SITE_URL}/hu${path}`, en: `${SITE_URL}/en${path}` } });
 
 export default async function sitemap() {
-  const cats = ["", ...["weapons", ...WEAPON_CATS, "other"].map((c) => `?cat=${c}`)];
+  const cats = ["", ...[...GROUP_IDS.filter((g) => g !== "weapons"), ...LEAVES].map((c) => `?cat=${c}`)];
   const lists = cats.flatMap((c) => ["hu", "en"].map((l) => ({
     url: `${SITE_URL}/${l}${c}`, changeFrequency: "daily", priority: c ? 0.7 : 1, alternates: both(c),
   })));

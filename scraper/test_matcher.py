@@ -120,3 +120,23 @@ class TestMatcher(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPartGate(unittest.TestCase):
+    """Tár/alkatrész nem kerülhet a fegyverhez a fegyver modellkódja alapján."""
+    def setUp(self):
+        self.cat = Catalog({"cyma": 1}, {1: ("cyma", "CYMA")})
+        self.cat.add_product(Product(10, 1, "CYMA CM.041K MP5K", "CM041K"))
+
+    def test_magazine_not_matched_to_gun(self):
+        r = match_offer(OfferIn("Magazine for CYMA CM.041K MP5K 200 rds", price_huf=2800), self.cat)
+        self.assertNotEqual(r.product_id, 10)
+        self.assertNotEqual(r.method, "code")
+
+    def test_gun_still_matches_by_code(self):
+        r = match_offer(OfferIn("CYMA CM.041K MP5K AEG", price_huf=45000), self.cat)
+        self.assertEqual((r.product_id, r.method), (10, "code"))
+
+    def test_bundle_is_gun(self):
+        r = match_offer(OfferIn("CYMA CM.041K MP5K AEG with battery and charger", price_huf=52000), self.cat)
+        self.assertEqual(r.product_id, 10)
