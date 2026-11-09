@@ -65,6 +65,7 @@ Repó → Settings → Secrets and variables → Actions:
   - A futás **Summary** oldalán táblázat jelenik meg: ✅ rendben, ⚠️ figyelmeztetés (pl. egy bolt nem sikerült), ❌ hiba.
   - Ellenőrzi: adatbázis, termékszám, árfolyam frissessége, napi letöltés, boltok, főoldal, szűrés, termékoldal, bolti link, sitemap, jogi oldal, a titkos végpont védelme.
 - **Kézi újrapárosítás:** Actions → **rematch** → Run workflow (pár perc).
+- **Ismeretlen márkák listája:** Actions → **brands** → Run workflow → a futás oldalán alul az `ismeretlen-markak` csatolmány (CSV) letölthető.
 - **Boltonkénti állapot:** D1 → Console → a `d1\allapot.sql` tartalma → Run.
 - **Miért ad egy bolt 0 terméket:** ugyanott a `d1\diagnozis.sql`.
 
@@ -92,7 +93,13 @@ UPDATE shops SET affiliate_template = 'https://partner.pelda.com/klikk?id=123&ur
 ```
 A `{url}` helyére kerül a termékoldal címe. Azonnal él (legfeljebb fél óra gyorsítótár).
 
-## 9. Biztonság (egyszer, kézzel)
+## 9. Google Search Console (egyszer)
+1. search.google.com/search-console → **Add property** → **Domain**: `airsofthunter.com` → Continue.
+2. Ellenőrzés: ha felajánlja a **Cloudflare**-t („Start verification”), jelentkezz be és engedélyezd – a TXT rekordot magától felveszi. Különben másold ki a `google-site-verification=…` szöveget → Cloudflare → DNS → Records → Add record: Type `TXT`, Name `@`, Content: a szöveg → Save → vissza a Search Console-ba → **Verify**.
+3. Bal menü **Sitemaps** → `https://www.airsofthunter.com/sitemap.xml` → Submit. Állapot: „Success” (az első indexelés napoktól hetekig tart).
+4. (Ajánlott) Bing: bing.com/webmasters → **Import from Google Search Console** – egy kattintás.
+
+## 10. Biztonság (egyszer, kézzel)
 - **Kétlépcsős azonosítás (2FA):** GitHub, Cloudflare, Google.
 - **GitHub → repó → Settings → Code security:** Dependabot alerts és Secret scanning: **Enable**.
 - **Cloudflare → airsofthunter.com → DNS → Settings → DNSSEC: Enable.**
