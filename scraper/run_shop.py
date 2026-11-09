@@ -113,17 +113,32 @@ def create_product(db, cat: Catalog, np: dict, lang: str, image: str | None) -> 
     mid, code = np["manufacturer_id"], np["model_code_norm"]          # code None: cím alapú termék
     raw_name = np["name"]
     np = {**np, "name": clean_name(raw_name, cat.manufacturers[mid][1], set(cat.aliases))}
-    slug = slugify(np["name"], f"{mid}:{code or raw_name.lower()}")
-    try:
-        pid = db.insert("products", [{
-            "manufacturer_id": mid, "model_code": code, "model_code_norm": code, "name": np["name"],
-            "slug": slug, "name_lang": lang, "image_url": image}])[0]["id"]
-    except RuntimeError as e:          # párhuzamos futás már létrehozta
-        if "23505" not in str(e):
-            raise
-        found = db.select("products", select="id", slug=f"eq.{slug}") if code is None else \
-            db.select("products", select="id", manufacturer_id=f"eq.{mid}", model_code_norm=f"eq.{code}")
-        pid = found[0]["id"]
+    slug, pid = slugify(np["name"], f"{mid}:{code or raw_name.lower()}"), None
+    for attempt in range(4):
+        try:
+            pid = db.insert("products", [{
+                "manufacturer_id": mid, "model_code": code, "model_code_norm": code, "name": np["name"],
+                "slug": slug, "name_lang": lang, "image_url": image}])[0]["id"]
+            break
+        except RuntimeError as e:
+            if "23505" not in str(e):
+                raise
+            # 1) párhuzamos futás már létrehozta ugyanezt a kódot -> azt használjuk
+            if code is not None:
+                found = db.select("products", select="id", manufacturer_id=f"eq.{mid}", model_code_norm=f"eq.{code}")
+                if found:
+                    pid = found[0]["id"]
+                    break
+            elif "slug" in str(e):
+                found = db.select("products", select="id,model_code_norm", slug=f"eq.{slug}")
+                if found and found[0]["model_code_norm"] is None and \
+                        cat.products.get(found[0]["id"]) and cat.products[found[0]["id"]].name == np["name"]:
+                    pid = found[0]["id"]          # ugyanaz a cím alapú termék
+                    break
+            # 2) a webcím foglalt (pl. egy régi, kódját elengedett termék) -> egyedi webcím
+            slug = slugify(np["name"], f"{mid}:{code or raw_name.lower()}:{attempt + 1}")
+    if pid is None:
+        raise RuntimeError(f"nem sikerült terméket létrehozni: {np['name']}")
     codes = [{"product_id": pid, "code_type": "model", "code_norm": c, "manufacturer_id": mid}
              for c in [code, *np.get("alt_codes", [])] if c]
     if np.get("ean"):
@@ -142,24 +157,51 @@ OFFER_COLS = "id,shop_id,title_raw,brand_raw,sku_raw,ean_raw,price,currency,imag
 
 def match_offers(db, cat: Catalog, offers: list[dict], rates: dict, lang_of, offer_pid: dict) -> dict:
     """Pending ajánlatok párosítása (a run_shop és a rematch is ezt használja). offer_pid-be írja az eredményt."""
-    stats = defaultdict(int)
-    for o in offers:
-        rate = rates.get(o["currency"])
-        huf = float(Decimal(str(o["price"])) * rate) if rate and o.get("price") is not None else None
-        r = match_offer(OfferIn(o["title_raw"], o["brand_raw"], o["sku_raw"], o["ean_raw"], huf), cat)
-        stats[r.method or r.status] += 1
-        if r.status == "auto":
-            pid = r.product_id or create_product(db, cat, r.new_product, lang_of(o), o["image_url"])
-            offer_pid[o["id"]] = pid
-            db.update("offers", {"product_id": pid, "match_status": "auto", "match_method": r.method,
-                                 "match_confidence": r.confidence}, id=f"eq.{o['id']}")
-        elif r.status == "review":
-            db.update("offers", {"match_status": "review", "match_method": r.method,
-                                 "match_confidence": r.confidence}, id=f"eq.{o['id']}")
-            db.upsert("match_candidates", [{"offer_id": o["id"], "product_id": pid, "score": sc,
-                                            "reasons": {"method": "fuzzy"}} for pid, sc in r.candidates[:3]],
-                      on_conflict="offer_id,product_id", returning=False)
+    stats, batch = defaultdict(int), defaultdict(list)     # azonos frissítések csoportosítva (1 kérés / 200 ajánlat)
+
+    def flush(force: bool = False) -> None:
+        for key in list(batch):
+            ids = batch[key]
+            while ids and (force or len(ids) >= 200):
+                chunk, ids[:] = ids[:200], ids[200:]
+                try:
+                    db.update("offers", dict(key), id=f"in.({','.join(map(str, chunk))})")
+                except Exception as e:
+                    stats["hiba"] += len(chunk)
+                    print(f"[match] frissítési hiba: {e}", file=sys.stderr)
+            if not ids:
+                del batch[key]
+
+    for i, o in enumerate(offers, 1):
+        try:
+            _match_one(db, cat, o, rates, lang_of, offer_pid, stats, batch)
+        except Exception as e:             # egy hibás ajánlat ne állítsa le az egészet
+            stats["hiba"] += 1
+            if stats["hiba"] <= 10:
+                print(f"[match] ajánlat {o.get('id')}: {e}", file=sys.stderr)
+        flush()
+        if i % 2000 == 0:
+            print(f"[match] {i}/{len(offers)}", flush=True)
+    flush(force=True)
     return stats
+
+
+def _match_one(db, cat: Catalog, o: dict, rates: dict, lang_of, offer_pid: dict, stats, batch) -> None:
+    rate = rates.get(o["currency"])
+    huf = float(Decimal(str(o["price"])) * rate) if rate and o.get("price") is not None else None
+    r = match_offer(OfferIn(o["title_raw"], o["brand_raw"], o["sku_raw"], o["ean_raw"], huf), cat)
+    stats[r.method or r.status] += 1
+    if r.status == "auto":
+        pid = r.product_id or create_product(db, cat, r.new_product, lang_of(o), o["image_url"])
+        offer_pid[o["id"]] = pid
+        batch[(("product_id", pid), ("match_status", "auto"), ("match_method", r.method),
+               ("match_confidence", round(r.confidence, 2)))].append(o["id"])
+    elif r.status == "review":
+        batch[(("match_status", "review"), ("match_method", r.method),
+               ("match_confidence", round(r.confidence, 2)))].append(o["id"])
+        db.upsert("match_candidates", [{"offer_id": o["id"], "product_id": pid, "score": sc,
+                                        "reasons": {"method": "fuzzy"}} for pid, sc in r.candidates[:3]],
+                  on_conflict="offer_id,product_id", returning=False)
 
 
 def run(slug: str, limit: int | None, dry: bool) -> None:

@@ -170,6 +170,8 @@ class FakeDB:
             op, val = v.split(".", 1)
             if op == "eq" and str(row.get(k)) != val or op == "lt" and not str(row.get(k)) < val:
                 return False
+            if op == "in" and str(row.get(k)) not in val.strip("()").split(","):     # PostgREST: id=in.(1,2,3)
+                return False
         return True
 
     def select(self, table, **f): return [dict(r) for r in self.t[table] if self._match(r, f)]
