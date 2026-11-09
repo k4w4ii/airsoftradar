@@ -3,7 +3,7 @@
 ## Stack
 | Réteg | Választás |
 |---|---|
-| Frontend | Next.js 16 (App Router) + sima CSS, dark-first, Vercel |
+| Frontend | Next.js 16 (App Router) + sima CSS, dark-first, **Cloudflare Workers** (OpenNext adapter; 2026-11-09 előtt Vercel) |
 | DB / Auth | Supabase (Postgres, RLS, Auth) |
 | Scraper + párosító | **Python, csak stdlib** (urllib, regex, json) – nincs `pip install`; Playwright csak JS/Cloudflare-es boltokra |
 | Ütemezés | GitHub Actions cron (`.github/workflows/daily-scrape.yml`) |
@@ -78,7 +78,12 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 ## Márka
 **AirsoftHunter** – „vadászd le a legjobb árat”. Logó: osztott szálkereszt (irányzék), sárgaréz középponttal (a találat = a legjobb ár). Domain: `www.airsofthunter.com` (az `airsofthunter.com` 308-cal ide irányít). Scraper User-Agent: `AirsoftHunterBot/1.0 (+https://www.airsofthunter.com/bot)`.
 
-## Weboldal (`web/`, Next.js 16, Vercel)
+## Cloudflare-átállás (2026-11-09 döntés: lépésenként, Workers Paid 5 $/hó)
+- **1. lépés – weboldal:** `web/wrangler.jsonc` + `web/open-next.config.ts`, `@opennextjs/cloudflare` + `wrangler`; Workers Builds a GitHub-repóból (root `web`, build `npx opennextjs-cloudflare build`, deploy `npx opennextjs-cloudflare deploy`). Az adat továbbra is Supabase (PostgREST fetch). Domain: Custom domain a Workeren, a csupasz domain Redirect Rule-lal a www-re. A forgalom innentől a Cloudflare proxyn megy (WAF, bot-védelem elérhető).
+- **2. lépés – adatbázis (terv):** D1 (SQLite). Ami a Postgresben volt (regex-besorolás, materializált nézet, tömbök, triggerek, RLS, RPC), az átkerül: besorolás/jellemzők/platformok Pythonban a scraperben (eltárolva), `product_summary` sima tábla, amit a scraper a futás végén újraépít, a kereső (`catalog_search`) a Worker JS-kódjában D1-lekérdezésekkel. A scraper egy titkos tokennel védett saját Worker-végponton át ír (a Cloudflare központi D1 API-ja 1200 kérés / 5 perc korlátos). Átállás: Supabase → D1 export-import szkript, párhuzamos futás és összevetés, majd átkapcsolás; végül a Supabase megszűnik. A GitHub Actions marad (a többórás letöltés Workersben nem fut).
+- Korlátok, amik miatt kell a fizetős csomag: D1 ingyen 100 000 sor írás/nap (az éjszakai futás több), Workers ingyen 10 ms CPU/kérés.
+
+## Weboldal (`web/`, Next.js 16, Cloudflare Workers)
 - Függőség csak `next`, `react`, `react-dom`; sima CSS (`app/globals.css`), JavaScript (nincs TS-típusellenőrzés, ami buildet törhetne).
 - Adat: PostgREST `fetch`-csel (`lib/data.js`), **publishable** kulccsal (csak olvas), 30 perces cache. Env: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`.
 - Jogi oldalak (HU/EN, `app/[locale]/[doc]`, tartalom: `lib/legal.js`): ÁSZF `/hu/aszf` · `/en/terms`, adatvédelem `/hu/adatvedelem` · `/en/privacy`, impresszum `/hu/impresszum` · `/en/imprint`, boltoknak `/hu/boltoknak` · `/en/for-shops`. Üzemeltetői adatok egy helyen: `lib/site.js` → `OPERATOR` (kitöltendő). Lábléc: márka, felelősségkizárás, jogi linkek.

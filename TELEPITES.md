@@ -138,6 +138,38 @@ Miért: a weboldal-frissítés túllépte a Supabase 8 mp-es időkorlátját (�
 2. **GitHub → Actions → rematch → Run workflow** (most egyszer kézzel; pár perc). A naplóban: `eltérő jellemző miatt leválasztva: N`, utána párosítás, átnevezés, frissítés.
 3. Ezután minden éjjel automatikusan lefut a napi letöltés végén – kézzel nem kell.
 
+## 19. Átköltözés a Cloudflare-re – 1. lépés: a weboldal (Vercel helyett Cloudflare Workers)
+Az adat egyelőre a Supabase-ből jön; a 2. lépésben az adatbázis is átkerül (D1). Közben az oldal végig működik.
+
+**A) Cloudflare fizetős csomag (havi 5 $):** Cloudflare → bal menü **Workers & Pages** → **Plans** (vagy „Upgrade”) → **Workers Paid** → fizetés megadása.
+
+**B) Fájlok:** zip kicsomagolása, `git add .` → `git commit -m "Cloudflare Workers"` → `git push`. (A Vercel ettől még fut tovább, az átállásig az él.)
+
+**C) Worker létrehozása a GitHub-repóból:**
+1. **Workers & Pages → Create → Import a repository** → GitHub összekötése (ha kéri) → válaszd az `airsoftradar` repót.
+2. **Project name:** `airsofthunter` (pontosan így – ez szerepel a `web/wrangler.jsonc`-ben).
+3. **Build settings / Advanced:**
+   - Root directory (Path): `web`
+   - Build command: `npx opennextjs-cloudflare build`
+   - Deploy command: `npx opennextjs-cloudflare deploy`
+   - Build variables: `SUPABASE_URL` és `SUPABASE_PUBLISHABLE_KEY` (ugyanazok, mint a Vercelen)
+4. **Create and deploy.** Az első fordítás 3–6 perc. Ha piros, küldd el a build naplót (Deployments → a sikertelen → View build log).
+
+**D) Futásidejű változók:** a Worker oldalán **Settings → Variables and Secrets → Add**:
+   - `SUPABASE_URL` – Type: **Secret** – érték: `https://xxxx.supabase.co`
+   - `SUPABASE_PUBLISHABLE_KEY` – Type: **Secret** – érték: `sb_publishable_...`
+   - **Deploy**. Ezután a `https://airsofthunter.<valami>.workers.dev` címen már működnie kell az oldalnak. Próbáld ki: lista, szűrők, termékoldal, ÁSZF, „Megnézem a boltban”.
+
+**E) A domain átállítása (ha a D) pontban minden jó):**
+1. **Cloudflare → airsofthunter.com → DNS → Records:** töröld a két `CNAME` rekordot, ami a `vercel-dns`-re mutat (`@` és `www`).
+2. **Workers & Pages → airsofthunter → Settings → Domains & Routes → Add → Custom domain:** `www.airsofthunter.com` → Add. Majd ugyanígy: `airsofthunter.com`.
+3. **Csupasz domain → www átirányítás:** airsofthunter.com → **Rules → Redirect Rules → Create rule**:
+   - Ha: *Hostname* *equals* `airsofthunter.com`
+   - Akkor: *Dynamic*, kifejezés: `concat("https://www.airsofthunter.com", http.request.uri.path)`, Status: **301**, *Preserve query string*: bepipálva → **Deploy**.
+4. Pár perc múlva a `https://www.airsofthunter.com` már a Cloudflare-ről jön (a böngészőben semmi nem látszik másnak).
+
+**F) Vercel megszüntetése (1–2 nap hibátlan működés után):** Vercel → a projekt → Settings → Advanced → **Delete Project**; GitHub → Settings → Applications → Vercel → Uninstall.
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|
@@ -150,4 +182,6 @@ Miért: a weboldal-frissítés túllépte a Supabase 8 mp-es időkorlátját (�
 | Vercel: „Supabase 404 … product_summary/v_product_offers” | A 8.1 lépés (`0005_web_views.sql`) kimaradt. |
 | Vercel domain: „Invalid Configuration” | Cloudflare-ben a felhő narancssárga (proxy) → kattints rá, legyen szürke (DNS only); vagy még terjed a DNS (várj, majd Refresh). |
 | `canceling statement due to statement timeout` | A 0013 (`0013_fast_refresh.sql`) még nem futott le. |
+| Cloudflare build: „Your Worker exceeded the size limit” | A Workers Paid csomag nincs bekapcsolva (A pont). |
+| Cloudflare oldal: „Hiányzik a SUPABASE_URL…” | A D pont változói hiányoznak (Settings → Variables and Secrets), utána Deploy. |
 | `Invalid JWT` | Rossz kulcs: a **Secret key**-t (`sb_secret_...`) add meg, ne a publishable-t. |

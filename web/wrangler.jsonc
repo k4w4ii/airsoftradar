@@ -1,0 +1,13 @@
+// Cloudflare Workers beállítás (a weboldal a Vercel helyett itt fut). Leírás: TELEPITES.md 19. pont.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "airsofthunter",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "observability": { "enabled": true },
+  // a Cloudflare felületén megadott változók (SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY) megmaradnak telepítéskor
+  "keep_vars": true,
+  "vars": { "SITE_URL": "https://www.airsofthunter.com" }
+}

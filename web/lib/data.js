@@ -16,7 +16,7 @@ async function q(path, { count = false } = {}) {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) {
-    throw new Error("Hiányzik a SUPABASE_URL vagy a SUPABASE_PUBLISHABLE_KEY környezeti változó (Vercel -> Settings -> Environment Variables).");
+    throw new Error("Hiányzik a SUPABASE_URL vagy a SUPABASE_PUBLISHABLE_KEY környezeti változó (Cloudflare -> Workers & Pages -> airsofthunter -> Settings -> Variables and Secrets).");
   }
   const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${path}`, {
     headers: { apikey: key, ...(count ? { Prefer: "count=exact" } : {}) },

@@ -3,7 +3,7 @@ import { GROUP_IDS, LEAVES } from "../lib/catalog";
 import { SITE_URL } from "../lib/site";
 import { DOCS } from "../lib/legal";
 
-export const revalidate = 86400; // naponta újraépül
+export const dynamic = "force-dynamic"; // kérésre készül (fordításkor nem kell adatbázis-kapcsolat)
 
 const both = (path) => ({ languages: { hu: `${SITE_URL}/hu${path}`, en: `${SITE_URL}/en${path}` } });
 

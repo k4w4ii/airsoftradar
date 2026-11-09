@@ -31,9 +31,8 @@ const operatorLines = (hu) => [
 const ADS_ON = Boolean(ADS.client);
 const google = (hu) => `Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, ${hu ? "Írország" : "Ireland"} – policies.google.com (${hu ? "hirdetések: Google AdSense" : "advertising: Google AdSense"})`;
 const hosts = (hu) => [
-  `Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA – privacy@vercel.com (${hu ? "weboldal tárhely" : "website hosting"})`,
   `Supabase Pte. Ltd., 970 Toa Payoh North #07-04, Singapore 318992 – supabase.com (${hu ? "adatbázis; az adatok az EU-ban, Frankfurtban vannak" : "database; data stored in the EU, Frankfurt"})`,
-  `Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA – cloudflare.com (${hu ? "domain és DNS" : "domain and DNS"})`,
+  `Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA – cloudflare.com (${hu ? "weboldal tárhely, domain és DNS" : "website hosting, domain and DNS"})`,
   ...(ADS_ON ? [google(hu)] : []),
 ];
 
@@ -104,7 +103,7 @@ const CONTENT = {
         ADS_ON ? "Saját sütink egyetlen van: a választott pénznem megjegyzésére." : "Egyetlen sütit használunk: a választott pénznem megjegyzésére.",
       ] },
       { h: "3. Milyen adatokat kezelünk", list: [
-        "Technikai naplóadatok: az oldal megnyitásakor a tárhelyszolgáltató (Vercel) szervere automatikusan rögzíti az IP-címet, a böngésző típusát, a kért oldalt és az időpontot. Cél: az oldal biztonságos működése, hibakeresés, visszaélések kiszűrése. Jogalap: jogos érdek (GDPR 6. cikk (1) f)). Megőrzés: a tárhelyszolgáltató naplózási ideje szerint, legfeljebb néhány hét.",
+        "Technikai naplóadatok: az oldal megnyitásakor a tárhelyszolgáltató (Cloudflare) szervere automatikusan rögzíti az IP-címet, a böngésző típusát, a kért oldalt és az időpontot. Cél: az oldal biztonságos működése, hibakeresés, visszaélések kiszűrése. Jogalap: jogos érdek (GDPR 6. cikk (1) f)). Megőrzés: a tárhelyszolgáltató naplózási ideje szerint, legfeljebb néhány hét.",
         "Pénznem-süti („cur”): a felhasználó által választott pénznemet (pl. HUF, EUR) tárolja, 1 évig. Csak a kért funkcióhoz szükséges, személyes adatot nem tartalmaz, ezért nem igényel hozzájárulást.",
         "Kimenő linkek: a „Megnézem a boltban” gomb a /go/… címen keresztül irányít a boltba. Ennek során személyes adatot nem rögzítünk. A bolt oldalán a bolt saját adatkezelése érvényes.",
         "Kapcsolatfelvétel: ha e-mailt írsz nekünk, a nevedet, e-mail címedet és az üzenetet a megkeresés megválaszolásához használjuk, és az ügy lezárása után legfeljebb 1 évig őrizzük. Jogalap: jogos érdek.",
@@ -112,7 +111,7 @@ const CONTENT = {
       ...adsSection(true),
       ...coffeeSection(true),
       { h: "4. Adatfeldolgozók és szolgáltatók", list: hosts(true) },
-      { p: [(ADS_ON ? "A Vercel, a Cloudflare és a Google amerikai (illetve amerikai anyavállalatú) cégek;" : "A Vercel és a Cloudflare amerikai cégek;") + " az adattovábbítás az EU–USA adatvédelmi keretrendszer, illetve általános szerződési feltételek alapján történik."] },
+      { p: [(ADS_ON ? "A Cloudflare és a Google amerikai (illetve amerikai anyavállalatú) cégek;" : "A Cloudflare amerikai cég;") + " az adattovábbítás az EU–USA adatvédelmi keretrendszer, illetve általános szerződési feltételek alapján történik."] },
       { h: "5. Jogaid", p: [
         "Kérheted a rólad kezelt adatokhoz való hozzáférést, azok helyesbítését, törlését, kezelésük korlátozását, és tiltakozhatsz a jogos érdeken alapuló adatkezelés ellen. Kérésedet a fenti e-mail címre küldd; 30 napon belül válaszolunk.",
         "Panasszal fordulhatsz a Nemzeti Adatvédelmi és Információszabadság Hatósághoz (NAIH): 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, www.naih.hu, vagy bírósághoz.",
@@ -182,7 +181,7 @@ const CONTENT = {
         ADS_ON ? "Our own site sets a single cookie, to remember your chosen currency." : "We use a single cookie to remember your chosen currency.",
       ] },
       { h: "3. What we process", list: [
-        "Technical logs: when you open a page, the hosting provider (Vercel) automatically logs the IP address, browser type, requested page and time. Purpose: security, troubleshooting, abuse prevention. Legal basis: legitimate interest (GDPR Art. 6(1)(f)). Retention: according to the host's log retention, at most a few weeks.",
+        "Technical logs: when you open a page, the hosting provider (Cloudflare) automatically logs the IP address, browser type, requested page and time. Purpose: security, troubleshooting, abuse prevention. Legal basis: legitimate interest (GDPR Art. 6(1)(f)). Retention: according to the host's log retention, at most a few weeks.",
         "Currency cookie (“cur”): stores the currency you chose (e.g. EUR, HUF) for 1 year. It is strictly needed for the feature you requested and contains no personal data, so no consent is required.",
         "Outbound links: the “View in shop” button redirects via /go/…; we do not record personal data. On the shop's site, the shop's own privacy policy applies.",
         "Contact: if you e-mail us, we use your name, e-mail address and message to reply and keep them for up to 1 year after the matter is closed. Legal basis: legitimate interest.",
@@ -190,7 +189,7 @@ const CONTENT = {
       ...adsSection(false),
       ...coffeeSection(false),
       { h: "4. Processors and providers", list: hosts(false) },
-      { p: [(ADS_ON ? "Vercel, Cloudflare and Google are US companies or have US parents;" : "Vercel and Cloudflare are US companies;") + " transfers rely on the EU–US Data Privacy Framework or standard contractual clauses."] },
+      { p: [(ADS_ON ? "Cloudflare and Google are US companies or have US parents;" : "Cloudflare is a US company;") + " transfers rely on the EU–US Data Privacy Framework or standard contractual clauses."] },
       { h: "5. Your rights", p: [
         "You may request access to, rectification or erasure of your data, restriction of processing, and object to processing based on legitimate interest. Send requests to the e-mail above; we reply within 30 days.",
         "You may lodge a complaint with the Hungarian data protection authority (NAIH, 1055 Budapest, Falk Miksa utca 9–11, www.naih.hu) or the authority of your country of residence.",

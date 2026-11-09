@@ -6,3 +6,6 @@ debug/
 node_modules/
 .next/
 supabase/.temp/
+.open-next/
+.wrangler/
+.dev.vars
