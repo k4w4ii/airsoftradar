@@ -67,7 +67,12 @@ def where(filters: dict) -> tuple[str, list]:
 
 class D1DB:
     def __init__(self, url: str | None = None, token: str | None = None):
-        self.url = (url or os.environ["D1_API_URL"]).rstrip("/")
+        u = (url or os.environ["D1_API_URL"]).strip().rstrip("/")
+        if not u.startswith(("https://", "http://")):          # elnézzük, ha a https:// lemaradt
+            u = "https://" + u
+        if not u.endswith("/api/db"):                           # és ha a /api/db vég
+            u += "/api/db"
+        self.url = u
         self.token = (token or os.environ["D1_API_TOKEN"]).strip()
 
     # ---- alacsony szint ----------------------------------------------------------------------------------

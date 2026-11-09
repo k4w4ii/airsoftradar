@@ -12,6 +12,6 @@
   "vars": { "SITE_URL": "https://www.airsofthunter.com" },
   // Cloudflare D1 adatbázis (TELEPITES.md 20. pont): a database_id-t a D1 oldaláról másold ide
   "d1_databases": [
-    { "binding": "DB", "database_name": "airsofthunter", "database_id": "a78abdf4-9489-4396-ae41-80b3f1e74bbe" }
+    { "binding": "DB", "database_name": "airsofthunter", "database_id": "IDE_MASOLD_A_D1_DATABASE_ID-T" }
   ]
 }
