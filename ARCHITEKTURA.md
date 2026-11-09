@@ -83,6 +83,17 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 - **2. lépés – adatbázis (terv):** D1 (SQLite). Ami a Postgresben volt (regex-besorolás, materializált nézet, tömbök, triggerek, RLS, RPC), az átkerül: besorolás/jellemzők/platformok Pythonban a scraperben (eltárolva), `product_summary` sima tábla, amit a scraper a futás végén újraépít, a kereső (`catalog_search`) a Worker JS-kódjában D1-lekérdezésekkel. A scraper egy titkos tokennel védett saját Worker-végponton át ír (a Cloudflare központi D1 API-ja 1200 kérés / 5 perc korlátos). Átállás: Supabase → D1 export-import szkript, párhuzamos futás és összevetés, majd átkapcsolás; végül a Supabase megszűnik. A GitHub Actions marad (a többórás letöltés Workersben nem fut).
 - Korlátok, amik miatt kell a fizetős csomag: D1 ingyen 100 000 sor írás/nap (az éjszakai futás több), Workers ingyen 10 ms CPU/kérés.
 
+### 2. fázis: D1 (2026-11-09, kód kész)
+- `d1/schema.sql`: SQLite séma. A Postgres-logika (besorolás, kiugró árak, összesítő) Pythonban fut: `scraper/classify.py` (a 0010/0012 SQL-ből generálva) és `scraper/summary.py` (csak a megváltozott `product_summary` sorokat írja, sha1 „sig” alapján).
+- Írás kívülről: `web/app/api/db/route.js`.
+  - `POST {statements:[{sql,params}]}`, legfeljebb 100 utasítás, egy D1 batch = egy tranzakció.
+  - Bearer `INGEST_TOKEN`, időzítés-független összehasonlítással. Token nélkül 404.
+  - A scraper a workers.dev címet használja (a zóna botvédelme miatt).
+- `scraper/d1db.py`: ugyanaz a felület, mint a `db.DB` (PostgREST-szűrők → SQL, rowid-lapozás, 90 paraméteres IN-darabolás). Választás: `DB_BACKEND=d1` (GitHub változó).
+- `web/lib/data_d1.js`: a `catalog_search` RPC megfelelője egy 8 utasításos batch-ben. Választás: `DATA_SOURCE=d1` (Worker változó); visszaállás a változó törlésével.
+- `scraper/migrate_to_d1.py` (Actions: migrate-d1): kulcstartományos lapozás a Supabase-ből; `INSERT OR REPLACE` literálokkal (≤90 KB / utasítás); időpontok egységes ISO-UTC-re; a végén `summary.rebuild`.
+- Tesztek: `scraper/test_d1.py` (helyi sqlite3 a D1 helyett: szűrők, lapozás, teljes folyamat, migráció). A webes oldal bun:sqlite-tal tesztelve (katalógus, ajánlatok, előzmény, `/api/db`).
+
 ## Weboldal (`web/`, Next.js 16, Cloudflare Workers)
 - Függőség csak `next`, `react`, `react-dom`; sima CSS (`app/globals.css`), JavaScript (nincs TS-típusellenőrzés, ami buildet törhetne).
 - Adat: PostgREST `fetch`-csel (`lib/data.js`), **publishable** kulccsal (csak olvas), 30 perces cache. Env: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`.

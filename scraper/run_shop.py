@@ -216,8 +216,8 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
         print(f"[{slug}] {len(scraped)} ajánlat, {len(errors)} hiba", file=sys.stderr)
         return
 
-    from db import DB
-    db = DB()
+    from db import get_db
+    db = get_db()
     shop = db.select("shops", select="*", slug=f"eq.{slug}")[0]
     run_id = db.insert("scrape_runs", [{"shop_id": shop["id"]}])[0]["id"]
     rates = {r["currency"]: Decimal(str(r["huf_per_unit"])) for r in db.select("latest_rates", select="*")}
@@ -301,8 +301,13 @@ if __name__ == "__main__":
     ap.add_argument("--refresh", action="store_true", help="product_summary frissítése")
     a = ap.parse_args()
     if a.refresh:
-        from db import DB
-        DB().rpc("refresh_product_summary")
+        from db import get_db
+        db = get_db()
+        if hasattr(db, "execute"):
+            import summary
+            summary.rebuild(db)
+        else:
+            db.rpc("refresh_product_summary")
         print("product_summary frissítve")
     elif a.shop:
         run(a.shop, a.limit, a.dry_run)

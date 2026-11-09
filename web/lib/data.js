@@ -1,6 +1,9 @@
-// Supabase PostgREST elérés fetch-csel (nincs supabase-js függőség).
-// Szerveroldalon fut; a publishable kulcs csak olvasni tud (RLS).
+// Adatréteg. DATA_SOURCE=d1 -> Cloudflare D1 (lib/data_d1.js), egyébként Supabase PostgREST (fetch, supabase-js nélkül).
+// Szerveroldalon fut; a Supabase publishable kulcs csak olvasni tud (RLS).
+import * as d1 from "./data_d1";
 import { PRICE_EDGES } from "./i18n";
+
+const useD1 = () => String(process.env.DATA_SOURCE || "").trim().toLowerCase() === "d1";
 
 export const PAGE_SIZE = 24;
 const REVALIDATE = 1800; // fél óra; az adatok éjjel frissülnek
@@ -62,15 +65,18 @@ export async function listProducts(params) {
 }
 
 export async function getProduct(slug) {
+  if (useD1()) return d1.getProductD1(slug);
   const rows = await q(`product_summary?slug=eq.${encodeURIComponent(slug)}&limit=1`);
   return rows[0] || null;
 }
 
 export async function getOffers(productId) {
+  if (useD1()) return d1.getOffersD1(productId);
   return q(`v_product_offers?product_id=eq.${Number(productId)}&order=price_huf.asc`);
 }
 
 export async function getHistory(productId) {
+  if (useD1()) return d1.getHistoryD1(productId);
   return q(`v_price_daily?product_id=eq.${Number(productId)}&order=observed_on.asc&limit=365`);
 }
 
@@ -79,11 +85,13 @@ export async function getManufacturers() {
 }
 
 export async function getRates() {
+  if (useD1()) return d1.getRatesD1();
   const rows = await q("latest_rates?select=currency,huf_per_unit");
   return Object.fromEntries(rows.map((r) => [r.currency, Number(r.huf_per_unit)]));
 }
 
 export async function getOfferTarget(id) {
+  if (useD1()) return d1.getOfferTargetD1(id);
   const rows = await q(`offers?id=eq.${Number(id)}&select=url,shops(affiliate_template)`);
   return rows[0] || null;
 }
@@ -121,6 +129,20 @@ export function buildSearchQuery(params, currency, rates) {
 }
 
 export async function catalogSearch(params, currency, rates) {
+  if (useD1()) {
+    const rate = currency === "HUF" ? 1 : rates?.[currency];
+    const cur = rate ? currency : "HUF";
+    const r = rate || 1;
+    const page = Math.max(1, Number(params.page) || 1);
+    const edges = PRICE_EDGES[cur];
+    const res = await d1.catalogSearchD1({
+      q: cleanQuery(params.q), cats: params.cats || [], plats: params.plats || [], brands: (params.brands || []).slice(0, 30),
+      pmin: params.min > 0 ? Math.floor(params.min * r) : null, pmax: params.max > 0 ? Math.ceil(params.max * r) : null,
+      inStock: !!params.stock, sort: params.sort || "popular", lim: PAGE_SIZE, off: (page - 1) * PAGE_SIZE,
+      edges: edges.map((e) => Math.round(e * r)),
+    });
+    return { ...res, page, pages: Math.max(1, Math.ceil((res.total || 0) / PAGE_SIZE)), edges, edgeCurrency: cur };
+  }
   const { path, page, edges, currency: cur } = buildSearchQuery(params, currency, rates);
   const res = await q(path);
   return { ...res, page, pages: Math.max(1, Math.ceil((res.total || 0) / PAGE_SIZE)), edges, edgeCurrency: cur };
@@ -128,6 +150,7 @@ export async function catalogSearch(params, currency, rates) {
 
 /** Sitemaphez: minden termék slug-ja lapozva (a Supabase egyszerre max. 1000 sort ad) */
 export async function getAllSlugs(max = 45000) {
+  if (useD1()) return d1.getAllSlugsD1(max);
   const out = [];
   for (let off = 0; off < max; off += 1000) {
     const rows = await q(`product_summary?select=slug,updated_at&order=id.asc&limit=1000&offset=${off}`);

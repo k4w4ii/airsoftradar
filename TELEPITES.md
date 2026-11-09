@@ -170,6 +170,76 @@ Az adat egyelőre a Supabase-ből jön; a 2. lépésben az adatbázis is átker�
 
 **F) Vercel megszüntetése (1–2 nap hibátlan működés után):** Vercel → a projekt → Settings → Advanced → **Delete Project**; GitHub → Settings → Applications → Vercel → Uninstall.
 
+## 20. Átköltözés a Cloudflare-re – 2. lépés: az adatbázis (Supabase helyett Cloudflare D1)
+Mit kapsz: a weboldal és az adatbázis is a Cloudflare-nél lesz, egy helyen. A scraper egy titkos, jelszóval védett címen (`/api/db`) ír a D1-be. Visszaállás bármikor egy változóval lehetséges, amíg a Supabase-t nem törlöd.
+
+**A) D1 adatbázis létrehozása:**
+1. Cloudflare → **Storage & databases → D1 SQL database → Create database**.
+2. Name: `airsofthunter`. Location: **Eastern Europe (EEUR)**. → **Create**.
+3. Másold ki a **Database ID**-t (hosszú azonosító, pl. `3f2a…-…`).
+4. Nyisd meg Jegyzettömbbel: `E:\airsoftradar\web\wrangler.jsonc`, és cseréld ki az `IDE_MASOLD_A_D1_DATABASE_ID-T` szöveget erre az ID-re (az idézőjelek maradjanak). Mentés.
+   > Ha ez kimarad, a Cloudflare build piros lesz. Ilyenkor az oldal a régi verzión fut tovább, nem áll le.
+
+**B) Titkos kulcs generálása** (PowerShell):
+```powershell
+[guid]::NewGuid().ToString("N") + [guid]::NewGuid().ToString("N")
+```
+Az eredmény egy 64 karakteres sor. Ezt ne küldd el senkinek, és ne mentsd fájlba: csak a következő két helyre másold be.
+
+**C) A kulcs a Workerbe:** Workers & Pages → `airsofthunter` → **Settings → Variables and Secrets → Add**.
+- Type: **Secret**
+- Name: `INGEST_TOKEN`
+- Value: a B) pont kulcsa
+- → **Deploy**
+
+**D) A kulcs és a cím a GitHubba:** repó → **Settings → Secrets and variables → Actions**.
+- **Secrets** fül → New repository secret: `D1_API_TOKEN` = ugyanaz a kulcs.
+- **Variables** fül → New repository variable: `D1_API_URL` = `https://airsofthunter.<valami>.workers.dev/api/db`.
+  - A pontos workers.dev címet itt találod: Worker → Settings → Domains & Routes → `workers.dev` sor.
+  - Ha a sor „Disabled”, kapcsold be (**Enable**). A scraper ezen a címen éri el a végpontot, mert a domain botvédelme nem engedné át.
+
+**E) Feltöltés:** zip kibontása `E:\airsoftradar`-ba (felülírás), majd:
+```powershell
+cd E:\airsoftradar
+git add -A
+git commit -m "Cloudflare D1"
+git push
+```
+Várd meg, amíg a Cloudflare-en a Deployments zöld lesz. Az oldal ekkor még a Supabase-ből olvas: semmi nem változik.
+
+**F) Adatok átmásolása:** GitHub → **Actions → migrate-d1 → Run workflow**.
+- Futási idő: 10–40 perc. A végén ez áll: `KÉSZ – a D1-ben minden adat megvan`.
+- Újrafuttatható: ha hibával megáll, egyszerűen indítsd újra.
+- Ellenőrzés: D1 → `airsofthunter` → **Console** → `SELECT count(*) FROM product_summary;` → nagyjából annyi termék, amennyi a weboldalon.
+
+**G) A weboldal átkapcsolása:** Worker → Settings → Variables and Secrets → Add.
+- Type: **Text**
+- Name: `DATA_SOURCE`
+- Value: `d1`
+- → **Deploy**
+
+Próbáld ki az oldalt: lista, szűrők, keresés, termékoldal, árgrafikon, „Megnézem a boltban”.
+> **Visszaállás:** töröld a `DATA_SOURCE` változót → Deploy. Az oldal azonnal újra a Supabase-ből olvas.
+
+**H) A scraper átkapcsolása:** GitHub → Settings → Secrets and variables → Actions → **Variables** → New: `DB_BACKEND` = `d1`.
+- A következő éjszakai futás már a D1-be ír.
+- Ellenőrzéshez indítsd el egyszer kézzel: **Actions → rematch → Run workflow** (pár perc, a végén `[summary] {...}` sor).
+> Fontos: az F–H pontot lehetőleg egy nap alatt csináld meg, 02:17 UTC (03:17 magyar idő) előtt. Ha közben lefutott egy éjszakai letöltés, futtasd újra a **migrate-d1**-et a H pont előtt, mert addig az új árak még a Supabase-be kerültek.
+
+**I) Supabase megszüntetése (kb. egy hét hibátlan működés után):**
+1. Supabase → Project Settings → General → **Delete project**.
+2. GitHub Secrets: töröld a `SUPABASE_URL` és `SUPABASE_SERVICE_KEY` titkokat.
+3. Worker változók: töröld a `SUPABASE_URL` és `SUPABASE_PUBLISHABLE_KEY` változókat.
+
+Az Adatvédelmi tájékoztatóból a Supabase a G) pont után magától kikerül.
+
+**Állapot lekérdezése D1-ben:** a `d1/allapot.sql` tartalmát másold a D1 Console-ba → Run (boltonként az utolsó futás, a hibák és a párosítás).
+
+**Költség:** a Workers Paid csomag (5 $/hó) havonta 50 millió sorírást és 25 milliárd sorolvasást tartalmaz.
+- Az átmásolás egyszeri, néhány millió írás.
+- Egy napi futás nagyjából 0,5 millió írás.
+- Ez bőven belefér; a forgalom a D1 oldal **Metrics** fülén látszik.
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|
@@ -185,3 +255,7 @@ Az adat egyelőre a Supabase-ből jön; a 2. lépésben az adatbázis is átker�
 | Cloudflare build: „Your Worker exceeded the size limit” | A Workers Paid csomag nincs bekapcsolva (A pont). |
 | Cloudflare oldal: „Hiányzik a SUPABASE_URL…” | A D pont változói hiányoznak (Settings → Variables and Secrets), utána Deploy. |
 | `Invalid JWT` | Rossz kulcs: a **Secret key**-t (`sb_secret_...`) add meg, ne a publishable-t. |
+| Cloudflare build: „database_id” / „D1 database not found” | A 20. A) 4. lépés kimaradt: a `wrangler.jsonc`-be az igazi Database ID kell. |
+| migrate-d1 / scraper: `D1 401` | A GitHub `D1_API_TOKEN` és a Worker `INGEST_TOKEN` nem egyezik (szóköz is számít). Generálj újat, és mindkét helyre ugyanazt írd. |
+| migrate-d1 / scraper: `D1 404` | A Workerben nincs `INGEST_TOKEN` (20. C), vagy a `D1_API_URL` rossz (a végén `/api/db` kell). |
+| Oldal: „Hiányzik a D1 kötés (DB)” | A `wrangler.jsonc` d1_databases része hiányzik, vagy a build még a régi; push után várd meg a zöld Deploymentet. |

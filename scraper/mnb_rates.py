@@ -44,8 +44,8 @@ def main() -> None:
         for r in rows:
             print(r)
         return
-    from db import DB
-    DB().upsert("exchange_rates", rows, on_conflict="currency,rate_date", returning=False)
+    from db import get_db
+    get_db().upsert("exchange_rates", rows, on_conflict="currency,rate_date", returning=False)
     print(f"MNB: {len(rows)} árfolyam mentve ({rows[0]['rate_date']})")
 
 

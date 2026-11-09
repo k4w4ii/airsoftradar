@@ -60,3 +60,11 @@ class DB:
 
     def rpc(self, fn: str, args: dict | None = None):
         return self._req("POST", f"rpc/{fn}", body=args or {})
+
+
+def get_db():
+    """A scraper adatbázisa: DB_BACKEND=d1 -> Cloudflare D1 (d1db.D1DB), egyébként Supabase (DB)."""
+    if os.environ.get("DB_BACKEND", "").strip().lower() == "d1":
+        from d1db import D1DB
+        return D1DB()
+    return DB()

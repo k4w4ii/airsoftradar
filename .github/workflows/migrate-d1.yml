@@ -1,0 +1,33 @@
+name: migrate-d1
+# Egyszeri: a Supabase teljes tartalmának átmásolása a Cloudflare D1-be (újrafuttatható). TELEPITES.md 20. pont.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: airsofthunter-db
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+  D1_API_URL: ${{ vars.D1_API_URL }}
+  D1_API_TOKEN: ${{ secrets.D1_API_TOKEN }}
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - name: Ellenőrzés
+        run: |
+          [ -n "$D1_API_URL" ] || { echo "Hiányzik a D1_API_URL (Settings → Secrets and variables → Actions → Variables)"; exit 1; }
+          [ -n "$D1_API_TOKEN" ] || { echo "Hiányzik a D1_API_TOKEN titok"; exit 1; }
+      - run: python scraper/migrate_to_d1.py

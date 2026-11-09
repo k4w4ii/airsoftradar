@@ -43,8 +43,8 @@ def audit_specs(db, cat) -> int:
 
 
 def main() -> None:
-    from db import DB
-    db = DB()
+    from db import get_db
+    db = get_db()
     rates = {r["currency"]: Decimal(str(r["huf_per_unit"])) for r in db.select("latest_rates", select="*")}
     rates["HUF"] = Decimal(1)
     lang = {s["id"]: s["lang"] for s in db.select("shops", select="id,lang")}
@@ -69,8 +69,12 @@ def main() -> None:
                 print(f"[rematch] átnevezve eddig: {renamed}", flush=True)
     print(f"[rematch] átnevezve: {renamed}", flush=True)
 
-    db.rpc("refresh_product_summary")
-    print("[rematch] kész, a weboldal frissítve")
+    if hasattr(db, "execute"):          # D1: az összesítést a Python építi újra
+        import summary
+        summary.rebuild(db)
+    else:                               # Supabase: tárolt eljárás
+        db.rpc("refresh_product_summary")
+    print("[rematch] kész, a weboldal frissítve", flush=True)
 
 
 if __name__ == "__main__":
