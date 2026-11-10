@@ -14,8 +14,8 @@ export async function GET(_req, { params }) {
   const js = JSON.stringify(target).replace(/</g, "\\u003c");
   const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
 <meta http-equiv="refresh" content="0;url=${esc(target)}"><title>AirsoftHunter</title></head>
-<body style="background:#1B2027;color:#E9E4D8;font-family:sans-serif"><script>location.replace(${js})</script>
-<p><a style="color:#C8A24E" href="${esc(target)}" rel="nofollow sponsored noopener noreferrer">Tovább a boltba / Continue to the shop</a></p></body></html>`;
+<body style="background:#F6F7F8;color:#14171A;font-family:sans-serif"><script>location.replace(${js})</script>
+<p><a style="color:#0B6E4F" href="${esc(target)}" rel="nofollow sponsored noopener noreferrer">Tovább a boltba / Continue to the shop</a></p></body></html>`;
   return new Response(html, {
     status: 200,
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" },

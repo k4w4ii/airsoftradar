@@ -1,20 +1,55 @@
-/* AirsoftHunter – palaszürke, csontfehér, sárgaréz. A sárgaréz kizárólag árat, legjobb ajánlatot és az irányzék középpontját jelöli. */
+/* AirsoftHunter – „Arktisz”: világos, tiszta felületek, jelzőzöld kiemelés (ár, legjobb ajánlat, irányzék közepe). Betű: Chakra Petch (címek, árak) + Manrope (szöveg). */
 :root {
-  --slate: #1b2027;
-  --surface: #242b34;
-  --surface-2: #2c3540;
-  --line: #36404c;
-  --bone: #e9e4d8;
-  --muted: #9aa3ad;
-  --brass: #c8a24e;
-  --brass-dim: #8a7038;
-  --olive: #7e9a55;
-  --brick: #b9654a;
-  --steel: #6f8aa6;
+  --slate: #f6f7f8;
+  --surface: #ffffff;
+  --surface-2: #eef1f3;
+  --line: #e3e6e9;
+  --bone: #14171a;
+  --muted: #5b6670;
+  --brass: #0b6e4f;
+  --brass-dim: #9fd3bf;
+  --olive: #1e7d3a;
+  --brick: #c2410c;
+  --steel: #2f6fb0;
   --radius-s: 4px;
   --radius-m: 8px;
-  --display: var(--font-display, "Barlow Condensed"), "Arial Narrow", "Roboto Condensed", sans-serif;
-  --body: var(--font-body, "Barlow"), "Segoe UI", system-ui, sans-serif;
+  --accent-bg: #e3f5ee;
+  --accent-hover: #095c42;
+  --on-accent: #ffffff;
+  --topbar: #ffffff;
+  --pop: #ffffff;
+  --faint: #a3abb3;
+  --legal-text: #2a3036;
+  --odd-bar: #c4cad0;
+  --shadow: rgba(20, 23, 26, .12);
+  color-scheme: light;
+  --display: var(--font-display, "Chakra Petch"), "Segoe UI", system-ui, sans-serif;
+  --body: var(--font-body, "Manrope"), "Segoe UI", system-ui, sans-serif;
+}
+
+/* Sötét téma (a claude.ai sötét módja alapján): meleg grafit felületek, agyagszínű kiemelés. Választás: /theme süti. */
+[data-theme="dark"] {
+  --slate: #262624;
+  --surface: #30302e;
+  --surface-2: #3a3936;
+  --line: #45443f;
+  --bone: #faf9f5;
+  --muted: #a6a39a;
+  --brass: #d97757;
+  --brass-dim: #8a4d38;
+  --accent-bg: #3b2c25;
+  --accent-hover: #e08a6c;
+  --on-accent: #1f1e1d;
+  --olive: #8fbf6f;
+  --brick: #e5655b;
+  --steel: #7aa7d9;
+  --topbar: #1f1e1d;
+  --pop: #30302e;
+  --faint: #77756e;
+  --legal-text: #e8e6dc;
+  --odd-bar: #57554f;
+  --shadow: rgba(0, 0, 0, .45);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -35,7 +70,7 @@ img { display: block; max-width: 100%; }
 .shell { min-height: 100vh; display: flex; flex-direction: column; }
 .page { width: 100%; max-width: 1120px; margin: 0 auto; padding: 24px 20px 48px; flex: 1; }
 
-.topbar { background: #161a20; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+.topbar { background: var(--topbar); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
 .topbar-inner {
   max-width: 1120px; margin: 0 auto; padding: 10px 20px;
   display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center;
@@ -49,7 +84,7 @@ img { display: block; max-width: 100%; }
   background: var(--slate); color: var(--bone); border: 1px solid var(--line); border-right: 0;
   border-radius: var(--radius-s) 0 0 var(--radius-s); font: inherit;
 }
-.topsearch input::placeholder { color: #737d88; }
+.topsearch input::placeholder { color: var(--faint); }
 .topsearch > button {
   height: 40px; padding: 0 16px; border: 1px solid var(--line); border-radius: 0 var(--radius-s) var(--radius-s) 0;
   background: var(--surface-2); color: var(--bone); font: 600 15px var(--body); cursor: pointer;
@@ -63,7 +98,7 @@ img { display: block; max-width: 100%; }
 .seg a.on { background: var(--surface-2); color: var(--bone); }
 .lang { font-size: 14px; color: var(--muted); }
 
-.footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; background: #161a20; }
+.footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; background: var(--topbar); }
 .footer-inner { max-width: 1120px; margin: 0 auto; padding: 28px 20px 12px; display: flex; flex-wrap: wrap; gap: 20px 48px; justify-content: space-between; }
 .footer-brand { max-width: 560px; }
 .footer-brand p { margin: 10px 0 0; line-height: 1.55; }
@@ -87,7 +122,7 @@ img { display: block; max-width: 100%; }
 .legal { max-width: 72ch; }
 .legal h1 { font: 700 clamp(28px, 4vw, 40px)/1.1 var(--display); margin: 8px 0 20px; }
 .legal h2 { font: 600 22px/1.2 var(--display); margin: 28px 0 8px; }
-.legal p, .legal li { line-height: 1.65; color: #d5d0c4; }
+.legal p, .legal li { line-height: 1.65; color: var(--legal-text); }
 .legal ul { padding-left: 1.2em; margin: 8px 0; }
 .legal li + li { margin-top: 6px; }
 .legal-todo { border-left: 3px solid var(--brick); padding: 8px 12px; background: var(--surface); color: var(--bone); }
@@ -187,24 +222,24 @@ img { display: block; max-width: 100%; }
 }
 .facet:hover { background: var(--surface); }
 .facet .n { margin-left: auto; padding-left: 8px; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
-.facet.zero { color: #6c7682; }
+.facet.zero { color: var(--faint); }
 .cat-tree .facet.on { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--bone); font-weight: 600; }
 .facet.check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.box { flex: none; width: 16px; height: 16px; border: 1.5px solid #6c7682; border-radius: 3px; display: grid; place-items: center; }
-.facet.check input:checked + .box, .facet.check.on .box { background: var(--bone); border-color: var(--bone); }
+.box { flex: none; width: 16px; height: 16px; border: 1.5px solid var(--faint); border-radius: 3px; display: grid; place-items: center; }
+.facet.check input:checked + .box, .facet.check.on .box { background: var(--brass); border-color: var(--brass); }
 .facet.check input:checked + .box::after, .facet.check.on .box::after {
-  content: ""; width: 8px; height: 4px; border-left: 2px solid var(--slate); border-bottom: 2px solid var(--slate);
+  content: ""; width: 8px; height: 4px; border-left: 2px solid var(--on-accent); border-bottom: 2px solid var(--on-accent);
   transform: translateY(-1px) rotate(-45deg);
 }
 .facet.check input:focus-visible + .box { outline: 2px solid var(--brass); outline-offset: 2px; }
-.facet.check input:indeterminate + .box { border-color: var(--bone); }
-.facet.check input:indeterminate + .box::after { content: ""; width: 8px; height: 2px; background: var(--bone); }
+.facet.check input:indeterminate + .box { border-color: var(--brass); background: var(--brass); }
+.facet.check input:indeterminate + .box::after { content: ""; width: 8px; height: 2px; background: var(--on-accent); }
 .more summary { cursor: pointer; font-size: 14px; color: var(--muted); padding: 6px; list-style-position: inside; }
 .facet-sub { font-size: 13px; color: var(--muted); margin: 12px 0 2px; }
 
 .pslider-rail { position: relative; height: 30px; margin: 2px 9px 4px; }
 .pslider-rail::before { content: ""; position: absolute; left: 0; right: 0; top: 14px; height: 3px; border-radius: 2px; background: var(--line); }
-.pslider-fill { position: absolute; top: 14px; height: 3px; background: var(--bone); border-radius: 2px; }
+.pslider-fill { position: absolute; top: 14px; height: 3px; background: var(--brass); border-radius: 2px; }
 .pslider-rail input[type="range"] {
   position: absolute; left: -9px; top: 5px; width: calc(100% + 18px); height: 20px; margin: 0;
   background: none; pointer-events: none; -webkit-appearance: none; appearance: none;
@@ -213,11 +248,11 @@ img { display: block; max-width: 100%; }
 .pslider-rail input[type="range"]::-moz-range-track { background: transparent; }
 .pslider-rail input[type="range"]::-webkit-slider-thumb {
   pointer-events: auto; -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; cursor: grab;
-  background: var(--bone); border: 3px solid var(--slate); box-shadow: 0 0 0 1px var(--muted);
+  background: var(--brass); border: 3px solid var(--slate); box-shadow: 0 0 0 1px var(--muted);
 }
 .pslider-rail input[type="range"]::-moz-range-thumb {
   pointer-events: auto; width: 14px; height: 14px; border-radius: 50%; cursor: grab;
-  background: var(--bone); border: 3px solid var(--slate); box-shadow: 0 0 0 1px var(--muted);
+  background: var(--brass); border: 3px solid var(--slate); box-shadow: 0 0 0 1px var(--muted);
 }
 .pslider-rail input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px var(--brass); }
 .pslider-inputs { display: flex; align-items: center; gap: 6px; }
@@ -281,8 +316,8 @@ img { display: block; max-width: 100%; }
 .rung.best .price { color: var(--brass); }
 .rung-price { display: grid; justify-items: end; }
 .orig { font-size: 13px; font-variant-numeric: tabular-nums; }
-.rung.best .go { background: var(--brass); color: #1b2027; border-color: var(--brass); }
-.rung.best .go:hover { background: #d6b25f; }
+.rung.best .go { background: var(--brass); color: var(--on-accent); border-color: var(--brass); }
+.rung.best .go:hover { background: var(--accent-hover); }
 
 .chart { margin: 0; }
 .chart svg { width: 100%; height: auto; max-height: 220px; display: block; background: var(--surface); border-radius: var(--radius-m); }
@@ -324,14 +359,14 @@ img { display: block; max-width: 100%; }
 .odd-offers { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
 .odd-offers summary { cursor: pointer; color: var(--muted); font-size: 14px; padding: 4px 0; }
 .odd-offers .rung.odd { opacity: .75; }
-.odd-offers .rung.odd .rung-bar div { background: #4a5260; }
+.odd-offers .rung.odd .rung-bar div { background: var(--odd-bar); }
 
 /* ---------- kereső javaslatokkal ---------- */
 .sg-wrap { position: relative; flex: 1; min-width: 0; display: flex; }
 .sg-wrap input { width: 100%; }
 .sg-list {
   position: absolute; top: calc(100% + 4px); left: 0; right: -1px; z-index: 30; list-style: none; margin: 0; padding: 6px 0;
-  background: #1f252d; border: 1px solid var(--line); border-radius: var(--radius-m); box-shadow: 0 12px 32px rgba(0,0,0,.45);
+  background: var(--pop); border: 1px solid var(--line); border-radius: var(--radius-m); box-shadow: 0 12px 32px var(--shadow);
   max-height: min(70vh, 520px); overflow-y: auto;
 }
 .sg-item { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; padding: 7px 12px; cursor: pointer; font-size: 15px; }
@@ -352,10 +387,10 @@ img { display: block; max-width: 100%; }
 
 /* ---------- pénznem: mobilon lenyíló ---------- */
 .cur-menu { display: none; position: relative; }
-.cur-menu summary { list-style: none; cursor: pointer; padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--radius-s); font-size: 13px; font-weight: 600; }
+.cur-menu summary { list-style: none; cursor: pointer; padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--radius-s); font-size: 13px; font-weight: 600; white-space: nowrap; }
 .cur-menu summary::-webkit-details-marker { display: none; }
 .cur-menu summary::after { content: " ▾"; color: var(--muted); }
-.cur-pop { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; display: grid; background: #1f252d; border: 1px solid var(--line); border-radius: var(--radius-s); min-width: 80px; }
+.cur-pop { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; display: grid; background: var(--pop); border: 1px solid var(--line); border-radius: var(--radius-s); min-width: 80px; }
 .cur-pop a { padding: 8px 12px; text-decoration: none; font-size: 14px; font-weight: 600; color: var(--muted); }
 .cur-pop a.on { color: var(--bone); background: var(--surface-2); }
 
@@ -375,7 +410,7 @@ img { display: block; max-width: 100%; }
 .tile-img img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
 .tile-badge {
   position: absolute; top: 8px; left: 8px; padding: 2px 7px; border-radius: var(--radius-s);
-  background: var(--brass); color: #1b2027; font: 700 15px/1.3 var(--display); font-variant-numeric: tabular-nums;
+  background: var(--brass); color: var(--on-accent); font: 700 15px/1.3 var(--display); font-variant-numeric: tabular-nums;
 }
 .tile-body { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; }
 .tile-name { font: 600 18px/1.15 var(--display); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 2.3em; }
@@ -385,15 +420,15 @@ img { display: block; max-width: 100%; }
 /* ---------- üdvözlő oldal ---------- */
 .hero {
   text-align: center; padding: clamp(28px, 6vw, 64px) 0 clamp(24px, 4vw, 40px); margin: -24px -20px 8px;
-  background: radial-gradient(ellipse at 50% 0%, #2c3540 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 0%, var(--accent-bg) 0%, transparent 70%);
   border-bottom: 1px solid var(--line);
 }
 .hero h1 { margin: 0 auto 10px; font: 700 clamp(32px, 5.6vw, 58px)/1.02 var(--display); max-width: 18ch; text-wrap: balance; }
 .hero-sub { margin: 0 auto 22px; color: var(--muted); max-width: 52ch; padding: 0 16px; }
 .hero .topsearch { max-width: 680px; margin: 0 auto; padding: 0 16px; text-align: left; }
 .topsearch.big input[type="search"] { height: 52px; font-size: 17px; padding: 0 18px; }
-.topsearch.big > button { height: 52px; padding: 0 22px; font-size: 16px; background: var(--brass); color: #1b2027; border-color: var(--brass); }
-.topsearch.big > button:hover { background: #d6b25f; }
+.topsearch.big > button { height: 52px; padding: 0 22px; font-size: 16px; background: var(--brass); color: var(--on-accent); border-color: var(--brass); }
+.topsearch.big > button:hover { background: var(--accent-hover); }
 .wblock { margin-top: 36px; }
 .wblock h2 { font: 600 28px/1.1 var(--display); margin: 0 0 4px; }
 .wblock-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
@@ -415,6 +450,7 @@ img { display: block; max-width: 100%; }
 @media (max-width: 860px) {
   .seg:not(.views) { display: none; }
   .cur-menu { display: block; }
+  .toolbar { gap: 8px; }
   .topsearch-gap { display: none; }
   .results-bar { flex-wrap: wrap; }
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -431,3 +467,9 @@ img { display: block; max-width: 100%; }
   .brand { font-size: 21px; gap: 8px; }
   .logo-mark { width: 24px; height: 24px; }
 }
+
+/* ---------- téma-váltó (JS nélkül: két link, mindig a másikra váltót mutatjuk) ---------- */
+.theme-btn { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: var(--radius-s); color: var(--muted); }
+.theme-btn:hover { color: var(--bone); border-color: var(--muted); }
+.theme-btn svg { width: 18px; height: 18px; }
+[data-theme="dark"] .theme-btn.to-dark, :root:not([data-theme="dark"]) .theme-btn.to-light { display: none; }

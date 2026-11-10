@@ -1,9 +1,10 @@
-import { Barlow, Barlow_Condensed } from "next/font/google";
+import { Chakra_Petch, Manrope } from "next/font/google";
+import { cookies } from "next/headers";
 import "../globals.css";
 import { ADS, SITE_URL } from "../../lib/site";
 
-const body = Barlow({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
-const display = Barlow_Condensed({ subsets: ["latin", "latin-ext"], weight: ["500", "600", "700"], variable: "--font-display", display: "swap" });
+const body = Manrope({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600", "700"], variable: "--font-body", display: "swap" });
+const display = Chakra_Petch({ subsets: ["latin", "latin-ext"], weight: ["500", "600", "700"], variable: "--font-display", display: "swap" });
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -14,12 +15,20 @@ export const metadata = {
   ...(ADS.client ? { other: { "google-adsense-account": ADS.client } } : {}),
 };
 
-export const viewport = { themeColor: "#1B2027", colorScheme: "dark" };
+async function theme() {
+  const jar = await cookies();
+  return jar.get("theme")?.value === "dark" ? "dark" : "light";   // alapértelmezés: világos
+}
+
+export async function generateViewport() {
+  const dark = (await theme()) === "dark";
+  return { themeColor: dark ? "#1F1E1D" : "#FFFFFF", colorScheme: dark ? "dark" : "light" };
+}
 
 export default async function RootLayout({ children, params }) {
   const { locale } = await params;
   return (
-    <html lang={locale === "hu" ? "hu" : "en"} className={`${body.variable} ${display.variable}`}>
+    <html lang={locale === "hu" ? "hu" : "en"} data-theme={await theme()} className={`${body.variable} ${display.variable}`}>
       <head>
         {/* AdSense: csak akkor töltődik be, ha a hirdetéskód ki van töltve (lib/site.js). Automatikus hirdetések: az AdSense felületén KIKAPCSOLVA. */}
         {ADS.client ? (
