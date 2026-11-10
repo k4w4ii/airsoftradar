@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CatImg from "./CatImg";
 import { CAT_GROUPS, hrefFor } from "../lib/catalog";
 import { t } from "../lib/i18n";
 import { ProductTile } from "./HomeView";
@@ -12,7 +13,7 @@ const GROUP_LEAVES = Object.fromEntries(CAT_GROUPS.map((g) => [g.id, g.leaves]))
 export default function Welcome({ locale, currency, rates, data }) {
   const tr = t(locale);
   const count = (c) => (GROUP_LEAVES[c] || [c]).reduce((x, l) => x + (data.counts[l] || 0), 0);
-  const image = (c) => (GROUP_LEAVES[c] || [c]).map((l) => data.images[l]).find(Boolean);
+  const image = (c) => (GROUP_LEAVES[c] || [c]).flatMap((l) => [].concat(data.images[l] || [])).slice(0, 3);
   const tiles = TILES.filter((c) => count(c) > 0);
   return (
     <div className="welcome">
@@ -32,7 +33,7 @@ export default function Welcome({ locale, currency, rates, data }) {
           {tiles.map((c) => (
             <li key={c}>
               <Link href={hrefFor(locale, { ...BASE, cats: [c] })} className="cat-tile">
-                <span className="cat-img">{image(c) ? <img src={image(c)} alt="" loading="lazy" referrerPolicy="no-referrer" /> : null}</span>
+                <span className="cat-img"><CatImg srcs={image(c)} /></span>
                 <span className="cat-name">{tr.cats[c]}</span>
                 <span className="cat-n">{tr.items(count(c))}</span>
               </Link>

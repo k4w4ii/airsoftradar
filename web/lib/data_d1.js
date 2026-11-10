@@ -162,15 +162,34 @@ export async function countProductsD1() {
   return (await db.prepare("SELECT count(*) AS n FROM product_summary").first())?.n || 0;
 }
 
+// kategóriára jellemző névrészletek a csempék mintaképéhez (az első egyező termék képe nyer)
+const TYPICAL_WORDS = {
+  rifle: ["m4", "ar15", "ak"], grenade: ["grenade", "launcher", "gránát"], acc_power: ["lipo", "battery", "akku"],
+  acc_ammo: [" bb", "bbs", "bio"], acc_optics: ["red dot", "scope", "sight"], acc_mag: ["magazine", "mag"],
+  acc_gear: ["plate carrier", "chest rig", "vest", "holster"], acc_protect: ["mask", "goggle"],
+  part_internal: ["gearbox", "piston", "cylinder"], part_hopup: ["hop"], part_motor: ["motor"], part_external: ["handguard", "stock"],
+};
+const TYPICAL = (() => {
+  const params = [];
+  const whens = Object.entries(TYPICAL_WORDS).map(([cat, words]) => {
+    params.push(cat, ...words.map((w) => `%${w}%`));
+    return `WHEN category = ? AND (${words.map(() => "lower(name) LIKE ?").join(" OR ")}) THEN 0`;
+  });
+  return { sql: `(CASE ${whens.join(" ")} ELSE 1 END)`, params };
+})();
+
 /** Üdvözlő oldal: kategóriánkénti darabszám és mintakép, legnagyobb árkülönbségek, népszerű márkák, számok. */
 export async function getWelcomeD1() {
   const db = await getDB();
   const weapons = GROUP_LEAVES.weapons;
   const res = await db.batch([
     db.prepare("SELECT category, count(*) AS n FROM product_summary GROUP BY category"),
+    // mintakép: kategóriánként 3 jelölt; előnyben a kategóriára jellemző nevű termék (pl. akkunál „lipo”), aztán a népszerű
     db.prepare(`SELECT category, image_url FROM (
-                  SELECT category, image_url, row_number() OVER (PARTITION BY category ORDER BY offer_count DESC, id) AS rn
-                  FROM product_summary WHERE image_url IS NOT NULL AND image_url <> '') WHERE rn = 1`),
+                  SELECT category, image_url, row_number() OVER (PARTITION BY category ORDER BY ${TYPICAL.sql}, offer_count DESC, id) AS rn
+                  FROM product_summary WHERE image_url LIKE 'https://%'
+                    AND lower(name) NOT LIKE '%patch%' AND lower(name) NOT LIKE '%felvarr%') WHERE rn <= 3
+                ORDER BY category, rn`).bind(...TYPICAL.params),
     // valódi, raktáron lévő árkülönbség 2+ boltnál; a 70% feletti (gyanús) eltérés kimarad
     db.prepare(`SELECT ${CARD_COLS}, (max_price_huf - best_price_huf) * 1.0 / max_price_huf AS d FROM product_summary
                 WHERE category IN (${weapons.map(() => "?").join(",")}) AND offer_count > 1 AND best_price_huf IS NOT NULL
@@ -182,7 +201,7 @@ export async function getWelcomeD1() {
   const [counts, images, deals, brands, shops] = res.map((r) => r.results || []);
   return {
     counts: Object.fromEntries(counts.map((r) => [r.category, r.n])),
-    images: Object.fromEntries(images.map((r) => [r.category, r.image_url])),
+    images: images.reduce((m, r) => ({ ...m, [r.category]: [...(m[r.category] || []), r.image_url] }), {}),
     deals, brands, shops: shops[0]?.n || 0,
     total: counts.reduce((x, r) => x + r.n, 0),
   };

@@ -71,7 +71,7 @@ const DICT = {
     showResults: (n) => `${n} találat mutatása`,
     category: "Típus",
     cats: {
-      all: "Minden termék", weapons: "Airsoft fegyverek", rifle: "Gépkarabélyok (AR, AK)", pistol: "Pisztolyok",
+      all: "Minden termék", weapons: "Airsoft fegyverek", rifle: "Gépkarabélyok", pistol: "Pisztolyok",
       smg: "Géppisztolyok", sniper: "Mesterlövész, DMR", lmg: "Géppuskák", shotgun: "Sörétes puskák",
       grenade: "Gránátok, gránátvetők",
       parts: "Alkatrészek", part_internal: "Gearbox, belső alkatrészek", part_hopup: "Hop-up, belső cső",
@@ -154,7 +154,7 @@ const DICT = {
     showResults: (n) => `Show ${n} results`,
     category: "Type",
     cats: {
-      all: "All products", weapons: "Airsoft guns", rifle: "Assault rifles (AR, AK)", pistol: "Pistols",
+      all: "All products", weapons: "Airsoft guns", rifle: "Assault rifles", pistol: "Pistols",
       smg: "SMGs", sniper: "Sniper rifles, DMR", lmg: "Machine guns", shotgun: "Shotguns",
       grenade: "Grenades, launchers",
       parts: "Parts", part_internal: "Gearbox & internals", part_hopup: "Hop-up & inner barrels",
