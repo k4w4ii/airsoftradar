@@ -92,13 +92,22 @@ def main() -> None:
     # terméknevek egységesítése (idempotens: csak a ténylegesen változókat írja)
     aliases, renamed = set(cat.aliases), 0
     print(f"[rematch] terméknevek egységesítése ({len(cat.products)} termék)...", flush=True)
+    batch: list = []                    # egy kérésben sok átnevezés (az első szótáras futás több ezret ír)
     for pid, prod in cat.products.items():
         new = clean_name(prod.name, cat.manufacturers[prod.manufacturer_id][1], aliases)
         if new != prod.name:
-            db.update("products", {"name": new}, id=f"eq.{pid}")
+            if hasattr(db, "execute"):
+                batch.append(("UPDATE products SET name=? WHERE id=?", [new, pid]))
+                if len(batch) >= 500:
+                    db.execute(batch)
+                    batch = []
+            else:
+                db.update("products", {"name": new}, id=f"eq.{pid}")
             renamed += 1
             if renamed % 500 == 0:
                 print(f"[rematch] átnevezve eddig: {renamed}", flush=True)
+    if batch:
+        db.execute(batch)
     print(f"[rematch] átnevezve: {renamed}", flush=True)
 
     import summary                      # az összesítő tábla (product_summary) újraépítése

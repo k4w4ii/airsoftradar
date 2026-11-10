@@ -54,7 +54,10 @@ def main() -> int:
     db = get_db()
     lang = {s["id"]: (s.get("lang") or "en") for s in db.select("shops", select="id,lang")}
     aliases = {a["alias_norm"] for a in db.select("manufacturer_aliases", select="alias_norm")}
-    known = {k.lower() for k in _WORD_MAP}
+    from dictionary import DIR, all_words
+    skip = DIR / "nem_forditando.lst"
+    known = {k.lower() for k in _WORD_MAP} | set(all_words())
+    known |= {l.strip().lower() for l in skip.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")}
     titles = [(o["title_raw"], lang.get(o["shop_id"], "en"))
               for o in db.select("offers", select="shop_id,title_raw", is_active="eq.1")]
     titles += [(p["name"], p.get("name_lang") or "en") for p in db.select("products", select="name,name_lang")]

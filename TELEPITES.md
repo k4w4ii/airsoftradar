@@ -83,6 +83,8 @@ Repó → Settings → Secrets and variables → Actions:
 ## 5/b. Rendrakás (automatikus)
 - A rematch (és a napi futás vége) leválasztja a rossz helyen lévő ajánlatokat: alkatrész egy fegyver alatt, egyedi/HPA/használt változat a gyári alatt (és fordítva), majd a helyes termékhez kerülnek.
 - Az egyedi, tuningolt, HPA és használt fegyverek külön kategóriában vannak („Egyedi és tuningolt fegyverek”).
+- **Idegen nyelvű címek:** ingyenes szótár fordítja angolra (`scraper/dict/*.txt`, kb. 3000 szó, nincs fizetős szolgáltatás). A terméknevek a rematch-nél lesznek angolok, a termékoldali bolti címek az oldal nyelvén jelennek meg (magyar oldalon a magyar szavak maradnak).
+- **Új szó felvétele:** a megfelelő `scraper/dict/0X.txt` fájlba egy sor: `szó=angol` (üres jobb oldal = a szó törlődik). Utána a gépeden: `python scraper/dictionary.py` (frissíti a `web/lib/dictionary.json`-t), push, majd Actions → rematch. Az Actions → words workflow csak a még nem ismert szavakat listázza.
 
 ## 6. Üzemeltetői adatok (ÁSZF, adatvédelem, impresszum)
 `web\lib\site.js` → `OPERATOR` rész (név, e-mail; cím, adószám, nyilvántartási szám csak ha kitöltöd). Mentés → push.

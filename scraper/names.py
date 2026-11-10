@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 
+from dictionary import WORDS as _DICT, translate
 from matcher import norm_alias, unescape_all
 
 # Többnyelvű általános szavak (a kategóriát külön mutatjuk, a „replika/airsoft” üres töltelék)
@@ -80,7 +81,7 @@ _ACRONYMS = {"AEG", "AEP", "GBB", "GBBR", "NBB", "EBB", "HPA", "SMG", "LMG", "DM
              "MOSFET", "ETU", "ECU", "FPS", "ASG", "KJW", "VFC", "LCT", "ICS", "APS", "EMG", "KWA", "CYMA", "SRC",
              "WE", "JG", "TM", "PDW", "UMP", "AKM", "AKS", "SVD", "VSS", "OD", "DE", "USP", "MP5", "MP7", "SCAR",
              "HK", "URG-I", "MWS", "ERG", "SA", "CM", "RK", "II", "III", "IV", "MK", "SD", "SBR"}
-_SEP_RX = re.compile(r"\s*(?:\s[-–—|/]\s|[,;]\s*|\s[-–—]$)\s*")
+_SEP_RX = re.compile(r"\s*(?:\s[-–—|/]\s|(?:;|,(?!\d))\s*|\s[-–—]$)\s*")   # „6,03” tizedesvessző marad
 
 
 def _brand_patterns(brand: str, aliases: set[str]) -> re.Pattern:
@@ -136,6 +137,7 @@ def clean_name(title: str, brand: str, aliases: set[str] | None = None) -> str:
     for rx, rep in _PHRASES:
         t = rx.sub(rep, t)
     t = _GENERIC_RX.sub(" ", t)
+    t = _GENERIC_RX.sub(" ", translate(t, _DICT) or "")     # idegen szavak angolul (dict/*.txt), utána a fordított „pistol” stb. is ki
     t = _SEP_RX.sub(" ", " " + t + " ")
     t = re.sub(r"[\s\-–—|/,:;]+$", "", re.sub(r"^[\s\-–—|/,:;]+", "", t))
     words = [w for w in t.split() if w not in {"-", "–", "—", "|", "/"}]

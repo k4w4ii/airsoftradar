@@ -35,6 +35,7 @@ A scraper a D1-be a weboldal Workerének titkos végpontján (`/api/db`, Bearer 
 | `mnb_rates.py` | MNB SOAP -> `exchange_rates` |
 | `d1db.py` | D1-kliens (a `/api/db` végponton át; PostgREST-stílusú szűrők) |
 | `classify.py`, `summary.py` | kategória/platform-besorolás; `product_summary` + kiugró árak újraépítése (csak a változások) |
+| `dictionary.py`, `dict/` | ingyenes szótáras fordítás (cseh, lengyel, magyar, olasz, finn, holland, német → angol); a `names.clean_name` és a weboldal (`web/lib/dictionary.js` + `dictionary.json`) is ezt használja; `hu_words.lst`: magyar oldalon meghagyott szavak, `nem_forditando.lst`: átnézett márkák/angol szavak |
 | `health_check.py` | állapot-ellenőrzés: D1 + weboldal (Actions → health, és a napi futás vége) |
 | `shops.json` | boltonkénti konfig (forrás, URL-minta, lapozás, extra fejlécek, `enabled`, `status`) |
 

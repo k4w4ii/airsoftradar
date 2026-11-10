@@ -1,3 +1,4 @@
+import { translateTitle } from "../lib/dictionary";
 import { shopTarget } from "../lib/links";
 import Link from "next/link";
 import { dateFmt, money, shopMoney, t } from "../lib/i18n";
@@ -47,7 +48,7 @@ function OfferLadder({ offers, currency, rates, locale, odd = false, scaleMax })
             <span className="shop-name">{o.shop_name}</span>
             <span className="cc">{o.shop_country}</span>
             <StockBadge stock={o.stock} locale={locale} />
-            {perShop[o.shop_name] > 1 || odd ? <span className="variant muted">{o.title_raw}</span> : null}
+            {perShop[o.shop_name] > 1 || odd ? <span className="variant muted">{translateTitle(o.title_raw, locale)}</span> : null}
           </div>
           <div className="rung-bar" aria-hidden="true">
             <div style={{ width: `${Math.min(100, Math.max(4, (Number(o.price_huf) / max) * 100))}%` }} />
