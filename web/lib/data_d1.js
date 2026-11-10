@@ -162,20 +162,33 @@ export async function countProductsD1() {
   return (await db.prepare("SELECT count(*) AS n FROM product_summary").first())?.n || 0;
 }
 
-// kategóriára jellemző névrészletek a csempék mintaképéhez (az első egyező termék képe nyer)
+// kategóriák mintaképe: 0 = erős találat (első helyen), 1 = gyenge, 2 = egyéb; a „not” szavas termék sosem csempekép
 const TYPICAL_WORDS = {
-  rifle: ["m4", "ar15", "ak"], grenade: ["grenade", "launcher", "gránát"], acc_power: ["lipo", "battery", "akku"],
-  acc_ammo: [" bb", "bbs", "bio"], acc_optics: ["red dot", "scope", "sight"], acc_mag: ["magazine", "mag"],
-  acc_gear: ["plate carrier", "chest rig", "vest", "holster"], acc_protect: ["mask", "goggle"],
-  part_internal: ["gearbox", "piston", "cylinder"], part_hopup: ["hop"], part_motor: ["motor"], part_external: ["handguard", "stock"],
+  rifle: { strong: ["m4", "ar15", "ak47", "ak74"] },
+  grenade: { strong: ["grenade launcher", "launcher"], weak: ["grenade", "gránát"] },
+  acc_mag: { strong: ["mid-cap", "midcap", "mid cap", "hi-cap", "hicap"], weak: ["magazine", "tár "],
+             not: ["pouch", "loader", "holder", "adapter", "speed", "coupler", "clamp", "zseb", "spring", "follower", "base", "pistol", "gbb", "pisztoly"] },
+  acc_ammo: { strong: ["green gas", "propane", "zöld gáz"], weak: ["bb", "bio"], not: ["box", "loader", "container", "doboz", "tester"] },
+  acc_power: { strong: ["lipo"], weak: ["battery", "akku"], not: ["box", "case", "bag", "peq", "tok", "connector", "cable", "checker", "adapter"] },
+  acc_optics: { strong: ["red dot", "scope"], weak: ["sight"], not: ["mount", "cover", "lens", "protector"] },
+  acc_gear: { strong: ["plate carrier"], weak: ["chest rig", "vest", "holster"] },
+  acc_protect: { strong: ["mask"], weak: ["goggle"] },
+  part_internal: { strong: ["complete gearbox", "gearbox v2", "v2 gearbox"], weak: ["gearbox"],
+                   not: ["shell", "screw", "spring", "bushing", "shim", "pin", "tool"] },
+  part_hopup: { strong: ["hop-up chamber", "hop up chamber"], weak: ["hop"] },
+  part_motor: { strong: ["motor"] },
+  part_external: { strong: ["handguard"], weak: ["stock"] },
 };
 const TYPICAL = (() => {
   const params = [];
-  const whens = Object.entries(TYPICAL_WORDS).map(([cat, words]) => {
-    params.push(cat, ...words.map((w) => `%${w}%`));
-    return `WHEN category = ? AND (${words.map(() => "lower(name) LIKE ?").join(" OR ")}) THEN 0`;
-  });
-  return { sql: `(CASE ${whens.join(" ")} ELSE 1 END)`, params };
+  const like = (words) => words.map((w) => { params.push(`%${w}%`); return "lower(name) LIKE ?"; }).join(" OR ");
+  const whens = [];
+  for (const [cat, w] of Object.entries(TYPICAL_WORDS)) {
+    if (w.not) { params.push(cat); whens.push(`WHEN category = ? AND (${like(w.not)}) THEN 3`); }
+    params.push(cat); whens.push(`WHEN category = ? AND (${like(w.strong)}) THEN 0`);
+    if (w.weak) { params.push(cat); whens.push(`WHEN category = ? AND (${like(w.weak)}) THEN 1`); }
+  }
+  return { sql: `(CASE ${whens.join(" ")} ELSE 2 END)`, params };
 })();
 
 /** Üdvözlő oldal: kategóriánkénti darabszám és mintakép, legnagyobb árkülönbségek, népszerű márkák, számok. */
