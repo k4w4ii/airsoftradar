@@ -15,6 +15,7 @@ import statistics
 from collections import Counter, defaultdict
 
 import classify
+from filters import is_variant
 
 STOCK_RANK = {"in_stock": 0, "preorder": 1, "out_of_stock": 2}
 
@@ -68,6 +69,10 @@ def compute(shops, mfrs, products, offers, rates) -> tuple[dict[int, dict], set[
             votes[cats[o["id"]]] += 1
         votes[classify.category(p["name"], None, None)] += 0.5
         cat = sorted(votes.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+        # egyedi / tuningolt / HPA / használt fegyver: külön kategória (a név, vagy az ajánlatok többsége szerint)
+        if cat in classify.WEAPONS and cat != "grenade" and (
+                is_variant(p["name"]) or 2 * sum(is_variant(o["title_raw"]) for o in clean) > len(clean)):
+            cat = classify.custom_of(cat)
         grp = classify.group(cat)
         plats = set(classify.platforms(p["name"]))
         for o in clean:

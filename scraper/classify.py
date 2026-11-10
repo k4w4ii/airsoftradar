@@ -45,6 +45,16 @@ _C = {
 _BUNDLE_O = re.compile(_C['BUNDLE'].pattern, re.I)
 
 WEAPONS = {'rifle', 'pistol', 'smg', 'sniper', 'lmg', 'shotgun', 'grenade'}
+# egyedi építésű / tuningolt / HPA / használt fegyverek külön csoportban (summary.py dönti el a termék szintjén)
+CUSTOM = {'custom_rifle', 'custom_pistol', 'custom_sniper'}
+
+
+def custom_of(cat: str) -> str:
+    return 'custom_pistol' if cat == 'pistol' else 'custom_sniper' if cat == 'sniper' else 'custom_rifle'
+
+
+def is_gun(cat: str | None) -> bool:
+    return cat in WEAPONS or cat in CUSTOM
 _SUBS = [('GEAR', 'acc_gear'), ('PROTECT', 'acc_protect'), ('MAG', 'acc_mag'), ('AMMO', 'acc_ammo'), ('POWER', 'acc_power'),
          ('OPTICS', 'acc_optics'), ('HOPUP', 'part_hopup'), ('MOTOR', 'part_motor'), ('INTERNAL', 'part_internal'),
          ('EXTERNAL', 'part_external')]
@@ -107,6 +117,8 @@ def category(title: str | None, url: str | None = None, price: float | None = No
 def group(cat: str | None) -> str:
     if cat in WEAPONS:
         return 'weapons'
+    if cat in CUSTOM:
+        return 'custom'
     return 'parts' if (cat or '').startswith('part_') else 'acc'
 
 

@@ -151,6 +151,9 @@ img { display: block; max-width: 100%; }
 }
 .spread-fill { height: 100%; background: var(--brass); }
 .spread-label { font-size: 14px; font-weight: 600; color: var(--bone); font-variant-numeric: tabular-nums; min-width: 4ch; text-align: right; }
+.row-spread .spread { flex-direction: column; align-items: stretch; gap: 5px; }
+.row-spread .spread-track { flex: none; }
+.row-spread .spread-label { text-align: left; font-size: 12.5px; color: var(--brass); line-height: 1.25; }
 
 .pager { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
 .pager a { font-weight: 600; }
@@ -245,7 +248,7 @@ img { display: block; max-width: 100%; }
 .chip:hover { border-color: var(--muted); }
 .chip-clear { font-size: 14px; color: var(--muted); margin-left: 4px; }
 .results .rows { border-top: 1px solid var(--line); }
-.results .row-link { grid-template-columns: 72px minmax(0, 1fr) 170px 130px; }
+.results .row-link { grid-template-columns: 72px minmax(0, 1fr) 190px 130px; }
 
 /* ---------- termékoldal ---------- */
 .back { display: inline-block; font-size: 14px; color: var(--muted); margin-bottom: 16px; }
@@ -376,6 +379,7 @@ img { display: block; max-width: 100%; }
 }
 .tile-body { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; }
 .tile-name { font: 600 18px/1.15 var(--display); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 2.3em; }
+.tile-save { font-size: 13px; font-weight: 600; color: var(--brass); line-height: 1.25; }
 .tile-price { margin-top: auto; padding-top: 6px; display: flex; align-items: baseline; gap: 6px; }
 
 /* ---------- üdvözlő oldal ---------- */

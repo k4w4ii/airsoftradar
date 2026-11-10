@@ -90,7 +90,12 @@ export default function ProductView({ locale, currency, rates, product, offers: 
             <Price huf={best} currency={currency} rates={rates} locale={locale} className="price big" />
             <StockBadge stock={product.stock} locale={locale} />
           </div>
-          {pct >= 1 && offers.length > 1 ? <p className="saving">{tr.save(pct)}</p> : null}
+          {pct >= 1 && offers.length > 1 ? (
+            <p className="saving">
+              {tr.saveUpTo(money(product.max_price_huf - best, currency, rates, locale), pct)}
+              <span className="muted small"> – {tr.saveUpToNote}</span>
+            </p>
+          ) : null}
           {product.updated_at ? <p className="muted small">{tr.updated}: {dateFmt(product.updated_at, locale)}</p> : null}
         </div>
       </div>

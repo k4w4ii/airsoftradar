@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CAT_GROUPS, defaultCats, hrefFor, PLATFORMS, withoutCat } from "../lib/catalog";
-import { plainMoney, t } from "../lib/i18n";
+import { money, plainMoney, t } from "../lib/i18n";
 import AutoSubmit from "./AutoSubmit";
 import PriceSlider from "./PriceSlider";
 import { Ad, Price, SpreadBar, StockBadge } from "./ui";
@@ -32,7 +32,7 @@ function ProductRow({ p, locale, currency, rates }) {
           </span>
         </div>
         <div className="row-spread">
-          {p.offer_count > 1 ? <SpreadBar min={best} max={p.max_price_huf} locale={locale} /> : null}
+          {p.offer_count > 1 ? <SpreadBar min={best} max={p.max_price_huf} locale={locale} currency={currency} rates={rates} /> : null}
         </div>
         <div className="row-price">
           {p.offer_count > 1 ? <span className="from">{tr.from}</span> : null}
@@ -53,7 +53,6 @@ export function ProductTile({ p, locale, currency, rates }) {
       <Link href={`/${locale}/p/${p.slug}`} className="tile-link">
         <div className="tile-img">
           {p.image_url ? <img src={p.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : null}
-          {pct >= 1 ? <span className="tile-badge" title={tr.save(pct)}>−{pct}%</span> : null}
         </div>
         <div className="tile-body">
           <span className="row-mfr">{p.manufacturer}</span>
@@ -66,6 +65,11 @@ export function ProductTile({ p, locale, currency, rates }) {
             {p.offer_count > 1 ? <span className="from">{tr.from}</span> : null}
             <Price huf={best} currency={currency} rates={rates} locale={locale} />
           </span>
+          {pct >= 1 ? (
+            <span className="tile-save" title={tr.saveUpToNote}>
+              {tr.saveUpTo(money(p.max_price_huf - best, currency, rates, locale), pct)}
+            </span>
+          ) : null}
         </div>
       </Link>
     </li>

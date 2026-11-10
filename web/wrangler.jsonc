@@ -2,7 +2,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "airsofthunter",
-  "main": ".open-next/worker.js",
+  "main": "custom-worker.js",                 // Next.js (OpenNext) + napi időzítő (custom-worker.js)
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
@@ -10,6 +10,8 @@
   // a Cloudflare felületén megadott változók és titkok (INGEST_TOKEN) megmaradnak telepítéskor
   "keep_vars": true,
   "vars": { "SITE_URL": "https://www.airsofthunter.com" },
+  // napi letöltés indítása pontosan 02:17 UTC-kor (03:17 / nyáron 04:17 magyar idő) – custom-worker.js
+  "triggers": { "crons": ["17 2 * * *"] },
   // Cloudflare D1 adatbázis (TELEPITES.md 3.3 pont): a database_id-t a D1 oldaláról másold ide
   "d1_databases": [
     { "binding": "DB", "database_name": "airsofthunter", "database_id": "a78abdf4-9489-4396-ae41-80b3f1e74bbe" }

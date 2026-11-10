@@ -47,6 +47,16 @@ Első feltöltés: `git add .` → `git commit -m "Első verzió"` → `gh repo 
    - Security → Security rules → Create rule ▾ → **Rate limiting rules**: URI Path starts with `/`, IP szerint, 100 kérés / 10 mp → Block 10 mp.
    - Az **AI Labyrinth** és a **Precursor** maradjon kikapcsolva.
 
+## 3/b. Pontos éjszakai indítás (egyszer kell)
+A GitHub saját ütemezője órákat késhet, ezért a napi letöltést a Cloudflare Worker indítja 02:17 UTC-kor (`web/custom-worker.js`). Ha ez valamiért elmarad, a GitHub 06:47 UTC-kor tartalékként indítja.
+1. GitHub → jobb felül a profilképed → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
+   - Token name: `airsofthunter-cron`. Expiration: a leghosszabb választható.
+   - Repository access: **Only select repositories** → `airsoftradar`.
+   - Permissions → Repository permissions → **Actions: Read and write**.
+   - **Generate token** → másold ki (csak egyszer látszik).
+2. Cloudflare → Worker → Settings → Variables and Secrets → Add: Type **Secret**, Name `GH_TOKEN`, Value: a token → Deploy.
+3. Lejáratkor ugyanígy újat kell generálni (addig a tartalék indítás működik).
+
 ## 4. GitHub titkok és változók (egyszer kell)
 Repó → Settings → Secrets and variables → Actions:
 - **Secrets** fül → `D1_API_TOKEN` = ugyanaz a kulcs, mint a Worker `INGEST_TOKEN`-je.
@@ -69,6 +79,10 @@ Repó → Settings → Secrets and variables → Actions:
 - **SQL-fájl futtatása** (új márkák, boltok): Actions → **d1-sql** → Run workflow → fájlnév (pl. `d1/uj_markak_2026-11-09.sql`). Utána magától lefut a rematch is.
 - **Boltonkénti állapot:** D1 → Console → a `d1\allapot.sql` tartalma → Run.
 - **Miért ad egy bolt 0 terméket:** ugyanott a `d1\diagnozis.sql`.
+
+## 5/b. Rendrakás (automatikus)
+- A rematch (és a napi futás vége) leválasztja a rossz helyen lévő ajánlatokat: alkatrész egy fegyver alatt, egyedi/HPA/használt változat a gyári alatt (és fordítva), majd a helyes termékhez kerülnek.
+- Az egyedi, tuningolt, HPA és használt fegyverek külön kategóriában vannak („Egyedi és tuningolt fegyverek”).
 
 ## 6. Üzemeltetői adatok (ÁSZF, adatvédelem, impresszum)
 `web\lib\site.js` → `OPERATOR` rész (név, e-mail; cím, adószám, nyilvántartási szám csak ha kitöltöd). Mentés → push.

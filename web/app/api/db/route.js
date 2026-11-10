@@ -1,3 +1,4 @@
+import { checkIngest } from "../../../lib/auth";
 import { getDB } from "../../../lib/data_d1";
 
 // A scraper (GitHub Actions) ezen a titkos végponton át ír a D1-be (scraper/d1db.py).
@@ -5,21 +6,12 @@ import { getDB } from "../../../lib/data_d1";
 // Egy kérés = legfeljebb 100 utasítás, egy tranzakcióban (D1 batch: hiba esetén semmi nem íródik).
 export const dynamic = "force-dynamic";
 
-function sameSecret(a, b) {                 // időzítés-független összehasonlítás
-  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 
 export async function POST(req) {
-  const token = String(process.env.INGEST_TOKEN || "").trim();
-  if (token.length < 32) return new Response("Not found", { status: 404 });
-  const auth = req.headers.get("authorization") || "";
-  if (!sameSecret(auth.replace(/^Bearer\s+/i, ""), token)) return json({ error: "unauthorized" }, 401);
+  const denied = checkIngest(req);
+  if (denied) return denied;
 
   let body;
   try { body = await req.json(); } catch { return json({ error: "bad json" }, 400); }

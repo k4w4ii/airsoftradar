@@ -86,16 +86,17 @@ export function StockBadge({ stock, locale }) {
 }
 
 /** Árfolyosó: a teljes sáv a legdrágább bolt ára, a sárgaréz rész a legolcsóbb. A maradék a megtakarítás. */
-export function SpreadBar({ min, max, locale }) {
+export function SpreadBar({ min, max, locale, currency, rates }) {
   if (!min || !max || max <= min) return null;
   const pct = Math.round((1 - min / max) * 100);
   if (pct < 1) return null;
+  const tr = t(locale);
   return (
-    <div className="spread" title={t(locale).save(pct)}>
+    <div className="spread" title={tr.saveUpToNote}>
       <div className="spread-track">
         <div className="spread-fill" style={{ width: `${(min / max) * 100}%` }} />
       </div>
-      <span className="spread-label">−{pct}%</span>
+      <span className="spread-label">{tr.saveUpTo(money(max - min, currency, rates, locale), pct)}</span>
     </div>
   );
 }

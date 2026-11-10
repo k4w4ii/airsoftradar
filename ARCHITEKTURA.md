@@ -105,6 +105,9 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 - SEO: `app/sitemap.js` (lista- és termékoldalak hu/en hreflang-gal, naponta), `app/robots.js` (`/go/`, `/cur`, `/api/` tiltva), `metadataBase` = `SITE_URL` (`lib/site.js`).
 - Útvonalak: `/` -> `/hu` vagy `/en` (Accept-Language, `next.config.mjs` redirect) · `/[locale]` paraméter nélkül **üdvözlő oldal** (kereső, kategória-csempék a legnépszerűbb termék képével, legnagyobb árkülönbségek, népszerű gyártók; `components/Welcome.jsx`), bármilyen katalógus-paraméterrel (`?cat=weapons` az alap) lista + szűrők · `/[locale]/p/[slug]` termékoldal · `/go/[id]` kimenő link (affiliate sablon) · `/cur` pénznem-süti.
 - Táblák a weboldalnak: `product_summary` (a scraper építi: legjobb ár, max ár, `category`, `platforms` „,m4,ak,” formában, `search_code`), az ajánlatok és az ártörténet SQL-lel a `offers` / `price_history` táblából.
+- Ütemezés: a Worker cron-triggere (`wrangler.jsonc` → `triggers.crons`, `web/custom-worker.js`) 02:17 UTC-kor a GitHub API-n át indítja a `daily-scrape`-et (`GH_TOKEN` Worker-titok); a GitHub-schedule 06:47 UTC-kor csak tartalék (a `gate` job kihagyja, ha 14 órán belül már indult).
+- Rendrakás (`rematch.py: audit_kinds`): alkatrész a fegyver alatt / fegyver az alkatrész alatt (besoroló + árküszöb), egyedi változat a gyári alatt → leválasztás és újrapárosítás; a matcher (`same_kind` + `gun_kind`) nem engedi vissza. Kategóriák: `custom_rifle`, `custom_pistol`, `custom_sniper` (csoport: `custom`), ha a termék neve vagy ajánlatainak többsége egyedi/HPA/tuningolt/használt.
+- Árkülönbség megjelenítése: „Akár X Ft megtakarítás (Y%)” – a legolcsóbb bolt a legdrágábbhoz képest (csempén, listában, termékoldalon), nem csak százalék.
 - Kereső: gépelés közbeni javaslatok (`components/SearchBox.jsx` → `/api/suggest`: kategóriák, gyártók, 6 termék árral; 180 ms késleltetés, billentyűzettel kezelhető, JS nélkül sima űrlap).
 - Rendezés: alap a **kedvezmény** (legolcsóbb vs. legdrágább bolt, %), továbbá „Összes találat” (legtöbb bolt), ár, név. Nézet: **csempe** (alap) vagy lista (`?view=list`).
 - Besorolás árküszöbbel (`classify.py: _weapon_ok`): fegyverkategória csak a típusra jellemző minimális ár felett (pl. pisztoly 2500 Ft, puska 6000 Ft); ha csak modellnév szerepel (M4, AK, SCAR, 1911, SVD) fegyverszó nélkül, 15 000 Ft (pisztoly 8000 Ft) alatt alkatrész.
@@ -125,6 +128,9 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 ## Teljesítmény
 - A weboldal egy oldalbetöltésnél 1–2 D1-kérést küld (a katalógus egy batch); az összesítő tábla indexelt (`category`, `manufacturer`, népszerűség).
 - A `summary.rebuild` csak a ténylegesen változott `product_summary` sorokat írja (sha1 „sig”), így a napi sorírás kicsi (D1: a sorírás a költség).
+
+## Költségek
+- Csak a Workers Paid csomag (5 $/hó); minden más ebben ingyenes (D1, cron trigger) vagy a GitHub/Cloudflare ingyenes része. Fizetős Cloudflare-szolgáltatást (pl. Workers AI) csak a tulajdonos kifejezett jóváhagyásával szabad bevezetni.
 
 ## Biztonság
 - Titkok: Worker → `INGEST_TOKEN` (Secret), GitHub → `D1_API_TOKEN` (Secret). A repóban nincs kulcs. A böngésző soha nem kap kulcsot; a D1 csak a Workerből érhető el.

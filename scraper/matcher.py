@@ -18,6 +18,7 @@ import unicodedata
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 
+import classify
 from filters import is_part, is_variant, spec_conflict, specs
 
 AUTO_FUZZY = 0.92
@@ -151,6 +152,13 @@ class Product:
     model_code_norm: str | None
 
 
+def gun_kind_of(category: str | None) -> bool | None:
+    """Fegyver (True), biztosan nem fegyver (False), vagy nem tudni (None: 'other' / ismeretlen)."""
+    if not category or category == "other":
+        return None
+    return classify.is_gun(category)
+
+
 @dataclass
 class Catalog:
     """A DB-ből egyszer betöltött, memóriában tartott index (pár tízezer terméknél bőven elég)."""
@@ -165,6 +173,12 @@ class Catalog:
     part_ids: set[int] = field(default_factory=set)                               # alkatrész/kiegészítő termékek
     variant_ids: set[int] = field(default_factory=set)                            # egyedi/átépített (custom, HPA) termékek
     specs: dict[int, dict] = field(default_factory=dict)                          # termékjellemzők (BB-súly, ml, V, M120...)
+    gun_of: dict[int, bool | None] = field(default_factory=dict)  # termék fegyver-e (True/False; None: nem tudni)
+
+    def gun_kind(self, pid: int) -> bool | None:
+        if pid not in self.gun_of:                     # új / még nem összesített termék: a neve alapján
+            self.gun_of[pid] = gun_kind_of(classify.category(self.products[pid].name, None, None))
+        return self.gun_of[pid]
 
     def learn(self, pid: int, sp: dict) -> None:
         """A termékhez került ajánlat jellemzőit megjegyezzük (ha a névből hiányoztak), így a következő eltérő nem kerül mellé."""
@@ -246,8 +260,12 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
     # Egyedi/átépített változat (custom, HPA...) csak ugyanilyen termékhez kerülhet.
     variant = is_variant(o.title)
     osp = specs(o.title)              # 0.20g ≠ 0.28g, 500 ml ≠ 1000 ml, M100 ≠ M120: eltérő jellemző = más termék
+    # fegyver ↔ nem fegyver: csak határozott jel alapján tiltunk ('other' = nem tudjuk, nem tilt)
+    ocat = classify.category(o.title, None, o.price_huf)
+    okind = gun_kind_of(ocat)
+    kind_ok = lambda pid: okind is None or cat.gun_kind(pid) in (None, okind)
     same_kind = lambda pid: ((pid in cat.part_ids) == part and (pid in cat.variant_ids) == variant
-                             and not spec_conflict(osp, cat.specs.get(pid, {})))
+                             and not spec_conflict(osp, cat.specs.get(pid, {})) and kind_ok(pid))
 
     # 2. erős kód -> meglévő termék
     for c in strong:

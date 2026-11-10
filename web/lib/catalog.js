@@ -4,6 +4,8 @@ export const CAT_GROUPS = [
   { id: "weapons", leaves: ["rifle", "pistol", "smg", "sniper", "lmg", "shotgun", "grenade"] },
   { id: "parts", leaves: ["part_internal", "part_hopup", "part_motor", "part_external"] },
   { id: "acc", leaves: ["acc_mag", "acc_power", "acc_optics", "acc_ammo", "acc_protect", "acc_gear", "other"] },
+  // egyedi építésű / tuningolt / HPA / használt fegyverek: külön, hogy ne keveredjenek a gyári replikákkal
+  { id: "custom", leaves: ["custom_rifle", "custom_pistol", "custom_sniper"] },
 ];
 export const GROUP_IDS = CAT_GROUPS.map((g) => g.id);
 export const LEAVES = CAT_GROUPS.flatMap((g) => g.leaves);

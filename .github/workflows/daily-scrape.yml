@@ -1,8 +1,10 @@
 name: daily-scrape
 
 on:
+  # Fő indítás: a Cloudflare Worker időzítője 02:17 UTC-kor pontosan elindítja (web/custom-worker.js, GH_TOKEN).
+  # Ez a GitHub-ütemezés csak tartalék: ha aznap még nem futott (a GitHub-időzítő órákat késhet), elindul.
   schedule:
-    - cron: "17 2 * * *"        # 02:17 UTC, éjszaka -> kíméli a boltokat
+    - cron: "47 6 * * *"
   workflow_dispatch:
     inputs:
       limit:
@@ -10,9 +12,10 @@ on:
         required: false
         type: number
 
-# a GITHUB_TOKEN csak olvashat (a scraper nem ír a repóba)
+# a GITHUB_TOKEN csak olvashat (a scraper nem ír a repóba); actions: read a tartalék-ellenőrzéshez
 permissions:
   contents: read
+  actions: read
 
 # a kézi újrapárosítás (rematch) megvárja, amíg ez fut, és fordítva
 concurrency:
@@ -26,7 +29,28 @@ env:
   D1_API_TOKEN: ${{ secrets.D1_API_TOKEN }}
 
 jobs:
+  # tartalék indításnál: ha az elmúlt 14 órában már indult napi futás, ez kimarad
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      go: ${{ steps.check.outputs.go }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" != "schedule" ]; then echo "go=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          since=$(date -u -d '-14 hours' +%Y-%m-%dT%H:%M:%SZ)
+          n=$(gh run list -R "$GITHUB_REPOSITORY" --workflow daily-scrape.yml --created ">=$since" --limit 20 \
+                --json databaseId --jq "[.[] | select(.databaseId != $GITHUB_RUN_ID)] | length")
+          if [ "${n:-0}" -gt 0 ]; then echo "Ma már futott – a tartalék indítás kimarad."; echo "go=false" >> "$GITHUB_OUTPUT"
+          else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+
   rates:
+    needs: gate
+    if: needs.gate.outputs.go == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -67,8 +91,8 @@ jobs:
   # a végén: jellemző-audit (BB-súly, gáz, rugó...), a leválasztott ajánlatok újrapárosítása,
   # névegységesítés és a weboldal frissítése (scraper/rematch.py)
   refresh:
-    needs: scrape
-    if: always()
+    needs: [gate, scrape]
+    if: always() && needs.gate.outputs.go == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -80,8 +104,8 @@ jobs:
 
   # legvégül: állapot-ellenőrzés (adatbázis + weboldal); ha piros, a GitHub e-mailt küld
   health:
-    needs: refresh
-    if: always()
+    needs: [gate, refresh]
+    if: always() && needs.gate.outputs.go == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

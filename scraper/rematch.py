@@ -12,7 +12,9 @@ from decimal import Decimal
 
 from collections import Counter, defaultdict
 
-from filters import specs
+import classify
+from filters import is_part, is_variant, specs
+from matcher import gun_kind_of
 from names import clean_name
 from run_shop import OFFER_COLS, load_catalog, match_offers
 
@@ -42,6 +44,34 @@ def audit_specs(db, cat) -> int:
     return len(detach)
 
 
+def audit_kinds(db, cat, rates) -> int:
+    """Rossz helyre került ajánlatok leválasztása:
+    - alkatrész / tartozék egy fegyver alatt (pl. „Šroub pažbičky M4” a CYMA M4 mellett) vagy fegyver egy alkatrész alatt;
+    - egyedi / tuningolt / HPA / használt változat a gyári termék alatt, vagy fordítva.
+    Csak határozott jel alapján (a besoroló 'other' eredménye nem dönt). A leválasztott ajánlat utána újrapárosul,
+    a matcher pedig már nem engedi vissza ugyanoda (same_kind)."""
+    rows = db.select("offers", select="id,product_id,title_raw,price,currency,match_status", is_active="eq.1",
+                     product_id="not.is.null")
+    detach = []
+    for r in rows:
+        pid = r["product_id"]
+        if r["match_status"] == "manual" or pid not in cat.products:
+            continue
+        rate = rates.get(r["currency"] or "HUF")
+        huf = float(Decimal(str(r["price"])) * rate) if rate and r["price"] is not None else None
+        okind = gun_kind_of(classify.category(r["title_raw"], None, huf))
+        pkind = cat.gun_kind(pid)
+        wrong_kind = okind is not None and pkind is not None and okind != pkind
+        wrong_variant = is_variant(r["title_raw"]) != (pid in cat.variant_ids)
+        wrong_part = pkind is True and is_part(r["title_raw"], huf)
+        if wrong_kind or wrong_variant or wrong_part:
+            detach.append(r["id"])
+    for i in range(0, len(detach), 200):
+        db.update("offers", {"product_id": None, "match_status": "pending", "match_method": None,
+                             "match_confidence": None}, id=f"in.({','.join(map(str, detach[i:i + 200]))})")
+    return len(detach)
+
+
 def main() -> None:
     from db import get_db
     db = get_db()
@@ -52,6 +82,8 @@ def main() -> None:
     cat, _ = load_catalog(db)
     n = audit_specs(db, cat)
     print(f"[rematch] eltérő jellemző miatt leválasztva: {n}", flush=True)
+    n = audit_kinds(db, cat, rates)
+    print(f"[rematch] rossz helyen lévő ajánlat (alkatrész a fegyver alatt, custom a gyári alatt stb.) leválasztva: {n}", flush=True)
     pending = db.select("offers", select=OFFER_COLS, match_status="eq.pending", is_active="eq.true")
     print(f"[rematch] {len(pending)} párosításra váró ajánlat", flush=True)
     stats = match_offers(db, cat, pending, rates, lambda o: lang.get(o["shop_id"], "en"), {})

@@ -24,9 +24,10 @@ from pathlib import Path
 from crawl import from_listing, from_sitemap
 from urllib.parse import urlsplit
 from fetcher import Fetcher
+import classify
 from filters import is_clothing, specs
 from jsonld import ScrapedOffer, extract
-from matcher import Catalog, OfferIn, Product, match_offer
+from matcher import Catalog, OfferIn, Product, gun_kind_of, match_offer
 from names import clean_name
 
 CONFIG = json.loads((Path(__file__).parent / "shops.json").read_text())
@@ -106,6 +107,11 @@ def load_catalog(db) -> tuple[Catalog, dict[int, str]]:
         alt, eans = codes[p["id"]]
         cat.add_product(Product(p["id"], p["manufacturer_id"], p["name"], p["model_code_norm"]), alt, eans)
         name_lang[p["id"]] = p["name_lang"]
+    try:                                   # a weboldal kategóriája: fegyver vagy nem (új adatbázisban még üres)
+        for r in db.select("product_summary", select="id,category"):
+            cat.gun_of[r["id"]] = gun_kind_of(r["category"])
+    except (KeyError, RuntimeError):
+        pass
     return cat, name_lang
 
 

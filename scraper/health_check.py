@@ -83,10 +83,13 @@ def check_db(db, rep: Report, today: date) -> dict:
     else:
         rep.fail("Napi letöltés", f"régen nem jött új adat (utolsó: {last}) – nézd meg a daily-scrape futást")
 
-    runs = q("""SELECT s.slug, r.status, r.offers_seen, r.started_at FROM shops s
+    runs = q("""SELECT s.slug, r.status, r.offers_seen, r.started_at,
+                       CASE WHEN json_valid(r.errors) THEN coalesce(json_extract(r.errors, '$[0].error'), '') END AS err
+                FROM shops s
                 JOIN scrape_runs r ON r.id = (SELECT max(id) FROM scrape_runs x WHERE x.shop_id = s.id)
                 ORDER BY s.slug""")
-    bad = [f"{r['slug']} ({r['status']})" for r in runs if r["status"] not in ("ok", "partial", "running")]
+    bad = [f"{r['slug']} ({r['status']}{': ' + str(r['err'])[:120] if r.get('err') else ''})"
+           for r in runs if r["status"] not in ("ok", "partial", "running")]
     if bad:
         rep.warn("Boltok utolsó futása", "sikertelen: " + ", ".join(bad) + " – részletek: d1/allapot.sql")
     elif runs:

@@ -151,5 +151,43 @@ class TestHealthCheck(unittest.TestCase):
         self.assertIn("❌", rep.markdown())
 
 
+
+class TestAuditKinds(unittest.TestCase):
+    def test_parts_and_custom_detached(self):
+        import rematch
+        from decimal import Decimal
+        from run_shop import load_catalog
+        db = LocalD1()
+        seed(db)
+        db.execute([
+            ("INSERT INTO products (id,manufacturer_id,name,slug) VALUES (1,1,'CYMA CM.048 AKM','cyma-cm048')", []),
+            ("INSERT INTO product_summary (id,slug,name,manufacturer,category,offer_count,in_stock_count,stock) VALUES (1,'cyma-cm048','CYMA CM.048 AKM','CYMA','rifle',1,1,'in_stock')", []),
+            ("INSERT INTO offers (id,shop_id,external_id,url,title_raw,price,currency,product_id,match_status) VALUES "
+             "(1,1,'a','u1','CYMA CM.048 AKM AEG',160,'EUR',1,'auto'),"
+             "(2,2,'b','u2','CYMA Šroub pažbičky AK 2ks',673,'HUF',1,'auto'),"
+             "(3,3,'c','u3','CYMA CM.048 AKM HPA custom build',600,'EUR',1,'auto'),"
+             "(4,2,'d','u4','CYMA CM048 tárrugó',900,'HUF',1,'manual')", []),
+        ])
+        cat, _ = load_catalog(db)
+        self.assertIs(cat.gun_kind(1), True)
+        n = rematch.audit_kinds(db, cat, {"EUR": Decimal(385), "HUF": Decimal(1)})
+        self.assertEqual(n, 2)
+        rows = {r["id"]: r for r in db.query("SELECT id, product_id, match_status FROM offers")}
+        self.assertEqual(rows[1]["product_id"], 1)                       # a fegyver marad
+        self.assertEqual((rows[2]["product_id"], rows[2]["match_status"]), (None, "pending"))   # csavar le
+        self.assertIsNone(rows[3]["product_id"])                         # custom le
+        self.assertEqual(rows[4]["product_id"], 1)                       # kézi párosítás érintetlen
+
+    def test_custom_category_in_summary(self):
+        import summary
+        rows, _ = summary.compute([{"id": 1, "country": "PL"}], {1: "CYMA"},
+                                  {7: {"id": 7, "manufacturer_id": 1, "name": "CYMA CM.048 AKM HPA Custom", "slug": "x"}},
+                                  [{"id": 1, "product_id": 7, "shop_id": 1, "url": "u", "title_raw": "CYMA CM.048 AKM HPA Custom AEG",
+                                    "price": 600, "currency": "EUR", "stock": "in_stock", "last_seen_at": "2026-11-10"}],
+                                  {"EUR": 385, "HUF": 1})
+        self.assertEqual(rows[7]["category"], "custom_rifle")
+
+
+
 if __name__ == "__main__":
     unittest.main()
