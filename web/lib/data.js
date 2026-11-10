@@ -14,7 +14,8 @@ export const getOffers = (productId) => d1.getOffersD1(productId);
 export const getHistory = (productId) => d1.getHistoryD1(productId);
 export const getRates = () => d1.getRatesD1();
 export const getOfferTarget = (id) => d1.getOfferTargetD1(id);
-export const getAllSlugs = (max = 45000) => d1.getAllSlugsD1(max);
+export const getAllSlugs = (max = 45000, offset = 0) => d1.getAllSlugsD1(max, offset);
+export const countProducts = () => d1.countProductsD1();
 export const getWelcome = () => d1.getWelcomeD1();
 export const suggest = (q) => d1.suggestD1(cleanQuery(q));
 

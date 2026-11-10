@@ -152,9 +152,14 @@ export async function getOfferTargetD1(id) {
   return row ? { url: row.url, shops: { affiliate_template: row.affiliate_template } } : null;
 }
 
-export async function getAllSlugsD1(max = 45000) {
+export async function getAllSlugsD1(max = 45000, offset = 0) {
   const db = await getDB();
-  return all(db.prepare("SELECT slug, updated_at FROM product_summary ORDER BY id LIMIT ?").bind(max));
+  return all(db.prepare("SELECT slug, updated_at FROM product_summary ORDER BY id LIMIT ? OFFSET ?").bind(max, offset));
+}
+
+export async function countProductsD1() {
+  const db = await getDB();
+  return (await db.prepare("SELECT count(*) AS n FROM product_summary").first())?.n || 0;
 }
 
 /** Üdvözlő oldal: kategóriánkénti darabszám és mintakép, legnagyobb árkülönbségek, népszerű márkák, számok. */

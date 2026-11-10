@@ -113,8 +113,11 @@ A `{url}` helyére kerül a termékoldal címe. Azonnal él (legfeljebb fél ór
 ## 9. Google Search Console (egyszer)
 1. search.google.com/search-console → **Add property** → **Domain**: `airsofthunter.com` → Continue.
 2. Ellenőrzés: ha felajánlja a **Cloudflare**-t („Start verification”), jelentkezz be és engedélyezd – a TXT rekordot magától felveszi. Különben másold ki a `google-site-verification=…` szöveget → Cloudflare → DNS → Records → Add record: Type `TXT`, Name `@`, Content: a szöveg → Save → vissza a Search Console-ba → **Verify**.
-3. Bal menü **Sitemaps** → `https://www.airsofthunter.com/sitemap.xml` → Submit. Állapot: „Success” (az első indexelés napoktól hetekig tart).
-4. (Ajánlott) Bing: bing.com/webmasters → **Import from Google Search Console** – egy kattintás.
+3. Bal menü **Sitemaps** → `sitemap.xml` → Submit. Ez egy index: a Google magától megtalálja a darabjait (`/sitemaps/static.xml`, `/sitemaps/p-0.xml` …). Állapot: „Success”; a „Felfedezett oldalak” száma pár nap alatt nő.
+4. Gyorsítás: felül az **URL-vizsgálat** mezőbe `https://www.airsofthunter.com/hu` → **Indexelés kérése**; ugyanígy `/en` és 2–3 kategória (pl. `/hu?cat=weapons`). Naponta kb. 10 ilyen kérés engedélyezett.
+5. Cloudflare: a **rate limiting** szabály (3.6) ne fogja meg a Google-t. Security → Security rules → a szabály → Edit: ha van **Verified Bot** mező, a kifejezés végére: `and not cf.client.bot`. Ha nincs ilyen mező, emeld a határt 300 kérés / 10 mp-re.
+6. (Ajánlott) Bing: bing.com/webmasters → **Import from Google Search Console** – egy kattintás.
+7. Az első indexelés napoktól hetekig tart; a **Pages** jelentésben az „Felfedezve – jelenleg nincs indexelve” új oldalnál normális.
 
 ## 10. Biztonság (egyszer, kézzel)
 - **Kétlépcsős azonosítás (2FA):** GitHub, Cloudflare, Google.

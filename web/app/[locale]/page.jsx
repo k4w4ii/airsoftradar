@@ -20,7 +20,8 @@ export async function generateMetadata({ params, searchParams }) {
   return {
     title: one ? `${tr.cats[one]} | AirsoftHunter` : tr.title,
     description: tr.description,
-    alternates: { canonical: `/${locale}?cat=${one || "weapons"}`, languages: { hu: "/hu", en: "/en" } },
+    alternates: { canonical: `/${locale}?cat=${one || "weapons"}`,
+                  languages: { hu: `/hu?cat=${one || "weapons"}`, en: `/en?cat=${one || "weapons"}` } },
   };
 }
 
