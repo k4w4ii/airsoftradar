@@ -406,5 +406,53 @@ null,
 null,
 45000,
 "pistol"
+],
+[
+"Sightmark Ultra Shot A-Spec Reflex Sight FDE",
+null,
+60000,
+"acc_optics"
+],
+[
+"Vortex - Dalmierz laserowy Diamondback HD 2000",
+null,
+120000,
+"acc_optics"
+],
+[
+"Muela Colibri Black Micarta Satin",
+null,
+45000,
+"other"
+],
+[
+"Specna Arms SA-E07 EDGE with reflex sight",
+null,
+90000,
+"rifle"
+],
+[
+"CYMA CM048",
+null,
+60000,
+"rifle"
+],
+[
+"CYMA Fixed Sniper Stock w/ Adjustable Buttpad and Cheek Rest for CM.708 Series Airsoft Sniper Rifles",
+null,
+26500,
+"part_external"
+],
+[
+"E&C AK74 AEG w/ 2 magazines for AK",
+null,
+90000,
+"rifle"
+],
+[
+"Airsoft sniper CM.708 - černá",
+null,
+68000,
+"sniper"
 ]
 ]

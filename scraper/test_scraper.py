@@ -254,10 +254,6 @@ class TestFixUrl(unittest.TestCase):
         self.assertEqual(o.url, "https://gunfire.com/en/products/am-009-1.html")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestRobotsSitemaps(unittest.TestCase):
     def test_sitemaps_from_robots(self):
         from fetcher import Fetcher
@@ -487,3 +483,17 @@ class TestCoverage(unittest.TestCase):
         with mock.patch.object(run_shop, "Fetcher", return_value=fake):
             out, errors, stale = run_shop.scrape("gunfire", None)
         self.assertEqual(sorted(o.title for o in out), ["M4 magazine 120 BB", "Specna Arms SA-E01"])
+
+
+class TestVariant(unittest.TestCase):
+    def test_variant_mentions_are_not_custom(self):
+        from filters import is_variant
+        self.assertTrue(is_variant("Evike Custom CYMA CM048 with Wolverine Inferno HPA System"))
+        self.assertTrue(is_variant("Used G&G CM16 Raider"))
+        self.assertFalse(is_variant("Specna Arms SA-E07 EDGE HPA ready"))
+        self.assertFalse(is_variant("G&G CM16 rifle used by special forces"))
+        self.assertFalse(is_variant("Custom series M4 AEG"))
+
+
+if __name__ == "__main__":
+    unittest.main()

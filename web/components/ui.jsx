@@ -6,13 +6,17 @@ import AdSlot from "./AdSlot";
 import SearchBox from "./SearchBox";
 
 export function Logo() {
-  // Irányzék: osztott szálkereszt, a középpont sárgaréz (a „találat” = a legjobb ár)
+  // Irányzék + sas (public/logo-mark.png maszkként: a szín a témából jön, világos és sötét módban is)
+  return <span className="logo-mark" aria-hidden="true" />;
+}
+
+// Szóvédjegy: AIRSOFT / HUNTER.com két sorban
+export function Wordmark() {
   return (
-    <svg className="logo-mark" viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path d="M16 1.5v8M16 22.5v8M1.5 16h8M22.5 16h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="16" cy="16" r="2.6" fill="var(--brass)" />
-    </svg>
+    <span className="wordmark">
+      <span className="wm-top">AIRSOFT</span>
+      <span className="wm-bottom">HUNTER<span className="wm-dot">.com</span></span>
+    </span>
   );
 }
 
@@ -47,7 +51,7 @@ export function Shell({ locale, currency, path = "", children, query = "", hideS
         <div className="topbar-inner">
           <Link href={`/${locale}`} className="brand">
             <Logo />
-            <span>AirsoftHunter</span>
+            <Wordmark />
           </Link>
           {hideSearch ? <span className="topsearch-gap" /> : (
             <SearchBox locale={locale} defaultValue={query} placeholder={tr.searchPlaceholder} label={tr.search}
@@ -80,7 +84,7 @@ export function Shell({ locale, currency, path = "", children, query = "", hideS
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <Link href={`/${locale}`} className="brand small-brand"><Logo /><span>AirsoftHunter</span></Link>
+            <Link href={`/${locale}`} className="brand small-brand" aria-label="AirsoftHunter"><Logo /><Wordmark /></Link>
             <p>{tr.footer}</p>
           </div>
           <nav className="footer-links" aria-label={locale === "hu" ? "Jogi információk" : "Legal"}>

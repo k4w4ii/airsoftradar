@@ -88,6 +88,12 @@ def check_db(db, rep: Report, today: date) -> dict:
                 FROM shops s
                 JOIN scrape_runs r ON r.id = (SELECT max(id) FROM scrape_runs x WHERE x.shop_id = s.id)
                 ORDER BY s.slug""")
+    try:                                  # letiltott bolt (shops.json: enabled=false) régi hibája nem számít
+        off = {k for k, v in json.load(open(os.path.join(os.path.dirname(__file__), "shops.json"), encoding="utf-8")).items()
+               if isinstance(v, dict) and v.get("enabled") is False}
+    except (OSError, ValueError):
+        off = set()
+    runs = [r for r in runs if r["slug"] not in off]
     bad = [f"{r['slug']} ({r['status']}{': ' + str(r['err'])[:120] if r.get('err') else ''})"
            for r in runs if r["status"] not in ("ok", "partial", "running")]
     if bad:

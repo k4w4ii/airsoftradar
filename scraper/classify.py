@@ -19,7 +19,7 @@ _C = {
     'MAG': re.compile('(magazin|magazyn|\\bmags?\\b|\\bhi-?caps?\\b|\\bmid-?caps?\\b|\\blow-?caps?\\b|\\btár(ak|at|ral)?\\b|zásobník|zasobnik|chargeur|cargador|caricator|\\bshells?\\b|speed ?loader|bb ?loader|magazynek|caricatore)', 0),
     'AMMO': re.compile('(\\bbbs?\\b|\\b\\d[.,]\\d{2} ?g\\b|\\bgolyó\\b|golyók\\b|kuličky\\b|kulki\\b|green ?gas|top ?gas|\\bpropane|co2 ?(cartridge|capsule|patron|bombičk|bombick|kapsuł|kapsul)|gáz ?palack|\\bgas ?(can|bottle|refill)s?\\b)', 0),
     'POWER': re.compile('(batter(y|ies)|\\bakku|akkumul|\\bbaterie|akumul|batterie|\\bli-?po\\b|\\bli-?ion\\b|\\bli-?fe\\b|\\bnimh\\b|chargers?\\b|\\btöltő|nabíječk|ładowar|ladowar|\\bdeans\\b|akumulátor|akkumulátor|nabíječ)', 0),
-    'OPTICS': re.compile('(scopes?\\b|céltávcs|red ?dots?|holo(graphic)? ?sights?|kolimátor|kolimator|celownik|zaměřovač|magnifier|\\boptics?\\b|flashlights?|lámpa|\\blasers?\\b|tracer|puškohled|puskohled|\\bluneta)', 0),
+    'OPTICS': re.compile('(scopes?\\b|céltávcs|red ?dots?|holo(graphic)? ?sights?|reflex|dot ?sights?|rangefinder|range ?finder|dalmierz|távolságmérő|night ?vision|éjjellátó|thermal|binocular|kolimátor|kolimator|celownik|zaměřovač|magnifier|\\boptics?\\b|flashlights?|lámpa|\\blasers?\\b|tracer|puškohled|puskohled|\\bluneta)', 0),
     'HOPUP': re.compile('(hop-?up|bucking|inner ?barrel|belső ?cső|precision ?barrel|tight ?bore|\\br-?hop|hop ?chamber|\\bnub\\b|hlaveň|hlaven|\\blufa\\b|\\blauf\\b|\\bcanna\\b|gumičk|gumick)', 0),
     'MOTOR': re.compile('(\\bmotors?\\b|mosfet|wiring|trigger ?unit)', 0),
     'INTERNAL': re.compile('(gearbox|mechabox|gear ?sets?|\\bgears\\b|fogaskerék|piston|dugattyú|cylinder|\\bhenger|nozzle|tappet|spring ?guide|rugóvezet|bushings?|bearings?|anti-?reversal|selector ?plate|air ?seal|o-?rings?|(main|aeg|upgrade|gearbox|power|valve|nozzle|hammer|recoil|tappet|trigger) ?springs?|\\bsprings? (m|sp)\\d{2,3}\\b|\\b(m|sp)\\d{2,3} ?springs?|\\brugó(szett|készlet|k)?\\b|pružin|sprężyn|sprezyn|blowback ?unit|\\bvalves?\\b|\\bsear\\b|\\bválec|\\bvalec|\\bválce|\\bpíst|\\bpist(u|y|em)?\\b|tłok|\\btlok|kolben|zylinder|cylindre|cilindro|pistone|\\bfeder\\b|ressort|\\bmolla\\b|muelle|těsnění|tesneni|tömítés|převod|prevod|ozuben|spoušť|spoust|ravasz|(upgrade|tuning) ?(set|kit)|ersatzteil|náhradní|nahradni|alkatrész|części|czesci)', 0),
@@ -27,7 +27,7 @@ _C = {
     'GRENADE': re.compile('(gránát|granát|grenade|granate|granada|granata|launcher|\\b40 ?mm\\b|\\bm203\\b|\\bm320\\b|\\bgl-?06\\b|claymore)', 0),
     'GRENADE_NOT': re.compile('(pouch|tasak|holder|tartó|zseb|pocket|sumka)', 0),
     'M_EXTERNAL': re.compile('(handguard|\\bris\\b|keymod|m-?lok|\\brails?\\b|\\bstocks?\\b|válltámasz|\\bgrips?\\b|markolat|outer ?barrel|külső ?cső|\\bbody\\b|receiver|\\bslides?\\b|sights?\\b|\\bmounts?\\b|pažb|pazb|\\bkolba\\b|předpažb|előagy|rukojeť|rukojet|chwyt|conversion)', 0),
-    'AMBIG_EXTERNAL': re.compile('(handguard|\\bris\\b|keymod|m-?lok|\\brails?\\b|\\bstocks?\\b|válltámasz|\\bgrips?\\b|markolat|outer ?barrel|külső ?cső|\\bbody\\b|receiver|\\bslides?\\b|iron ?sights?|\\bsights?\\b|\\bmounts?\\b|buffer ?tube|charging ?handle)', 0),
+    'AMBIG_EXTERNAL': re.compile('(handguard|\\bris\\b|keymod|m-?lok|\\brails?\\b|\\bstocks?\\b|válltámasz|\\bgrips?\\b|markolat|outer ?barrel|külső ?cső|\\bbody\\b|receiver|\\bslides?\\b|iron ?sights?|\\bmounts?\\b|buffer ?tube|charging ?handle)', 0),
     'OTHER_MISC': re.compile('(cleaning|\\boil\\b|olaj|silicon|szilikon|grease|\\btargets?\\b|céltábl|chrono|\\bpatch|\\bradio|headset|knife|\\bkés\\b|bayonet|\\btools?\\b|szerszám)', 0),
     'SNIPER': re.compile('(sniper|mesterlövész|odstřel|odstrel|\\bdmr\\b|\\bsvd\\b|dragunov|\\bvsr|\\bl96|\\bawm\\b|\\baw ?338|\\bm24\\b|\\bm40\\b|\\bm700\\b|\\bsrs\\b|\\bssg|\\bmb ?0?\\d{2}\\b|bolt[- ]action|\\bsr-?25|\\bm14\\b|\\bg28\\b|\\bsr-?10\\b|\\bmk ?1[12]\\b|\\btac-?41|\\bt-?10\\b|\\bscout\\b|marksman)', 0),
     'LMG': re.compile('(\\blmg\\b|géppuska|kulomet|machine ?gun|machine-gun|\\bm249|\\bm60\\b|\\bpkm?\\b|\\brpk|\\bmg ?(3|4|42|5)\\b|\\bmk ?4[68]\\b|minimi|\\bnegev|\\bm240|\\brpd\\b|\\bsaw\\b)', 0),
@@ -78,6 +78,9 @@ def _weapon_ok(cat: str, p: float, explicit: bool) -> bool:
     return explicit or p >= _FLOOR_MODEL_ONLY.get(cat, _FLOOR_MODEL_ONLY_DEFAULT)
 
 
+_MODEL_CODE = re.compile(r"(?<![\w])[A-Z]{1,5}[-.]?\d{2,4}[A-Z]?(?![\w])")   # CM048, SA-C08, AM-007, LVOA-S nincs
+
+
 def category(title: str | None, url: str | None = None, price: float | None = None) -> str:
     o = _BUNDLE_O.sub('', title or '')
     c = _C['BUNDLE'].sub('', (title or '').lower())
@@ -85,7 +88,11 @@ def category(title: str | None, url: str | None = None, price: float | None = No
     p = float(price or 0)
     has = lambda k, s=c: _C[k].search(s) is not None
     w, f = has('W'), has('F')
-    m = has('M1') or has('M2', o) or has('M3')
+    full = (title or '').lower()
+    # „Stock w/ Adjustable Buttpad … for CM.708 Sniper Rifles”: a „w/” utáni rész nem csomag, a „for X” a fő tárgyra vonatkozik
+    piece = has('AMBIG_EXTERNAL') or has('M_EXTERNAL') or any(has(k) for k, _ in _SUBS)
+    m = has('M1') or has('M2', o) or has('M3') or (piece and has('M1', full))
+    f = f or (piece and has('M1', full))
     sub = next((name for k, name in _SUBS if has(k)), None)
     if has('GRENADE') and not has('GRENADE_NOT'):
         if 0 < p < 8000 and (m or f or sub):              # „Bearings for 40mm grenades”, „seal kit pro granáty”
@@ -111,7 +118,10 @@ def category(title: str | None, url: str | None = None, price: float | None = No
     for k, name in _URL_TYPES:
         if has(k, u):
             return name if _weapon_ok(name, p, explicit) else not_weapon
-    return 'rifle' if p >= 40000 else 'other'
+    # végső tartalék: drága, de semmi nem utal fegyverre -> csak akkor puska, ha modellkód vagy platform van a címben
+    if p >= 40000 and (platforms(o) or _MODEL_CODE.search(o)):
+        return 'rifle'
+    return 'other'
 
 
 def group(cat: str | None) -> str:

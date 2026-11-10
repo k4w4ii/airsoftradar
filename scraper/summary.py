@@ -3,7 +3,7 @@ product_summary újraépítése D1-ben (a Postgres materializált nézet + v_off
 A napi futás végén egyszer fut (rematch.py). Csak a ténylegesen változott sorokat írja (D1: a sorírás a költség).
 
 Lépések: árfolyamok -> aktív, párosított ajánlatok -> bolt+URL ismétlődés szűrése -> HUF/EUR ár ->
-kiugró árak (>=3 bolt: a medián 40%-a alatt / 250%-a felett; 2 bolt: 4x olcsóbb) -> offers.is_outlier ->
+kiugró árak (>=3 bolt: a medián 40%-a alatt / 250%-a felett; 2 bolt: 2,5x olcsóbb – szinte mindig alkatrész vagy más termék) -> offers.is_outlier ->
 kategória a boltok többségi szavazatával (+ a terméknév fél szavazat) -> platformok -> összesítő sor.
 """
 from __future__ import annotations
@@ -55,7 +55,7 @@ def compute(shops, mfrs, products, offers, rates) -> tuple[dict[int, dict], set[
         prices = [o["price_huf"] for o in offs]
         n, mx, mid = len(prices), max(prices), statistics.median(prices)
         for o in offs:
-            if (n >= 3 and (o["price_huf"] < 0.4 * mid or o["price_huf"] > 2.5 * mid)) or (n == 2 and o["price_huf"] * 4 < mx):
+            if (n >= 3 and (o["price_huf"] < 0.4 * mid or o["price_huf"] > 2.5 * mid)) or (n == 2 and o["price_huf"] * 2.5 < mx):
                 outliers.add(o["id"])
         clean = [o for o in offs if o["id"] not in outliers]
         if not clean:

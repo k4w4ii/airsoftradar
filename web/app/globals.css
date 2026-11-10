@@ -16,6 +16,9 @@
   --accent-bg: #e3f5ee;
   --accent-hover: #095c42;
   --on-accent: #ffffff;
+  --logo-olive: #6f6b3c;
+  --logo-tan: #9c7543;
+  --brand-font: var(--font-brand, "Montserrat"), var(--display);
   --topbar: #ffffff;
   --pop: #ffffff;
   --faint: #a3abb3;
@@ -40,6 +43,8 @@
   --accent-bg: #3b2c25;
   --accent-hover: #e08a6c;
   --on-accent: #1f1e1d;
+  --logo-olive: #8f8a55;
+  --logo-tan: #b8915a;
   --olive: #8fbf6f;
   --brick: #e5655b;
   --steel: #7aa7d9;
@@ -75,8 +80,13 @@ img { display: block; max-width: 100%; }
   max-width: 1120px; margin: 0 auto; padding: 10px 20px;
   display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center;
 }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 24px/1 var(--display); letter-spacing: .01em; }
-.logo-mark { width: 28px; height: 28px; color: var(--bone); }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--bone); }
+.logo-mark { flex: none; width: 46px; height: 46px; background: var(--logo-olive);
+  -webkit-mask: url(/logo-mark.png) center / contain no-repeat; mask: url(/logo-mark.png) center / contain no-repeat; }
+.wordmark { display: grid; font: 800 19px/0.95 var(--brand-font); letter-spacing: .02em; }
+.wm-top { color: var(--bone); }
+.wm-bottom { color: var(--logo-tan); }
+.wm-dot { color: var(--logo-olive); font-weight: 700; letter-spacing: 0; text-transform: lowercase; }
 
 .topsearch { display: flex; min-width: 0; }
 .topsearch input[type="search"] {
@@ -102,8 +112,8 @@ img { display: block; max-width: 100%; }
 .footer-inner { max-width: 1120px; margin: 0 auto; padding: 28px 20px 12px; display: flex; flex-wrap: wrap; gap: 20px 48px; justify-content: space-between; }
 .footer-brand { max-width: 560px; }
 .footer-brand p { margin: 10px 0 0; line-height: 1.55; }
-.small-brand { font-size: 20px; color: var(--bone); }
-.small-brand .logo-mark { width: 22px; height: 22px; }
+.small-brand .wordmark { font-size: 14px; }
+.small-brand .logo-mark { width: 32px; height: 32px; }
 .footer-links { display: grid; grid-template-columns: repeat(2, auto); gap: 8px 32px; align-content: start; }
 .footer-links a { color: var(--bone); font-size: 14px; text-decoration: none; }
 .footer-links a:hover { text-decoration: underline; }
@@ -464,8 +474,9 @@ img { display: block; max-width: 100%; }
   .wblock-head { flex-wrap: wrap; align-items: baseline; }
 }
 @media (max-width: 380px) {
-  .brand { font-size: 21px; gap: 8px; }
-  .logo-mark { width: 24px; height: 24px; }
+  .brand { gap: 8px; }
+  .logo-mark { width: 38px; height: 38px; }
+  .wordmark { font-size: 15px; }
 }
 
 /* ---------- téma-váltó (JS nélkül: két link, mindig a másikra váltót mutatjuk) ---------- */

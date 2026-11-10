@@ -67,7 +67,7 @@ A scraper a D1-be a weboldal Workerének titkos végpontján (`/api/db`, Bearer 
 | VSGUN | ES | – | ❌ letiltva (bot-védelem) |
 | Airsoft Legends | NL | sitemap, csak `/en/` | ÚJ – ellenőrizendő |
 | Bunker501 | NL | sitemap, általános minta | ÚJ – ellenőrizendő |
-| Phenix Airsoft | FR | angol sitemap (`1_en_0`), PrestaShop minta | javítva 2026-11-09 – ellenőrizendő |
+| Phenix Airsoft | FR | – | ❌ letiltva 2026-11-10 (a GitHub-gépről 405, bot-védelem; feedet kérni) |
 | Militaria.pl | PL | – | ❌ letiltva (nincs sitemap, JS-lista; később lapozós konfig) |
 | Red Beret | PL | sitemap, általános minta | ÚJ – ellenőrizendő |
 | Atom Airsoft | FI | Shopify sitemap `/products/` | ÚJ – ellenőrizendő |
@@ -123,7 +123,7 @@ Időkorlát: boltonként 300 perc (`SCRAPE_BUDGET_MIN`, job-timeout 330) és ala
 - Jellemző-őr (`filters.py: specs / spec_conflict`): BB-súly, kiszerelés (g/kg, db), gázfajta és ml, akku V / mAh / csatlakozó / forma, rugó (M100…), belső cső átmérő és hossz, gumikeménység (°), tárkapacitás és -típus (hi/mid/low-cap), áttétel (18:1), motor tengely és típus, generáció, verzió (V2/V3), fps, csőhossz (″), csomagméret, bio/nyomjelző BB. Ha két cím ugyanabban a jellemzőben eltér, soha nem párosulnak (se kódra, se fuzzy-val); a termékhez került ajánlat jellemzőit a katalógus megjegyzi (`Catalog.learn`).
 - Jellemző-audit (`rematch.py: audit_specs`): egy terméken belül az eltérő jellemzőjű ajánlatok leválnak (a név szerinti, ennek hiányában a leggyakoribb érték marad), majd újrapárosulnak. A napi futás utolsó lépése (`refresh` job → `rematch.py`), így az oldal minden éjjel magától rendbe jön.
 - Egyedi változat (`is_variant`: custom, HPA, Wolverine/Polarstar, tuned, upgraded, használt…): csak ugyanilyen termékhez párosul; ha a kód az alap terméké, cím alapján új termék lesz (pl. „Evike Custom CYMA CM048 … HPA” ≠ „CYMA CM048”).
-- Árkiugrás (`summary.py`, `offers.is_outlier`): >= 3 boltnál a medián 40%-a alatti / 250%-a feletti ajánlat, 2 boltnál a 4x olcsóbb „eltérő”. Nem számít a legjobb árba, árfolyosóba, boltszámba, ártörténetbe; a termékoldalon lenyitható „Eltérő ár” blokkban látszik.
+- Árkiugrás (`summary.py`, `offers.is_outlier`): >= 3 boltnál a medián 40%-a alatti / 250%-a feletti ajánlat, 2 boltnál a 2,5x olcsóbb „eltérő” (pl. alkatrész a fegyver mellett). Nem számít a legjobb árba, árfolyosóba, boltszámba, ártörténetbe; a termékoldalon lenyitható „Eltérő ár” blokkban látszik.
 - Dizájn: palaszürke `#1B2027`, csontfehér `#E9E4D8`, sárgaréz `#C8A24E` (csak ár / legjobb ajánlat), olív = raktáron, tégla = elfogyott; Barlow Condensed + Barlow. Egyedi elem: árfolyosó (legolcsóbb vs. legdrágább bolt) és arányos ajánlat-létra.
 
 ## Teljesítmény

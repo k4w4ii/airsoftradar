@@ -99,9 +99,16 @@ LOWER_FOR_RX = re.compile(r"(?<![\w])(?:pro|do|per)\s+" + _TARGET.replace("m4|ak
 HOZ_RX = re.compile(r"\S*(?:\d|m4|ak|glock|vsr|mp5|g36)\S*-(?:hoz|hez|h[oö]z)(?![\w])", re.I)
 
 
+PIECE_RX = re.compile(r"(?<![\w])(?:stocks?|buttstock|handguard|receiver|body|slides?|frame|outer\s+barrel|rails?|grips?|"
+                      r"pažb\w*|kolba|válltámasz|előagy|tok|ház)(?![\w])", re.I)
+
+
 def made_for_other(title: str) -> bool:
     core = BUNDLE_RX.sub("", title)
-    return bool(FOR_TARGET_RX.search(core) or LOWER_FOR_RX.search(core) or HOZ_RX.search(core))
+    if FOR_TARGET_RX.search(core) or LOWER_FOR_RX.search(core) or HOZ_RX.search(core):
+        return True
+    # a csomagnak hitt „w/ …” részben is számít a „for CM.708 … Rifles” (Evike: „Stock w/ Cheek Rest for CM.708 …”)
+    return bool(FOR_TARGET_RX.search(title) and (PART_RX.search(core) or PIECE_RX.search(core)))
 
 
 def is_part(title: str | None, price_huf: float | None = None) -> bool:
@@ -110,7 +117,7 @@ def is_part(title: str | None, price_huf: float | None = None) -> bool:
     if not title:
         return False
     core = BUNDLE_RX.sub("", title.replace("_", " "))
-    if made_for_other(core):
+    if made_for_other(title.replace("_", " ")):
         return True
     m = PART_RX.search(core)
     if not m:
@@ -130,8 +137,19 @@ VARIANT_RX = re.compile(
     r"high ?speed ?build|dmr ?build|full ?upgrade|egyedi|tuningolt|felújított|refurbished|used|használt)(?![\w])", re.I)
 
 
+# nem egyedi változat, csak említés: „HPA ready”, „HPA adapter”, „used by …”, „custom series/fit/logo”, gyári „upgraded version”
+VARIANT_NOT_RX = re.compile(
+    r"(?<![\w])(?:hpa[\s-]*(?:ready|compatible|kompatibilis|adapt\w*|tank|line|hose|regulator|tömlő|palack)|"
+    r"(?:ready|compatible|adapter)\s+(?:for\s+)?hpa|used\s+(?:by|in|with|for)|"
+    r"custom\s+(?:series|fit|logo|marking\w*|engraving|colou?r|edition\s+box)|upgraded\s+version|"
+    r"tuning\s+(?:kit|parts?|set))(?![\w])", re.I)
+
+
 def is_variant(title: str | None) -> bool:
-    return bool(title and VARIANT_RX.search(BUNDLE_RX.sub("", title)))
+    if not title:
+        return False
+    t = VARIANT_NOT_RX.sub(" ", BUNDLE_RX.sub("", title))
+    return bool(VARIANT_RX.search(t))
 
 
 # ---------------------------------------------------------------------------------------------
