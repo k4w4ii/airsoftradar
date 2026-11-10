@@ -179,16 +179,17 @@ const TYPICAL_WORDS = {
   part_motor: { strong: ["motor"] },
   part_external: { strong: ["handguard"], weak: ["stock"] },
 };
+// A szavak beégetett konstansok -> SQL-literálként (a D1 egy lekérdezésben max. 100 paramétert enged)
+const lit = (v) => `'${String(v).replace(/'/g, "''")}'`;
 const TYPICAL = (() => {
-  const params = [];
-  const like = (words) => words.map((w) => { params.push(`%${w}%`); return "lower(name) LIKE ?"; }).join(" OR ");
+  const like = (words) => words.map((w) => `lower(name) LIKE ${lit(`%${w}%`)}`).join(" OR ");
   const whens = [];
   for (const [cat, w] of Object.entries(TYPICAL_WORDS)) {
-    if (w.not) { params.push(cat); whens.push(`WHEN category = ? AND (${like(w.not)}) THEN 3`); }
-    params.push(cat); whens.push(`WHEN category = ? AND (${like(w.strong)}) THEN 0`);
-    if (w.weak) { params.push(cat); whens.push(`WHEN category = ? AND (${like(w.weak)}) THEN 1`); }
+    if (w.not) whens.push(`WHEN category = ${lit(cat)} AND (${like(w.not)}) THEN 3`);
+    whens.push(`WHEN category = ${lit(cat)} AND (${like(w.strong)}) THEN 0`);
+    if (w.weak) whens.push(`WHEN category = ${lit(cat)} AND (${like(w.weak)}) THEN 1`);
   }
-  return { sql: `(CASE ${whens.join(" ")} ELSE 2 END)`, params };
+  return { sql: `(CASE ${whens.join(" ")} ELSE 2 END)` };
 })();
 
 /** Üdvözlő oldal: kategóriánkénti darabszám és mintakép, legnagyobb árkülönbségek, népszerű márkák, számok. */
@@ -202,7 +203,7 @@ export async function getWelcomeD1() {
                   SELECT category, image_url, row_number() OVER (PARTITION BY category ORDER BY ${TYPICAL.sql}, offer_count DESC, id) AS rn
                   FROM product_summary WHERE image_url LIKE 'https://%'
                     AND lower(name) NOT LIKE '%patch%' AND lower(name) NOT LIKE '%felvarr%') WHERE rn <= 3
-                ORDER BY category, rn`).bind(...TYPICAL.params),
+                ORDER BY category, rn`),
     // valódi, raktáron lévő árkülönbség 2+ boltnál; a 70% feletti (gyanús) eltérés kimarad
     db.prepare(`SELECT ${CARD_COLS}, (max_price_huf - best_price_huf) * 1.0 / max_price_huf AS d FROM product_summary
                 WHERE category IN (${weapons.map(() => "?").join(",")}) AND offer_count > 1 AND best_price_huf IS NOT NULL
