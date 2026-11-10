@@ -1,0 +1,29 @@
+name: words
+# Idegen nyelvű szavak listája (scraper/foreign_words.py) a fordító szótárhoz. Kézzel: Actions → words → Run workflow.
+# Eredmény: a futás oldalán alul az „idegen-szavak” csatolmány (CSV) letölthető.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+  D1_API_URL: ${{ vars.D1_API_URL }}
+  D1_API_TOKEN: ${{ secrets.D1_API_TOKEN }}
+
+jobs:
+  words:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - run: python scraper/foreign_words.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: idegen-szavak
+          path: idegen_szavak.csv
+          retention-days: 7
