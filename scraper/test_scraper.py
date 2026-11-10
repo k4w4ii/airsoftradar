@@ -485,6 +485,14 @@ class TestCoverage(unittest.TestCase):
         self.assertEqual(sorted(o.title for o in out), ["M4 magazine 120 BB", "Specna Arms SA-E01"])
 
 
+class TestMarkVersion(unittest.TestCase):
+    def test_mk_versions_never_merge(self):
+        from filters import specs, spec_conflict
+        a, b = specs("Arcturus LWT MK-II CQB 10in AEG"), specs("Arcturus LWT MK-I CQB 10in AEG")
+        self.assertTrue(spec_conflict(a, b))
+        self.assertFalse(spec_conflict(specs("TT Pouch MKII"), specs("TT pouch MK 2")))
+
+
 class TestVariant(unittest.TestCase):
     def test_variant_mentions_are_not_custom(self):
         from filters import is_variant

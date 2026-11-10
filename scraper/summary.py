@@ -89,7 +89,7 @@ def compute(shops, mfrs, products, offers, rates) -> tuple[dict[int, dict], set[
             "category": cat, "platforms": ("," + ",".join(sorted(plats)) + ",") if plats else "",
             "best_price_huf": best_huf,
             "best_price_eur": min((o["price_eur"] for o in instock if o["price_eur"] is not None), default=None),
-            "max_price_huf": max(o["price_huf"] for o in clean),
+            "max_price_huf": max((o["price_huf"] for o in instock), default=None),   # csak raktáron lévők egymás közt
             "min_price_any_huf": min_any,
             "min_price_any_eur": min((o["price_eur"] for o in clean if o["price_eur"] is not None), default=None),
             "offer_count": len({o["shop_id"] for o in clean}),

@@ -169,6 +169,7 @@ _SPEC_RULES = [
     ("inch",  re.compile(r"(\d{1,2}(?:[.,]\d)?)\s*(?:\"|″|''|inch|in(?![a-z]))", re.I)),
     ("fps",   re.compile(r"(\d{3})\s*fps", re.I)),
     ("gen",   re.compile(r"(?<![a-z])gen(?:eration)?\.?\s*(\d)(?!\d)", re.I)),
+    ("mk",    re.compile(r"(?<![a-z])mk\.?\s*-?\s*(iv|i{1,3}|\d{1,2})(?![a-z\d])", re.I)),   # MK-I ≠ MK-II
     ("ver",   re.compile(r"(?<![\w.])v\s?(\d)(?![\d.,]|\s*(?:v|mm))", re.I)),
     ("rounds", re.compile(r"(\d{2,4})\s*(?:rounds?|rds|ran|lövetű|lövés\w*|kulek|kulí\w*|billes|colpi|schuss|bb(?!s?\s*(?:0|bag))s?(?=\s|$|[,)]))", re.I)),
     ("count", re.compile(r"(\d{3,6})\s*(?:pcs|db|ks|szt|bbs|darab|stück|kusů|pieces|kul\w*)(?![a-z])", re.I)),
@@ -211,7 +212,10 @@ def specs(title: str | None) -> dict[str, str]:
             continue
         m = rx.search(t)
         if m:
-            out.setdefault(key, _num(next(g for g in m.groups() if g)))
+            g = next(g for g in m.groups() if g)
+            if key == "mk":                                # római szám -> szám (MK-II = MK2)
+                g = str({"i": 1, "ii": 2, "iii": 3, "iv": 4}.get(g.lower(), g))
+            out.setdefault(key, _num(g))
     if _SPRING_CTX.search(t) and (m := _SPRING_RX.search(t)):
         out["spring"] = m.group(1)
     if _GAS_CTX.search(t) and (m := _GAS_TYPE.search(t)):

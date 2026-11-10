@@ -164,7 +164,6 @@ export async function countProductsD1() {
 
 // kategóriák mintaképe: 0 = erős találat (első helyen), 1 = gyenge, 2 = egyéb; a „not” szavas termék sosem csempekép
 const TYPICAL_WORDS = {
-  rifle: { strong: ["m4", "ar15", "ak47", "ak74"] },
   grenade: { strong: ["grenade launcher", "launcher"], weak: ["grenade", "gránát"] },
   acc_mag: { strong: ["mid-cap", "midcap", "mid cap", "hi-cap", "hicap"], weak: ["magazine", "tár "],
              not: ["pouch", "loader", "holder", "adapter", "speed", "coupler", "clamp", "zseb", "spring", "follower", "base", "pistol", "gbb", "pisztoly"] },
