@@ -13,7 +13,7 @@ from decimal import Decimal
 from collections import Counter, defaultdict
 
 import classify
-from filters import is_part, is_variant, specs
+from filters import spec_conflict, is_part, is_variant, specs
 from matcher import gun_kind_of
 from names import clean_name
 from run_shop import OFFER_COLS, load_catalog, match_offers
@@ -34,7 +34,7 @@ def audit_specs(db, cat) -> int:
             if key not in keep:
                 vals = Counter(sp[key] for _, sp in offers if key in sp)
                 keep[key] = sorted(vals.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
-        bad = [oid for oid, sp in offers if any(k in keep and keep[k] != v for k, v in sp.items())]
+        bad = [oid for oid, sp in offers if spec_conflict(sp, keep)]   # a „power” átfedésre is figyel
         if bad:
             detach += bad
             cat.specs[pid] = keep          # az újrapárosításnál már ne kerüljenek vissza

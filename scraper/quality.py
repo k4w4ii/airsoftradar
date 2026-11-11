@@ -22,8 +22,11 @@ from filters import is_part
 
 FIXES_FILE = Path(__file__).parent / "javitasok.txt"
 SITE = "https://www.airsofthunter.com/hu/p/"
-_FOREIGN = re.compile(r"[ěščřžůňťďąęłńśźżćàèìòùâêîôûçãõñßæøåœ]", re.I)   # nem magyar ékezetek
+_FOREIGN = re.compile(r"[ěščřžůňťďąęłńśźżćàèìòùâêîôûçãõñßøåœ]", re.I)   # æ nem: „Æther” márkanév   # nem magyar ékezetek
 EXPENSIVE_PART_HUF = 150_000
+# nem termék (ajándékkártya, szerviz, tesztsor): sosem jelenik meg az oldalon
+NON_PRODUCT = re.compile(r"gift ?card|ajándékkártya|ajandekkartya|voucher|gutschein|carte cadeau|bon cadeau|buono regalo|"
+                         r"karta podarunkowa|dárkový poukaz|teszt termék|riparazione prodotto|repair service", re.I)
 
 
 def load_fixes(path: Path | None = None) -> dict:
@@ -77,13 +80,16 @@ def review(rows: dict[int, dict], by_product: dict[int, list[dict]], cats: dict[
         add = lambda kind, detail: issues.append({"tipus": kind, "termek": r["name"], "kategoria": r["category"],
                                                    "reszlet": detail, "link": SITE + r["slug"]})
         grp = classify.group(r["category"])
-        mixed = [o for o in offs if classify.group(cats.get(o["id"], r["category"])) != grp and not o.get("outlier")]
+        gun = classify.is_gun(r["category"])          # csak a fegyver ↔ nem fegyver keveredés számít (az alkatrész/kiegészítő határ nem)
+        mixed = [o for o in offs if classify.is_gun(cats.get(o["id"], r["category"])) != gun and not o.get("outlier")]
         if mixed and len(mixed) < len(offs):
-            add("vegyes ajánlatok", f"{len(mixed)}/{len(offs)} ajánlat más csoportba illik: {mixed[0]['title_raw'][:80]}")
+            add("vegyes ajánlatok", f"{len(mixed)}/{len(offs)} ajánlat {'nem fegyver' if gun else 'fegyver'}: {mixed[0]['title_raw'][:80]}")
         instock = [o["price_huf"] for o in offs if o["stock"] == "in_stock" and not o.get("outlier")]
         if len(instock) >= 2 and max(instock) > 2.5 * min(instock):
             add("nagy árkülönbség", f"{min(instock)}–{max(instock)} Ft a raktáron lévők között")
-        if grp in ("parts", "acc") and r["price"] and r["price"] > EXPENSIVE_PART_HUF:
+        name = r["name"].lower()
+        if (grp in ("parts", "acc") and r["price"] and r["price"] > EXPENSIVE_PART_HUF
+                and classify._C["STRONG_W"].search(name) and not classify._C["F"].search(name)):
             add("drága alkatrész/kiegészítő", f"{r['price']} Ft – lehet, hogy fegyver?")
         if _FOREIGN.search(r["name"]):
             add("idegen nyelvű név", r["name"])
@@ -107,5 +113,11 @@ def report(issues: list[dict], fixed: list[dict], path: str = "minoseg.csv") -> 
         lines = ["## Minőség-őr", "", f"Automatikusan javítva: **{len(fixed)}**", "",
                  "| Ellenőrizendő | db |", "|---|---|", *[f"| {k} | {v} |" for k, v in sorted(counts.items())], "",
                  "A teljes lista: a futás oldalán lent, **Artifacts → minoseg** (CSV).", ""]
+        for kind in sorted(counts):                      # típusonként 15 példa közvetlenül az összesítőben
+            lines += [f"<details><summary>{kind} – példák</summary>", "", "| Termék | Kategória | Részlet |", "|---|---|---|"]
+            for x in [i for i in issues if i["tipus"] == kind][:15]:
+                cell = lambda v: str(v).replace("|", "/").replace("\n", " ")[:90]
+                lines.append(f"| [{cell(x['termek'])}]({x['link']}) | {x['kategoria']} | {cell(x['reszlet'])} |")
+            lines += ["", "</details>", ""]
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
             f.write("\n".join(lines) + "\n")

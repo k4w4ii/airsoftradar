@@ -50,7 +50,7 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
             best[key] = (rank, o)
     by_product = defaultdict(list)
     for _, o in best.values():
-        if o["url"] not in fixes["elrejt"]:
+        if o["url"] not in fixes["elrejt"] and not quality.NON_PRODUCT.search(o["title_raw"] or ""):
             by_product[o["product_id"]].append(o)
 
     outliers, rows = set(), {}
@@ -88,10 +88,13 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
                 is_variant(p["name"]) or 2 * sum(is_variant(o["title_raw"]) for o in clean) > len(clean)):
             cat = classify.custom_of(cat)
         grp = classify.group(cat)
+        gun = classify.is_gun(cat)
+        pows = set(classify.powers(p["name"], gun))
         plats = set(classify.platforms(p["name"]))
         for o in clean:
             if classify.group(cats[o["id"]]) == grp:
                 plats.update(classify.platforms(o["title_raw"]))
+                pows.update(classify.powers(o["title_raw"], gun))
         instock = [o for o in clean if o["stock"] == "in_stock"]
         best_huf = min((o["price_huf"] for o in instock), default=None)
         min_any = min(o["price_huf"] for o in clean)
@@ -101,6 +104,7 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
             "manufacturer": mname,
             "search_code": re.sub(r"[^a-z0-9]", "", f"{mname} {p['name']} {p.get('model_code') or ''}".lower()),
             "category": cat, "platforms": ("," + ",".join(sorted(plats)) + ",") if plats else "",
+            "powers": ("," + ",".join(sorted(pows)) + ",") if pows else "",
             "best_price_huf": best_huf,
             "best_price_eur": min((o["price_eur"] for o in instock if o["price_eur"] is not None), default=None),
             "max_price_huf": max((o["price_huf"] for o in instock), default=None),   # csak raktáron lévők egymás közt
@@ -116,6 +120,15 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
     for r in rows.values():
         r["sig"] = hashlib.sha1(json.dumps(r, sort_keys=True, default=str).encode()).hexdigest()[:16]
     return rows, outliers
+
+
+def _ensure_powers_column(db) -> None:
+    """2026-11-11: új oszlop (működés-szűrő). Magától létrehozza, ha még nincs (nem kell kézi SQL)."""
+    try:
+        db.execute([("SELECT powers FROM product_summary LIMIT 1", [])])
+    except Exception:
+        db.execute([("ALTER TABLE product_summary ADD COLUMN powers TEXT NOT NULL DEFAULT ''", [])])
+        print("[summary] új oszlop: product_summary.powers", flush=True)
 
 
 def rebuild(db) -> dict:
@@ -141,6 +154,7 @@ def rebuild(db) -> dict:
         if ids:
             db.update("offers", {"is_outlier": vals}, id=f"in.({','.join(map(str, ids))})")
 
+    _ensure_powers_column(db)
     # összesítő: törlés + csak a megváltozott sorok írása
     old = {r["id"]: r["sig"] for r in db.select("product_summary", select="id,sig")}
     gone = sorted(set(old) - set(rows))

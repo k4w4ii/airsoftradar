@@ -78,3 +78,28 @@ class TestReview(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPowers(unittest.TestCase):
+    def test_powers(self):
+        import classify
+        self.assertEqual(classify.powers("Specna Arms SA-J22 FLEX AEG"), ["aeg"])
+        self.assertEqual(classify.powers("Tokyo Marui VSR-10 G-Spec sniper rifle"), ["spring"])
+        self.assertEqual(classify.powers("Tokyo Marui VSR-10 GBB"), ["gbb"])
+        self.assertEqual(classify.powers("WE Glock 17 non-blowback gas pistol"), ["gas"])
+        self.assertEqual(classify.powers("Prometheus MS120 non-linear spring", gun=False), [])
+        self.assertEqual(classify.powers("Maple Leaf Hop Up Rubber for VSR-10 & GBB", gun=False), ["gbb", "spring"])
+
+    def test_aeg_never_merges_with_gbbr(self):
+        from filters import spec_conflict, specs
+        flex, vapor = specs("Specna Arms AK-12 SA-J22 FLEX AEG - Black"), specs("Specna Arms AK-12 SA-J22 VAPOR GBBR - Black")
+        self.assertTrue(spec_conflict(flex, vapor))
+        self.assertFalse(spec_conflict(specs("Hop Up Rubber for VSR-10 & GBB"), specs("Hop Up Rubber for GBB")))
+        self.assertTrue(spec_conflict(specs("SA-E07 EDGE carbine"), specs("SA-E07 CORE carbine")))
+
+    def test_summary_powers_and_non_products(self):
+        prods = {1: {"id": 1, "manufacturer_id": 1, "name": "CYMA CM.048 AKM AEG", "slug": "a"},
+                 2: {"id": 2, "manufacturer_id": 1, "name": "Gift card 50 EUR", "slug": "g"}}
+        rows, _ = run(prods, [offer(1, 1, "CYMA CM.048 AKM AEG", 160, "EUR"), offer(2, 2, "Atom Airsoft Gift card", 50, "EUR")])
+        self.assertEqual(rows[1]["powers"], ",aeg,")
+        self.assertNotIn(2, rows)

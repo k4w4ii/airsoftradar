@@ -29,7 +29,7 @@ export function translateTitle(text, locale = "en") {
   });
   return out
     .replace(/\s{2,}/g, " ")
-    .replace(/\s+([,.;:)])/g, "$1")
+    .replace(/\s+([,.;:)])(?=\s|$)/g, "$1")
     .replace(/(\(|^)\s+/g, "$1")
     .replace(/^[\s\-–,]+|[\s\-–,]+$/g, "");
 }

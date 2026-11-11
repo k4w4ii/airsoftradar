@@ -15,7 +15,7 @@ WORD = re.compile(r"[^\W\d_]+(?:['’-][^\W\d_]+)*", re.U)
 # ezek angolul / márkanévként is előfordulnak („VSR-10 Pro”, „Porta”): csak kisbetűs alakban vagy csupa nagybetűs címben cseréljük
 AMBIGUOUS = {"pro", "na", "do", "per", "porta", "pas", "bal", "oko", "lap", "pont", "man", "tok", "más", "fix", "stal",
              "alto", "mira", "ram", "nov", "kol", "kus", "typ", "patron", "mama", "ran", "lampa", "apa", "kule", "sal",
-             "z", "s", "ze", "mit"}
+             "z", "s", "ze", "mit", "za", "kom", "pod", "à", "canon", "pour", "de", "patron"}
 
 
 _HU_MAP = {"fekete", "homokszín", "homokszínű", "olívzöld", "zöld", "szürke", "barna", "fém", "gáz", "tár", "tárak", "henger",
@@ -92,7 +92,7 @@ def translate(text: str | None, words: dict[str, str] | None = None, keep: set[s
 
     out = WORD.sub(rep, text)
     out = re.sub(r"\s{2,}", " ", out)
-    out = re.sub(r"\s+([,.;:)])", r"\1", out)
+    out = re.sub(r"\s+([,.;:)])(?=\s|$)", r"\1", out)        # „ ,” → „,” (de a „DE .50” marad)
     out = re.sub(r"(\(|^)\s+", r"\1", out)
     out = re.sub(r"(\s-\s*)+(?=\s*-)", " ", out)          # üresen maradt „ - - ” elválasztók
     return out.strip(" -–,")

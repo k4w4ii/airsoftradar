@@ -82,7 +82,7 @@ _PART = [
 ]
 PART_RX = re.compile(r"(?<![\w])(?:" + "|".join(_PART) + r")(?![\w])", re.I)
 # „vele járó” részek levágása: „M4 AEG with battery and charger”, „Glock 17 + 2 magazines”
-BUNDLE_RX = re.compile(r"(?:\s\+|(?<![\w])(?:with|w/|incl\.?|including|included|mit|avec|con|com|v[cč]etn[eě]|v[cč]\.|plus|[eé]s|w zestawie|z zestawem|set with)(?![\w])).*$", re.I)
+BUNDLE_RX = re.compile(r"(?:\s\+|(?<![\w])(?:with|w/|incl\.?|including|included|mit|avec|con|v[cč]etn[eě]|v[cč]\.|plus|[eé]s|w zestawie|z zestawem|set with)(?![\w])).*$", re.I)
 # fegyverre utaló szavak (főnév vagy rendszer)
 WEAPON_RX = re.compile(r"(?<![\w])(?:aeg|aep|gbbr?|nbb|hpa|ebb|rifles?|carbines?|karab[eé]ly\w*|karabin\w*|puska\w*|pu[sš]k\w*|"
                        r"pistols?|pistole\w*|pistolet\w*|pistola\w*|pisztoly(?!tok)\w*|replica\w*|replik\w*|r[eé]plique\w*|"
@@ -196,12 +196,21 @@ def _num(s: str) -> str:
     return f"{v:g}"
 
 
+_SPECNA_CODE = re.compile(r"\bsa-[a-z]{1,2}\d", re.I)
+_SPECNA_LINE = re.compile(r"\b(core|flex|edge|prime|vapor|one)\b", re.I)
+
+
 def specs(title: str | None) -> dict[str, str]:
     """Normalizált jellemzők: {'bb_g': '0.2', 'kg': '1', 'ml': '500', 'gas': 'green', 'spring': 'M120', ...}"""
     if not title:
         return {}
     t = BUNDLE_RX.sub("", title)
     out: dict[str, str] = {}
+    import classify                                   # késleltetett import (classify -> dictionary -> names -> filters)
+    if pw := classify.powers(t, gun=False):           # AEG ≠ GBB ≠ HPA ≠ rugós: soha nem ugyanaz a termék
+        out["power"] = ",".join(pw)
+    if _SPECNA_CODE.search(t) and (m := _SPECNA_LINE.search(t)):
+        out["line"] = m.group(1).lower()              # Specna: CORE ≠ FLEX ≠ EDGE ≠ PRIME ≠ VAPOR (azonos SA-kód mellett is)
     for key, rx in _SPEC_RULES:
         if key == "mass":          # a „0.25g 1kg” első találata a BB-súly: az első >= 1 g értéket keressük
             for m in rx.finditer(t):
@@ -241,5 +250,14 @@ def specs(title: str | None) -> dict[str, str]:
 
 
 def spec_conflict(a: dict[str, str], b: dict[str, str]) -> bool:
-    """Igaz, ha van olyan jellemző, ami mindkettőben szerepel, de eltér."""
-    return any(k in b and b[k] != v for k, v in a.items())
+    """Igaz, ha van olyan jellemző, ami mindkettőben szerepel, de eltér.
+    „power” (AEG/GBB/HPA…): csak akkor ütközik, ha nincs közös elem („for VSR & GBB” ≈ „for GBB”)."""
+    for k, v in a.items():
+        if k not in b:
+            continue
+        if k == "power":
+            if not set(v.split(",")) & set(b[k].split(",")):
+                return True
+        elif b[k] != v:
+            return True
+    return False

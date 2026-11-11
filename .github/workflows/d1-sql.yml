@@ -36,3 +36,10 @@ jobs:
           SQL_FILE: ${{ inputs.file }}
         run: python scraper/run_sql.py "$SQL_FILE"
       - run: python scraper/rematch.py
+      - uses: actions/upload-artifact@v4       # minőség-őr: javított és ellenőrizendő termékek listája
+        if: always()
+        with:
+          name: minoseg
+          path: minoseg.csv
+          if-no-files-found: ignore
+          retention-days: 14

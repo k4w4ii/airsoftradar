@@ -466,5 +466,77 @@ null,
 null,
 null,
 "acc_gear"
+],
+[
+"A&K M249 Para AEG",
+null,
+195000,
+"lmg"
+],
+[
+"WE Tech L85 Bullpup Gas Blowback Model: Green Gas",
+null,
+181000,
+"rifle"
+],
+[
+"G&G Armament KAR98K Green Gas",
+null,
+231000,
+"sniper"
+],
+[
+"Snow Wolf sniper M82 BARRETT SW-02A Scope + bipod Black",
+null,
+156000,
+"sniper"
+],
+[
+"Hawke Optics Scope Airmax 30 10x44 rifle scope",
+null,
+158000,
+"acc_optics"
+],
+[
+"A&K M1A Airsoft Rifle Polymer Stock",
+null,
+20000,
+"part_external"
+],
+[
+"Specna Arms 8in1 AEG Maintenance kit",
+null,
+8000,
+"other"
+],
+[
+"KWA Evike.com Custom ATP Full Auto Gas Blowback Pistol with Angel Custom Upgrade Package",
+null,
+150000,
+"pistol"
+],
+[
+"BalystiK - Regulator HPR200 US - Titanium Silver",
+null,
+45000,
+"part_internal"
+],
+[
+"SPEGNIFIAMMA SHORTY - JING GONG",
+null,
+8000,
+"part_external"
+],
+[
+"E&C M4 AEG keymod",
+null,
+50000,
+"rifle"
+],
+[
+"WE G17 GBB green gas magazine",
+null,
+18000,
+"acc_mag"
 ]
 ]
