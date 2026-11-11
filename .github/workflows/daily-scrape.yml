@@ -100,6 +100,13 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
       - run: python scraper/rematch.py
+      - uses: actions/upload-artifact@v4       # minőség-őr: javított és ellenőrizendő termékek listája
+        if: always()
+        with:
+          name: minoseg
+          path: minoseg.csv
+          if-no-files-found: ignore
+          retention-days: 14
       # Next.js ISR újraépítés (opcionális): curl -X POST "$REVALIDATE_URL?secret=$REVALIDATE_SECRET"
 
   # legvégül: állapot-ellenőrzés (adatbázis + weboldal); ha piros, a GitHub e-mailt küld

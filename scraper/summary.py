@@ -15,6 +15,7 @@ import statistics
 from collections import Counter, defaultdict
 
 import classify
+import quality
 from filters import is_variant
 
 STOCK_RANK = {"in_stock": 0, "preorder": 1, "out_of_stock": 2}
@@ -26,8 +27,12 @@ def _rates(db) -> dict[str, float]:
     return r
 
 
-def compute(shops, mfrs, products, offers, rates) -> tuple[dict[int, dict], set[int]]:
-    """Tiszta függvény (teszthez): visszaadja az összesítő sorokat (termék-id -> sor) és a kiugró ajánlatok id-jét."""
+def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tuple[dict[int, dict], set[int]]:
+    """Tiszta függvény (teszthez): visszaadja az összesítő sorokat (termék-id -> sor) és a kiugró ajánlatok id-jét.
+    fixes: quality.load_fixes() (kézi javítások); diag: ide kerülnek a minőség-őr adatai (javítások, ajánlat-kategóriák)."""
+    fixes = fixes or {"kategoria": {}, "elrejt": set()}
+    diag = diag if diag is not None else {}
+    diag.update(fixed=[], cats={}, by_product={})
     eur = rates.get("EUR")
     country = {s["id"]: s["country"] for s in shops}
     for o in offers:
@@ -45,7 +50,8 @@ def compute(shops, mfrs, products, offers, rates) -> tuple[dict[int, dict], set[
             best[key] = (rank, o)
     by_product = defaultdict(list)
     for _, o in best.values():
-        by_product[o["product_id"]].append(o)
+        if o["url"] not in fixes["elrejt"]:
+            by_product[o["product_id"]].append(o)
 
     outliers, rows = set(), {}
     for pid, offs in by_product.items():
@@ -69,8 +75,16 @@ def compute(shops, mfrs, products, offers, rates) -> tuple[dict[int, dict], set[
             votes[cats[o["id"]]] += 1
         votes[classify.category(p["name"], None, None)] += 0.5
         cat = sorted(votes.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+        cat, why = quality.fix_category(cat, p, clean, cats, fixes)      # minőség-őr: kézi + biztos automatikus javítás
+        if why and why != "kézi javítás":
+            diag["fixed"].append({"tipus": why, "termek": p["name"], "kategoria": cat, "reszlet": "",
+                                  "link": quality.SITE + p["slug"]})
+        diag["cats"].update(cats)
+        for o in offs:
+            o["outlier"] = o["id"] in outliers
+        diag["by_product"][pid] = offs
         # egyedi / tuningolt / HPA / használt fegyver: külön kategória (a név, vagy az ajánlatok többsége szerint)
-        if cat in classify.WEAPONS and cat != "grenade" and (
+        if why != "kézi javítás" and cat in classify.WEAPONS and cat != "grenade" and (
                 is_variant(p["name"]) or 2 * sum(is_variant(o["title_raw"]) for o in clean) > len(clean)):
             cat = classify.custom_of(cat)
         grp = classify.group(cat)
@@ -112,7 +126,13 @@ def rebuild(db) -> dict:
     products = {p["id"]: p for p in db.select("products", select="id,manufacturer_id,name,slug,model_code,image_url")}
     offers = db.select("offers", select="id,product_id,shop_id,url,title_raw,price,currency,stock,last_seen_at,is_outlier",
                        is_active="eq.1", product_id="not.is.null")
-    rows, outliers = compute(shops, mfrs, products, offers, rates)
+    fixes, diag = quality.load_fixes(), {}
+    if fixes["elrejt"]:                 # kézzel elrejtett ajánlat: soha ne párosuljon újra (manual = az automatika nem nyúl hozzá)
+        hide = [o["id"] for o in offers if o["url"] in fixes["elrejt"]]
+        for i in range(0, len(hide), 80):
+            db.update("offers", {"product_id": None, "match_status": "manual"}, id=f"in.({','.join(map(str, hide[i:i + 80]))})")
+    rows, outliers = compute(shops, mfrs, products, offers, rates, fixes, diag)
+    quality.report(quality.review(rows, diag["by_product"], diag["cats"]), diag["fixed"])
 
     # kiugró jelzők: csak a változókat
     now_out = {o["id"] for o in offers if o.get("is_outlier")}

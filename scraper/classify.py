@@ -49,6 +49,10 @@ WEAPONS = {'rifle', 'pistol', 'smg', 'sniper', 'lmg', 'shotgun', 'grenade'}
 CUSTOM = {'custom_rifle', 'custom_pistol', 'custom_sniper'}
 
 
+ALL_CATEGORIES = WEAPONS | CUSTOM | {'part_internal', 'part_hopup', 'part_motor', 'part_external', 'acc_mag', 'acc_power',
+                                     'acc_optics', 'acc_ammo', 'acc_protect', 'acc_gear', 'other'}
+
+
 def custom_of(cat: str) -> str:
     return 'custom_pistol' if cat == 'pistol' else 'custom_sniper' if cat == 'sniper' else 'custom_rifle'
 

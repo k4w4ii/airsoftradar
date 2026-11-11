@@ -86,6 +86,16 @@ Repó → Settings → Secrets and variables → Actions:
 - **Idegen nyelvű címek:** ingyenes szótár fordítja angolra (`scraper/dict/*.txt`, kb. 3000 szó, nincs fizetős szolgáltatás). A terméknevek a rematch-nél lesznek angolok, a termékoldali bolti címek az oldal nyelvén jelennek meg (magyar oldalon a magyar szavak maradnak).
 - **Új szó felvétele:** a megfelelő `scraper/dict/0X.txt` fájlba egy sor: `szó=angol` (üres jobb oldal = a szó törlődik). Utána a gépeden: `python scraper/dictionary.py` (frissíti a `web/lib/dictionary.json`-t), push, majd Actions → rematch. Az Actions → words workflow csak a még nem ismert szavakat listázza.
 
+## 5/c. Minőség-őr (automatikus + kézi javítások)
+- Minden éjjel és minden kézi rematch-nél fut (`scraper/quality.py`):
+  - **automatikusan javít**, amit biztosan el lehet dönteni: a típusához túl olcsó „fegyvert”, és az alkatrész nevű „fegyvert” (pl. „Stock for CM.708”) átsorolja;
+  - **listát készít** arról, amit érdemes megnézni: vegyes ajánlatok egy termék alatt, 2,5x-es árkülönbség a raktáron lévők között, drága „alkatrész”, idegen nyelvű név.
+- **Hol látod:** Actions → a rematch (vagy a napi futás) → **Summary** oldal: „Minőség-őr” táblázat; lent **Artifacts → minoseg** → CSV (Excelben megnyitható).
+- **Kézi javítás (mindörökre):** `scraper/javitasok.txt` – egy sor = egy javítás, a fájl elején példák:
+  - `kategoria <termék-slug> = acc_gear` (a slug a termékoldal címének vége: `.../hu/p/<slug>`)
+  - `elrejt <bolti URL>` (az ajánlat soha többé nem jelenik meg)
+  - Mentés → push → Actions → rematch.
+
 ## 6. Üzemeltetői adatok (ÁSZF, adatvédelem, impresszum)
 `web\lib\site.js` → `OPERATOR` rész (név, e-mail; cím, adószám, nyilvántartási szám csak ha kitöltöd). Mentés → push.
 

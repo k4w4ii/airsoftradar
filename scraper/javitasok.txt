@@ -1,0 +1,14 @@
+# Kézi javítások – ezek mindig nyernek, és minden éjjel újra érvényesülnek (mindörökre).
+# Mentés után: git push, majd Actions → rematch (vagy megvárod az éjszakai futást).
+#
+# Termék kategóriája (a slug a termékoldal címének vége: airsofthunter.com/hu/p/<slug>):
+#   kategoria <slug> = <kategória>
+# Kategóriák: rifle, pistol, smg, sniper, lmg, shotgun, grenade, custom_rifle, custom_pistol, custom_sniper,
+#   part_internal, part_hopup, part_motor, part_external, acc_mag, acc_power, acc_optics, acc_ammo, acc_protect, acc_gear, other
+#
+# Egy bolti ajánlat végleges elrejtése (rossz termékhez került, vagy nem airsoft): a bolti termékoldal teljes címe
+#   elrejt <URL>
+#
+# Példák (a # miatt nem érvényesek):
+# kategoria acm-patch-0399-dont-run-yodt-grenade-black-1a2b3c = acc_gear
+# elrejt https://www.example-shop.com/en/some-product
