@@ -492,6 +492,12 @@ class TestMarkVersion(unittest.TestCase):
         self.assertTrue(spec_conflict(a, b))
         self.assertFalse(spec_conflict(specs("TT Pouch MKII"), specs("TT pouch MK 2")))
 
+    def test_pack_sizes_never_merge(self):
+        from filters import specs, spec_conflict
+        self.assertTrue(spec_conflict(specs("Umarex CO2 12g box of 5"), specs("Umarex CO2 12g box of 20")))
+        self.assertTrue(spec_conflict(specs("CO2 patron 12g 5db"), specs("CO2 Capsules 12g (Quantity: 20)")))
+        self.assertFalse(spec_conflict(specs("Walther CO2 12g 5er Pack"), specs("Walther CO2 12g x 5")))
+
 
 class TestVariant(unittest.TestCase):
     def test_variant_mentions_are_not_custom(self):
@@ -501,6 +507,27 @@ class TestVariant(unittest.TestCase):
         self.assertFalse(is_variant("Specna Arms SA-E07 EDGE HPA ready"))
         self.assertFalse(is_variant("G&G CM16 rifle used by special forces"))
         self.assertFalse(is_variant("Custom series M4 AEG"))
+
+
+class TestImages(unittest.TestCase):
+    def test_imageobject_name_is_not_an_image(self):
+        import jsonld
+        self.assertIsNone(jsonld._image({"@type": "ImageObject", "name": "Vorsk VMP-1X GBB submachine gun Black"}))
+        self.assertEqual(jsonld._image([{"name": "x", "contentUrl": "https://a.eu/1.jpg"}]), "https://a.eu/1.jpg")
+        self.assertEqual(jsonld._image("https://a.eu/img/12345"), "https://a.eu/img/12345")
+
+    def test_og_image_fallback(self):
+        import jsonld
+        page = ('<meta property="og:image" content="https://x.eu/a.jpg"><script type="application/ld+json">'
+                '{"@type":"Product","name":"Vorsk VMP-1X","image":{"name":"Vorsk VMP-1X"},"offers":{"price":"200"}}</script>')
+        self.assertEqual([o.image for o in jsonld.extract(page, "https://s.eu/p/1")], ["https://x.eu/a.jpg"])
+
+    def test_summary_picks_working_image(self):
+        from summary import pick_image
+        self.assertEqual(pick_image("https://s.eu/p/Vorsk VMP-1X GBB", [{"image_url": "https://s.eu/i/1.jpg", "stock": "in_stock"}]),
+                         "https://s.eu/i/1.jpg")
+        self.assertEqual(pick_image("https://s.eu/i/9.png", [{"image_url": "https://s.eu/i/1.jpg"}]), "https://s.eu/i/9.png")
+        self.assertIsNone(pick_image(None, [{"image_url": "Termék neve"}]))
 
 
 if __name__ == "__main__":

@@ -33,7 +33,7 @@ _C = {
     'AMBIG_EXTERNAL': re.compile('(handguard|forend|\\bris\\b|keymod|m-?lok|\\brails?\\b|\\bstocks?\\b|válltámasz|\\bgrips?\\b|markolat|outer ?barrel|külső ?cső|\\bbody\\b|receiver|\\bslides?\\b|iron ?sights?|\\bmounts?\\b|buffer ?tube|charging ?handle)', 0),
     'OTHER_MISC': re.compile('(cleaning|\\bracks?\\b|\\bstands?\\b|display|maintenance|\\boil\\b|olaj|silicon|szilikon|grease|\\btargets?\\b|céltábl|chrono|\\bpatch|\\bradio|headset|knife|\\bkés\\b|bayonet|\\btools?\\b|szerszám)', 0),
     'SNIPER': re.compile('(sniper|\\btrg\\b|\\bpgm\\b|\\.338|\\bhti\\b|\\bm40a\\d|kar ?98|enfield|\\ble4\\b|mesterlövész|odstřel|odstrel|\\bdmr\\b|\\bsvd\\b|dragunov|\\bvsr|\\bl96|\\bawm\\b|\\baw ?338|\\bm24\\b|\\bm40\\b|\\bm700\\b|\\bsrs\\b|\\bssg|\\bmb ?0?\\d{2}\\b|bolt[- ]action|\\bsr-?25|\\bm14\\b|\\bg28\\b|\\bsr-?10\\b|\\bmk ?1[12]\\b|\\btac-?41|\\bt-?10\\b|\\bscout\\b|marksman)', 0),
-    'LMG': re.compile('(\\blmg\\b|géppuska|kulomet|machine ?gun|machine-gun|\\bm249|\\bm60\\b|\\bpkm?\\b|\\brpk|\\bmg ?(3|4|42|5)\\b|\\bmk ?4[68]\\b|minimi|\\bnegev|\\bm240|\\brpd\\b|\\bsaw\\b)', 0),
+    'LMG': re.compile('(\\blmg\\b|géppuska|kulomet|(?<!sub)(?<!sub-)(?<!sub )machine[ -]?gun|\\bm249|\\bm60\\b|\\bpkm?\\b|\\brpk|\\bmg ?(3|4|42|5)\\b|\\bmk ?4[68]\\b|minimi|\\bnegev|\\bm240|\\brpd\\b|\\bsaw\\b)', 0),
     'SHOTGUN': re.compile('(shotgun|sörétes|brokovnic|fusil à pompe|\\bm870|\\bspas|\\bm1014|\\baa-?12|\\bmp-?153|\\bksg\\b|\\bm3 super|\\bpump\\b|flinta)', 0),
     'SMG': re.compile('(\\bsmg\\b|\\bpp-?2k\\b|\\bots-?126|géppisztoly|samopal|submachine|sub-machine|pistolet[- ]mitrailleur|\\bmp ?5|\\bmp ?7\\b|\\bp ?90\\b|\\bump|\\bvector\\b|kriss|scorpion|\\buzi\\b|\\bmp ?9\\b|\\bmac-?1[01]|\\bvmp|\\bpdw\\b|ppsh|thompson|\\bsten\\b|\\bmp ?40|\\bpp-?19|bizon|\\bpp-?2000)', 0),
     'PISTOL': re.compile('(pisztoly(?!tok)|\\bpistol|\\bpistole|\\bpistolet|\\bpistola|handgun|revolver|glock|\\bg ?1[789]\\b|hi-?capa|\\b1911|\\bm9\\b|\\bp226|\\bp320|\\busp\\b|beretta|desert eagle|\\bcz ?75|\\bcz ?p-?0\\d|\\bm&p|five-seven|walther|\\bppk|makarov|\\btt-?33|\\baep\\b)', 0),
@@ -94,6 +94,12 @@ _ENDS_PIECE = re.compile(r"\b(stocks?|handguards?|forends?|grips?|receivers?|bod
                          r"buffer tube|outer barrel|charging handle|dust cover|magwell|frame)\W*$")
 
 
+_HEAD_PIECE = re.compile(r"\b(stocks?|handguards?|forends?|grips?|receivers?|body|slides?|mounts?|rails?|buffer tube|outer barrel|"
+                         r"charging handle|dust cover|magwell|frame|(?<!starter )(?<!complete )(?<!full )(?<!go airsoft )kits?|"
+                         r"conversions?|upper|lower|chassis|shell|housing)\W*$")
+_COMPLETE = re.compile(r"\b(complete|completed|pre-?built|installed|fully assembled)\b")
+
+
 def _translated(title: str) -> str:
     try:                                   # késleltetett import (a dictionary -> names -> matcher lánc ezt a modult is használja)
         from dictionary import translate
@@ -127,6 +133,8 @@ def category(title: str | None, url: str | None = None, price: float | None = No
     weapon_first = not f and sub in ('acc_optics', 'acc_ammo', 'acc_gear', 'acc_mag', 'acc_power') and (
         (has('STRONG_W') and p >= 30000 and sub != 'acc_mag')                     # 5-ös tárcsomag ≠ fegyver
         or (gun_typed and p >= 90000 and sub in ('acc_ammo', 'acc_mag')))         # „rifle scope”, „Rifle Plate Carrier” ≠ puska
+    if weapon_first and sub == 'acc_gear' and _C['GEAR'].search(c).start() < _C['STRONG_W'].search(c).start():
+        weapon_first = False          # „Gas Tank Cordura Pouch … M249 Machine Gun”: a tok a tárgy, a fegyver csak a „mihez”
     if sub and not weapon_first and (sub in ('acc_optics', 'acc_protect', 'acc_ammo', 'acc_gear', 'acc_mag') or f
                                      or not (has('STRONG_W') and p >= 30000)):   # „HPA regulator”, „Rifle Plate Carrier”
         return sub
@@ -134,6 +142,10 @@ def category(title: str | None, url: str | None = None, price: float | None = No
         return 'part_external'
     # „A&K M1A Airsoft Rifle Polymer Stock”, „AAP01 SMG forend, M-LOK”: a cím utolsó szava a tárgy (színek, márka nélkül)
     if 0 < p < 60000 and _ENDS_PIECE.search(_TAIL_NOISE.sub('', c)):
+        return 'part_external'
+    # „King Arms CNC PDW M11 Kit for KWA … Sub-Machine Gun”, „VIK II M-LOK Handguard for Kriss Vector SMG”: a „for” előtti
+    # rész (a termék maga) alkatrész/készlet -> árától függetlenül nem fegyver (kivéve a gyárilag összeszerelt „Complete” csomag)
+    if f and (fm := _C['F'].search(c)) and _HEAD_PIECE.search(_TAIL_NOISE.sub('', c[:fm.start()])) and not _COMPLETE.search(c):
         return 'part_external'
     if has('OTHER_MISC') and (not w or 0 < p < 40000):
         return 'other'

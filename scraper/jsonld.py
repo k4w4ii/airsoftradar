@@ -105,6 +105,29 @@ def _text(v) -> str | None:
     return s.strip()
 
 
+_IMG_EXT = re.compile(r"\.(jpe?g|png|webp|gif|avif)(?:$|[?#])", re.I)
+
+
+def _image(v) -> str | None:
+    """A JSON-LD „image” mezője: szöveg, lista, vagy ImageObject ({"url"/"contentUrl", "name"…}). A „name” NEM kép
+    (a termék neve) – régen ebből lett hibás képcím („…/Vorsk VMP-1X GBB submachine gun Black”)."""
+    if isinstance(v, list):
+        for x in v:
+            if img := _image(x):
+                return img
+        return None
+    if isinstance(v, dict):
+        v = v.get("contentUrl") or v.get("url") or v.get("thumbnailUrl") or v.get("@id")
+        if isinstance(v, (list, dict)):
+            return _image(v)
+    if not isinstance(v, str):
+        return None
+    s = html.unescape(v).strip()
+    if not s or (" " in s and not _IMG_EXT.search(s)):
+        return None                          # szóközös, kiterjesztés nélküli szöveg: nem képcím
+    return s
+
+
 def _load_blocks(page: str) -> list:
     out = []
     for raw in _LD_RX.findall(page):
@@ -157,7 +180,7 @@ def _from_product(p: dict, page_url: str, parent: dict | None = None) -> list[Sc
     brand = _text(p.get("brand")) or _text(base.get("brand")) or _text(p.get("manufacturer"))
     sku, mpn = _text(p.get("sku")), _text(p.get("mpn")) or _text(base.get("mpn"))
     ean = next((_text(p.get(k)) for k in ("gtin13", "gtin", "gtin12", "gtin14", "gtin8", "ean") if p.get(k)), None)
-    image = _text(p.get("image")) or _text(base.get("image"))
+    image = _image(p.get("image")) or _image(base.get("image"))
     out = []
     for o in _offer_nodes(p):
         price = parse_price(o.get("price") or o.get("lowPrice") or (o.get("priceSpecification") or {}).get("price"))
@@ -205,8 +228,17 @@ def extract(page: str, page_url: str) -> list[ScrapedOffer]:
         for r in uniq:                       # stabil ID: az SKU csak akkor számít, ha egy oldalon több változat van
             if per_page[page_key(r.url)] == 1:
                 r.external_id = _ext_id(r.url, None)
+        if any(not r.image for r in uniq) and (og := _og_image(page)):
+            for r in uniq:                   # nincs (jó) kép a JSON-LD-ben: az oldal og:image-e
+                r.image = r.image or urljoin(page_url, og)
         return uniq
     return _from_meta(page, page_url)
+
+
+def _og_image(page: str) -> str | None:
+    meta = {k.lower(): html.unescape(v) for k, v in _META_RX.findall(page)}
+    meta.update({k.lower(): html.unescape(v) for v, k in _META_RX_REV.findall(page)})
+    return _image(meta.get("og:image") or meta.get("twitter:image"))
 
 
 def _from_meta(page: str, page_url: str) -> list[ScrapedOffer]:

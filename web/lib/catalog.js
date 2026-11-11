@@ -32,6 +32,13 @@ export function visibleDims(cats) {
   });
 }
 
+/** A „Mihez jó (platform)” szűrő alkatrészeknél/kiegészítőknél kell; ha csak fegyver-kategória van kiválasztva,
+ *  helyette a „Modell / platform” (mdl) extra szűrő látszik. */
+export function showPlatforms(cats) {
+  const leaves = [...new Set((cats || []).flatMap((c) => GROUP_LEAVES_C[c] || [c]))];
+  return !leaves.length || leaves.some((l) => !["weapons", "custom"].includes(groupOf(l)));
+}
+
 export const SORTS = ["discount", "popular", "price", "price_desc", "name"];
 export const DEFAULT_SORT = "discount";          // legnagyobb árkülönbség (legolcsóbb vs. legdrágább bolt)
 export const VIEWS = ["grid", "list"];           // csempe az alap

@@ -31,6 +31,8 @@ export default async function RootLayout({ children, params }) {
   return (
     <html lang={locale === "hu" ? "hu" : "en"} data-theme={await theme()} className={`${body.variable} ${display.variable} ${brand.variable}`}>
       <head>
+        {/* betöltetlen (törölt / hotlink-tiltott) boltkép: nem a nyers alt-szöveg látszik, hanem egy halvány logó */}
+        <script dangerouslySetInnerHTML={{ __html: "document.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='IMG'&&!t.closest('.cat-tile')){t.style.visibility='hidden';t.parentNode&&t.parentNode.classList.add('noimg')}},true)" }} />
         {/* AdSense: csak akkor töltődik be, ha a hirdetéskód ki van töltve (lib/site.js). Automatikus hirdetések: az AdSense felületén KIKAPCSOLVA. */}
         {ADS.client ? (
           <script async crossOrigin="anonymous"

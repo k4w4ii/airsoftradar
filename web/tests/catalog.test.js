@@ -44,13 +44,19 @@ test("isWelcome + alapértelmezések", async () => {
 });
 
 test("extra szűrők (pow, gt…) és láthatóság", async () => {
-  const { parseCatalog, hrefFor, isWelcome, visibleDims } = await import("../lib/catalog.js");
+  const { parseCatalog, hrefFor, isWelcome, visibleDims, showPlatforms } = await import("../lib/catalog.js");
   const p = parseCatalog({ cat: "weapons", pow: ["gbb", "xyz", "aeg"], bbw: "0.25" });
   expect(p.attrs).toEqual({ pow: ["aeg", "gbb"], bbw: ["0.25"] });
   expect(hrefFor("hu", { ...p, attrs: { pow: p.attrs.pow } })).toBe("/hu?pow=aeg&pow=gbb");
   expect(isWelcome({ pow: "aeg" })).toBe(false);
-  expect(visibleDims(["weapons"])).toEqual(["pow"]);                 // 6/7 fegyverkategória: a működés látszik, a gránát nem
-  expect(visibleDims(["grenade", "rifle"])).toEqual(["pow", "gt"]);   // 2 kategória: mindkettőé
+  expect(visibleDims(["weapons"])).toEqual(["pow", "mdl"]);          // 6/7 fegyverkategória: működés + modell, a gránát nem
+  expect(visibleDims(["grenade", "rifle"])).toEqual(["pow", "mdl", "gt"]);   // 2 kategória: mindkettőé
+  expect(visibleDims(["lmg"])).toEqual(["pow", "mdl"]);
+  expect(showPlatforms(["lmg"])).toBe(false);                         // fegyvernél „Modell”, nem „Mihez jó”
+  expect(showPlatforms(["weapons"])).toBe(false);
+  expect(showPlatforms(["part_external"])).toBe(true);
+  expect(showPlatforms([])).toBe(true);
+  expect(parseCatalog({ cat: "lmg", mdl: ["m249", "nincs"] }).attrs).toEqual({ mdl: ["m249"] });
   expect(visibleDims(["acc_ammo"])).toEqual(["bbw", "bbt", "bbq", "gas", "gml"]);
   expect(visibleDims(["acc"])).toEqual([]);                           // az egész „Kiegészítők”: nincs zsúfolt extra szűrő
   expect(visibleDims([])).toEqual([]);

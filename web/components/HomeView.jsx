@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CAT_GROUPS, defaultCats, FACETS, hrefFor, PLATFORMS, visibleDims, withoutCat } from "../lib/catalog";
+import { CAT_GROUPS, defaultCats, FACETS, hrefFor, PLATFORMS, showPlatforms, visibleDims, withoutCat } from "../lib/catalog";
 import { money, plainMoney, shortDate, t } from "../lib/i18n";
 import { imgSrc } from "../lib/links";
 import AutoSubmit from "./AutoSubmit";
@@ -141,21 +141,30 @@ function AttrFilters({ locale, params, counts }) {
   return visibleDims(params.cats).map((k) => {
     const sel = new Set(params.attrs?.[k] || []);
     const c = counts[k] || {};
-    const items = FACETS[k].values.filter(([v]) => c[v] || sel.has(v));
+    let items = FACETS[k].values.filter(([v]) => c[v] || sel.has(v));
     if (!items.length) return null;
+    if (FACETS[k].sort === "count") items = [...items].sort((a, b) => (c[b[0]] || 0) - (c[a[0]] || 0));
+    const MAX = 8;                                        // hosszú lista: a többi lenyitható (a kiválasztottak mindig látszanak)
+    const top = items.filter(([v], i) => i < MAX || sel.has(v));
+    const rest = items.filter(([v], i) => i >= MAX && !sel.has(v));
+    const row = ([v, lhu, len]) => (
+      <li key={v}>
+        <label className={c[v] || sel.has(v) ? "facet check" : "facet check zero"}>
+          <input type="checkbox" name={k} value={v} defaultChecked={sel.has(v)} />
+          <span className="box" aria-hidden="true" /><span>{hu ? lhu : len}</span><span className="n">{c[v] || 0}</span>
+        </label>
+      </li>
+    );
     return (
       <section className="fgroup" key={k}>
         <h2>{FACETS[k].label[hu ? 0 : 1]}</h2>
-        <ul className="facet-list">
-          {items.map(([v, lhu, len]) => (
-            <li key={v}>
-              <label className={c[v] || sel.has(v) ? "facet check" : "facet check zero"}>
-                <input type="checkbox" name={k} value={v} defaultChecked={sel.has(v)} />
-                <span className="box" aria-hidden="true" /><span>{hu ? lhu : len}</span><span className="n">{c[v] || 0}</span>
-              </label>
-            </li>
-          ))}
-        </ul>
+        <ul className="facet-list">{top.map(row)}</ul>
+        {rest.length ? (
+          <details className="more">
+            <summary>{hu ? `Összes (${items.length})` : `All (${items.length})`}</summary>
+            <ul className="facet-list">{rest.map(row)}</ul>
+          </details>
+        ) : null}
       </section>
     );
   });
@@ -313,7 +322,7 @@ export default function HomeView({ locale, currency, rates, data, params }) {
           <CategoryTree locale={locale} params={params} counts={facets.categories || {}} />
         </section>
         <AttrFilters locale={locale} params={params} counts={facets.attrs || {}} />
-        <PlatformFilter locale={locale} params={params} counts={facets.platforms || {}} />
+        {showPlatforms(params.cats) ? <PlatformFilter locale={locale} params={params} counts={facets.platforms || {}} /> : null}
         <section className="fgroup">
           <h2>{tr.availability}</h2>
           <ul className="facet-list">

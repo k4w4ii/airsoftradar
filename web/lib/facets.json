@@ -57,6 +57,376 @@
    ]
   ]
  },
+ "mdl": {
+  "cats": [
+   "rifle",
+   "pistol",
+   "smg",
+   "sniper",
+   "lmg",
+   "shotgun",
+   "custom_rifle",
+   "custom_pistol",
+   "custom_sniper"
+  ],
+  "label": [
+   "Modell / platform",
+   "Model / platform"
+  ],
+  "values": [
+   [
+    "m4",
+    "M4 / AR-15 / HK416",
+    "M4 / AR-15 / HK416"
+   ],
+   [
+    "ak",
+    "AK (AK-47, AK-74, AKM…)",
+    "AK (AK-47, AK-74, AKM…)"
+   ],
+   [
+    "g36",
+    "G36",
+    "G36"
+   ],
+   [
+    "scar",
+    "SCAR",
+    "SCAR"
+   ],
+   [
+    "aug",
+    "Steyr AUG",
+    "Steyr AUG"
+   ],
+   [
+    "famas",
+    "FAMAS",
+    "FAMAS"
+   ],
+   [
+    "l85",
+    "L85 / SA80",
+    "L85 / SA80"
+   ],
+   [
+    "g3",
+    "G3 / HK417",
+    "G3 / HK417"
+   ],
+   [
+    "mcx",
+    "SIG MCX / Spear",
+    "SIG MCX / Spear"
+   ],
+   [
+    "acr",
+    "ACR / Masada",
+    "ACR / Masada"
+   ],
+   [
+    "tavor",
+    "Tavor / X95",
+    "Tavor / X95"
+   ],
+   [
+    "f2000",
+    "FN F2000",
+    "FN F2000"
+   ],
+   [
+    "sig55x",
+    "SIG 550 / 552",
+    "SIG 550 / 552"
+   ],
+   [
+    "galil",
+    "Galil",
+    "Galil"
+   ],
+   [
+    "m14",
+    "M14 / EBR",
+    "M14 / EBR"
+   ],
+   [
+    "ar10",
+    "AR-10 / SR-25 / G28",
+    "AR-10 / SR-25 / G28"
+   ],
+   [
+    "ww2",
+    "Történelmi (II. vh.)",
+    "Historic (WWII)"
+   ],
+   [
+    "mp5",
+    "MP5",
+    "MP5"
+   ],
+   [
+    "mp7",
+    "MP7",
+    "MP7"
+   ],
+   [
+    "p90",
+    "P90",
+    "P90"
+   ],
+   [
+    "ump",
+    "UMP",
+    "UMP"
+   ],
+   [
+    "vector",
+    "Kriss Vector",
+    "Kriss Vector"
+   ],
+   [
+    "scorpion",
+    "Scorpion EVO",
+    "Scorpion EVO"
+   ],
+   [
+    "mp9",
+    "MP9 / TP9",
+    "MP9 / TP9"
+   ],
+   [
+    "mpx",
+    "SIG MPX",
+    "SIG MPX"
+   ],
+   [
+    "mac",
+    "MAC-10 / M11",
+    "MAC-10 / M11"
+   ],
+   [
+    "uzi",
+    "Uzi",
+    "Uzi"
+   ],
+   [
+    "thompson",
+    "Thompson",
+    "Thompson"
+   ],
+   [
+    "ppsh",
+    "PPSh-41",
+    "PPSh-41"
+   ],
+   [
+    "bizon",
+    "PP-19 Bizon / Vityaz",
+    "PP-19 Bizon / Vityaz"
+   ],
+   [
+    "pp2000",
+    "PP-2000",
+    "PP-2000"
+   ],
+   [
+    "glock",
+    "Glock",
+    "Glock"
+   ],
+   [
+    "aap01",
+    "AAP-01",
+    "AAP-01"
+   ],
+   [
+    "hicapa",
+    "Hi-Capa",
+    "Hi-Capa"
+   ],
+   [
+    "m1911",
+    "1911 / MEU",
+    "1911 / MEU"
+   ],
+   [
+    "m9",
+    "M9 / Beretta 92",
+    "M9 / Beretta 92"
+   ],
+   [
+    "sig",
+    "SIG P226 / P320",
+    "SIG P226 / P320"
+   ],
+   [
+    "hk",
+    "HK USP / VP9",
+    "HK USP / VP9"
+   ],
+   [
+    "cz",
+    "CZ (75, P-09, Shadow)",
+    "CZ (75, P-09, Shadow)"
+   ],
+   [
+    "deagle",
+    "Desert Eagle",
+    "Desert Eagle"
+   ],
+   [
+    "mp_sw",
+    "S&W M&P",
+    "S&W M&P"
+   ],
+   [
+    "walther",
+    "Walther (PPK, PPQ, P99)",
+    "Walther (PPK, PPQ, P99)"
+   ],
+   [
+    "fiveseven",
+    "Five-seveN",
+    "Five-seveN"
+   ],
+   [
+    "makarov",
+    "Makarov / TT-33",
+    "Makarov / TT-33"
+   ],
+   [
+    "revolver",
+    "Revolver",
+    "Revolver"
+   ],
+   [
+    "vsr",
+    "VSR-10 platform",
+    "VSR-10 platform"
+   ],
+   [
+    "l96",
+    "L96 / AWP / AWM",
+    "L96 / AWP / AWM"
+   ],
+   [
+    "m24",
+    "M24 / M700 / M40",
+    "M24 / M700 / M40"
+   ],
+   [
+    "silverback",
+    "Silverback (SRS, TAC-41, HTI)",
+    "Silverback (SRS, TAC-41, HTI)"
+   ],
+   [
+    "ssg24",
+    "Novritsch SSG24",
+    "Novritsch SSG24"
+   ],
+   [
+    "svd",
+    "SVD / Dragunov",
+    "SVD / Dragunov"
+   ],
+   [
+    "barrett",
+    "Barrett M82 / M107",
+    "Barrett M82 / M107"
+   ],
+   [
+    "trg",
+    "Sako TRG / PGM",
+    "Sako TRG / PGM"
+   ],
+   [
+    "m249",
+    "M249 / Minimi / Mk46 / Mk48",
+    "M249 / Minimi / Mk46 / Mk48"
+   ],
+   [
+    "m60",
+    "M60",
+    "M60"
+   ],
+   [
+    "pkm",
+    "PKM / PKP",
+    "PKM / PKP"
+   ],
+   [
+    "mg42",
+    "MG42 / MG3",
+    "MG42 / MG3"
+   ],
+   [
+    "mg4",
+    "MG4 / MG5 / MG36",
+    "MG4 / MG5 / MG36"
+   ],
+   [
+    "negev",
+    "Negev",
+    "Negev"
+   ],
+   [
+    "m240",
+    "M240 / FN MAG",
+    "M240 / FN MAG"
+   ],
+   [
+    "rpk",
+    "RPK / RPD",
+    "RPK / RPD"
+   ],
+   [
+    "stoner",
+    "Stoner / Ultimax / Ameli",
+    "Stoner / Ultimax / Ameli"
+   ],
+   [
+    "m870",
+    "M870 / Remington",
+    "M870 / Remington"
+   ],
+   [
+    "m1014",
+    "M1014 / Benelli M4",
+    "M1014 / Benelli M4"
+   ],
+   [
+    "spas",
+    "SPAS-12",
+    "SPAS-12"
+   ],
+   [
+    "aa12",
+    "AA-12",
+    "AA-12"
+   ],
+   [
+    "ksg",
+    "KSG",
+    "KSG"
+   ],
+   [
+    "saiga12",
+    "Saiga-12 / Vepr-12",
+    "Saiga-12 / Vepr-12"
+   ],
+   [
+    "lever",
+    "Karos (M1887, Winchester)",
+    "Lever action (M1887, Winchester)"
+   ],
+   [
+    "double",
+    "Kétcsövű / csonkolt",
+    "Double barrel / sawed-off"
+   ]
+  ],
+  "sort": "count"
+ },
  "gt": {
   "cats": [
    "grenade"

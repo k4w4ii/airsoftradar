@@ -101,7 +101,7 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
         min_any = min(o["price_huf"] for o in clean)
         stock = min((o["stock"] for o in clean), key=lambda s: STOCK_RANK.get(s, 3))
         rows[pid] = {
-            "id": pid, "slug": p["slug"], "name": p["name"], "model_code": p.get("model_code"), "image_url": p.get("image_url"),
+            "id": pid, "slug": p["slug"], "name": p["name"], "model_code": p.get("model_code"), "image_url": pick_image(p.get("image_url"), clean),
             "manufacturer": mname,
             "search_code": re.sub(r"[^a-z0-9]", "", f"{mname} {p['name']} {p.get('model_code') or ''}".lower()),
             "category": cat, "platforms": ("," + ",".join(sorted(plats)) + ",") if plats else "",
@@ -122,6 +122,29 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
     for r in rows.values():
         r["sig"] = hashlib.sha1(json.dumps(r, sort_keys=True, default=str).encode()).hexdigest()[:16]
     return rows, outliers
+
+
+_IMG_EXT = re.compile(r"\.(jpe?g|png|webp|gif|avif)(?:$|[?#])", re.I)
+
+
+def _img_score(u: str | None) -> int:
+    """2 = biztosan képcím (kiterjesztés), 1 = lehet (http, nincs szóköz az utolsó részben), 0 = rossz."""
+    if not u or not re.match(r"https?://[^/\s]+/", u.strip(), re.I):
+        return 0
+    if _IMG_EXT.search(u):
+        return 2
+    last = u.strip().split("?")[0].rstrip("/").rsplit("/", 1)[-1]
+    return 0 if (" " in last or "%20" in last) else 1
+
+
+def pick_image(product_img: str | None, offers: list[dict]) -> str | None:
+    """A termék képe; ha rossz (pl. a régi hibás „…/Termék neve” cím), a boltok friss képei közül az első jó.
+    Sorrend: termékkép, majd a raktáron lévő ajánlatok, majd a többi."""
+    cands = [product_img] + [o.get("image_url") for o in sorted(offers, key=lambda o: o.get("stock") != "in_stock")]
+    for want in (2, 1):
+        if img := next((c.strip() for c in cands if _img_score(c) >= want), None):
+            return img
+    return None
 
 
 def _subtypes(cat: str, name: str, offers: list[dict]) -> str:
@@ -151,7 +174,7 @@ def rebuild(db) -> dict:
     shops = db.select("shops", select="id,country")
     mfrs = {m["id"]: m["name"] for m in db.select("manufacturers", select="id,name")}
     products = {p["id"]: p for p in db.select("products", select="id,manufacturer_id,name,slug,model_code,image_url")}
-    offers = db.select("offers", select="id,product_id,shop_id,url,title_raw,price,currency,stock,last_seen_at,is_outlier",
+    offers = db.select("offers", select="id,product_id,shop_id,url,title_raw,price,currency,stock,last_seen_at,is_outlier,image_url",
                        is_active="eq.1", product_id="not.is.null")
     fixes, diag = quality.load_fixes(), {}
     if fixes["elrejt"]:                 # kézzel elrejtett ajánlat: soha ne párosuljon újra (manual = az automatika nem nyúl hozzá)

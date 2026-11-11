@@ -19,11 +19,21 @@ class TestFacets(unittest.TestCase):
         self.assertEqual(a("acc_optics", "Killflash for T1"), {"ot=mount"})
         self.assertEqual(a("part_internal", "Specna Arms V2 gearbox ETU"), {"pt=gearbox"})
         self.assertEqual(a("part_hopup", "Maple Leaf Hop Up Rubber 60°"), {"pt=bucking"})
-        self.assertEqual(a("rifle", "Specna Arms SA-E07"), set())
+        self.assertEqual(a("rifle", "Specna Arms SA-E07"), {"mdl=m4"})
+
+    def test_models(self):
+        self.assertEqual(a("lmg", "Cybergun FN Herstal M249 Para GBB Machine Gun"), {"mdl=m249"})
+        self.assertEqual(a("lmg", "A&K MP5 something"), set())                   # MP5 nem géppuska-modell
+        self.assertEqual(a("smg", "Maruyama MP-IX MP9 DX GBB"), {"mdl=mp9"})
+        self.assertEqual(a("smg", "S&T PPSH-41 WWII Submachine Gun"), {"mdl=ppsh", "mdl=ww2"})
+        self.assertEqual(a("shotgun", "CYMA M1014 / M4 Super 90 shotgun"), {"mdl=m1014"})   # nem M4 karabély
+        self.assertEqual(a("pistol", "WE Glock 18C GBB"), {"mdl=glock"})
+        self.assertEqual(a("rifle", "CYMA CM.040 AKM"), {"mdl=ak"})
+        self.assertEqual(a("sniper", "Well MB4401 L96"), {"mdl=l96"})
 
     def test_values_are_declared(self):
         declared = {f"{k}={v[0]}" for k, d in facets.DIMS.items() for v in d["values"]}
-        for cat, t in [("acc_ammo", "BLS 0,28g BIO 1kg tracer"), ("acc_power", "NiMH 9.6V mini Tamiya"), ("grenade", "Smoke grenade")]:
+        for cat, t in [("acc_ammo", "BLS 0,28g BIO 1kg tracer"), ("acc_power", "NiMH 9.6V mini Tamiya"), ("grenade", "Smoke grenade"), ("lmg", "M249 minimi"), ("custom_rifle", "HPA M4 Polarstar")]:
             self.assertTrue(a(cat, t) <= declared, a(cat, t) - declared)
 
     def test_web_json_up_to_date(self):

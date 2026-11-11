@@ -598,5 +598,59 @@ null,
 "https://airsoft-guns.eu/de/zielfernrohr-3-9x50",
 45000,
 "other"
+],
+[
+"VFC Gas Tank Cordura Pouch M249 GBB Machine Gun",
+null,
+68846,
+"acc_gear"
+],
+[
+"King Arms CNC PDW M11 Kit for KWA/HFC Gas Blowback Sub-Machine Gun (Package: Kit Only)",
+null,
+105100,
+"part_external"
+],
+[
+"King Arms CNC PDW M11 Kit for KWA/HFC Gas Blowback Sub-Machine Gun (Package: Complete KWA M11)",
+null,
+165000,
+"smg"
+],
+[
+"AceTech VIK II Modular M-LOK Handguard for Krytac Kriss Vector Submachine Gun",
+null,
+43831,
+"part_external"
+],
+[
+"S&T 6mmProShop PPSH-41 WWII Airsoft Submachine Gun",
+null,
+115977,
+"smg"
+],
+[
+"Umarex Beretta GBB PMX gas-operated submachine gun",
+null,
+148681,
+"smg"
+],
+[
+"Vorsk VMP-1X GBB submachine gun Black",
+null,
+87843,
+"smg"
+],
+[
+"Cybergun FN Herstal M249 Para GBB Machine Gun",
+null,
+289996,
+"lmg"
+],
+[
+"Specna Arms SA-C02 CORE Carbine Replica Starter Kit",
+null,
+90000,
+"rifle"
 ]
 ]

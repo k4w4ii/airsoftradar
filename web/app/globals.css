@@ -489,3 +489,9 @@ img { display: block; max-width: 100%; }
 .tile-upd, .row-meta .upd, .rung-shop .checked { font-size: 11.5px; }
 .tile-upd { display: block; margin-top: 4px; }
 .rung-shop .checked { display: block; }
+
+/* betöltetlen termékkép: nincs alt-szöveg-katyvasz, helyette halvány logó (a head-ben lévő kis szkript jelöli) */
+.thumb img, .tile-img img, .sg-thumb img, .product-img img { color: transparent; font-size: 0; }
+.noimg { background: #fff url(/logo-mark.png) center / 34% no-repeat !important; }
+.noimg::after { content: ""; position: absolute; inset: 0; background: rgba(255, 255, 255, .55); pointer-events: none; }
+.thumb.noimg, .sg-thumb.noimg, .product-img.noimg { position: relative; }

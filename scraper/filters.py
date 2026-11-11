@@ -173,7 +173,12 @@ _SPEC_RULES = [
     ("ver",   re.compile(r"(?<![\w.])v\s?(\d)(?![\d.,]|\s*(?:v|mm))", re.I)),
     ("rounds", re.compile(r"(\d{2,4})\s*(?:rounds?|rds|ran|lövetű|lövés\w*|kulek|kulí\w*|billes|colpi|schuss|bb(?!s?\s*(?:0|bag))s?(?=\s|$|[,)]))", re.I)),
     ("count", re.compile(r"(\d{3,6})\s*(?:pcs|db|ks|szt|bbs|darab|stück|kusů|pieces|kul\w*)(?![a-z])", re.I)),
-    ("pack",  re.compile(r"(?:(?<![\w.])(\d{1,2})\s*(?:pcs|db|ks|szt|pack|pk|darab|stück|kusy)(?![a-z])|(?<![\w])x\s?(\d{1,2})(?![\d]))", re.I)),
+    # darabszám a csomagban: „5 pcs”, „20 db”, „box of 5”, „5er Pack”, „10-pack”, „x5”, „5 x 12g” – a 5-ös és a 20-as doboz külön termék
+    ("pack",  re.compile(r"(?:(?:box|pack|set|bag|tube|blister|case|carton)\s+of\s+(\d{1,3})(?!\d)"
+                         r"|(?:quantity|qty|menge|množství|ilość|mennyiség)\s*:?\s*(\d{1,3})(?![\d.,])"
+                         r"|(?<![\w.])(\d{1,2})\s*-?\s*(?:pcs|pc|db|ks|kom|szt|pack|pk|pak|darab|stück|stk|kusy|kusů|pezzi|uds|"
+                         r"unidades|er(?:[- ]?pack)?|cartridges|capsules|patron\w*|bombi\w*|kapsu\w*|nábojů)\.?(?![a-z])"
+                         r"|(?<![\w.])(\d{1,2})\s*x\s*(?=\d|co2)|(?<![\w])x\s?(\d{1,2})(?![\d]))", re.I)),
 ]
 _SPRING_RX = re.compile(r"(?<![a-z0-9])(?:m|sp)\s?(9\d|1\d\d|2\d\d)(?!\d)", re.I)
 _SPRING_CTX = re.compile(r"spring|rug[oó]|pru[zž]in|spr[eę][zż]yn|feder|ressort|molla|muelle", re.I)
