@@ -40,21 +40,30 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
     Ha több termék van, mint max_products, naponta forgó ablakot tölt le -> N nap alatt mindet."""
     cfg = CONFIG[slug]
     deadline = time.monotonic() + float(os.environ.get("SCRAPE_BUDGET_MIN", 300)) * 60
-    f = Fetcher(extra_headers=cfg.get("headers"), timeout=cfg.get("timeout", 30))
     errors, out, urls, diag = [], [], [], {}
-    try:
-        if cfg["source"] == "sitemap":
-            maps = f.sitemaps(cfg["base_url"]) if cfg["sitemap"] == "auto" else [cfg["sitemap"]]
-            diag["sitemapek"] = maps[:5]
-            urls = list(dict.fromkeys(u for m in maps for u in from_sitemap(f, m, cfg["product_pattern"], limit=60000, diag=diag)))
-        else:
-            urls, out = from_listing(f, cfg["start_urls"], cfg["product_pattern"], cfg.get("page_tpl"),
-                                     cfg.get("max_pages", 50), extract_fn=extract, diag=diag,
-                                     page_size=cfg.get("page_size", 24))
-        if rw := cfg.get("url_rewrite"):                        # pl. ["/fr/", "/en/"]: angol oldal a francia sitemapből
-            urls = list(dict.fromkeys(u.replace(rw[0], rw[1], 1) for u in urls))
-    except Exception as e:
-        errors.append({"error": f"felderítés hiba: {e!r}"[:300]})
+    for attempt in (1, 2):
+        # 2. próba: ha az első csak időtúllépést / hálózati / 5xx hibát kapott (a bolt szervere épp lassú), 2 perc múlva
+        # még egyszer, dupla időkorláttal – így egy átmeneti akadás miatt nem lesz piros az egész napi futás
+        f = Fetcher(extra_headers=cfg.get("headers"), timeout=cfg.get("timeout", 30) * attempt)
+        errors, out, urls, diag = [], [], [], {}
+        try:
+            if cfg["source"] == "sitemap":
+                maps = f.sitemaps(cfg["base_url"]) if cfg["sitemap"] == "auto" else [cfg["sitemap"]]
+                diag["sitemapek"] = maps[:5]
+                urls = list(dict.fromkeys(u for m in maps for u in from_sitemap(f, m, cfg["product_pattern"], limit=60000, diag=diag)))
+            else:
+                urls, out = from_listing(f, cfg["start_urls"], cfg["product_pattern"], cfg.get("page_tpl"),
+                                         cfg.get("max_pages", 50), extract_fn=extract, diag=diag,
+                                         page_size=cfg.get("page_size", 24))
+            if rw := cfg.get("url_rewrite"):                        # pl. ["/fr/", "/en/"]: angol oldal a francia sitemapből
+                urls = list(dict.fromkeys(u.replace(rw[0], rw[1], 1) for u in urls))
+        except Exception as e:
+            errors.append({"error": f"felderítés hiba: {e!r}"[:300]})
+        transient = f.stats and all(k in ("timeout", "neterr") or str(k).startswith("5") for k in f.stats)
+        if urls or out or attempt == 2 or not transient:
+            break
+        print(f"[{slug}] felderítés: csak átmeneti hiba ({dict(f.stats)}), 2 perc múlva újra", file=sys.stderr)
+        time.sleep(120)
     # ruházat kiszűrése még letöltés előtt (URL-ben gyakran ott a kategória), + boltonkénti kizáró minta
     excl = re.compile(cfg["exclude_pattern"], re.I) if cfg.get("exclude_pattern") else None
     skip = lambda u: is_clothing(urlsplit(u).path) or (excl is not None and bool(excl.search(u)))
