@@ -464,7 +464,7 @@ class TestCoverage(unittest.TestCase):
             def get(self, url):
                 fetched.append(url)
                 return super().get(url)
-        fake = F({"https://www.taiwangun.com/sitemap/products_sitemap/": sm,
+        fake = F({run_shop.CONFIG["taiwangun"]["sitemap"]: sm,
                   "https://www.taiwangun.com/assault-rifle-aeg/cm-522-sport-line": WOO,
                   "https://www.taiwangun.com/025g-bbs-6mm/specna-bbs-025g": WOO})
         with mock.patch.object(run_shop, "Fetcher", return_value=fake):
@@ -528,6 +528,21 @@ class TestImages(unittest.TestCase):
                          "https://s.eu/i/1.jpg")
         self.assertEqual(pick_image("https://s.eu/i/9.png", [{"image_url": "https://s.eu/i/1.jpg"}]), "https://s.eu/i/9.png")
         self.assertIsNone(pick_image(None, [{"image_url": "Termék neve"}]))
+
+
+class TestShopConfig(unittest.TestCase):
+    def test_sitemap_list_supported(self):
+        sm = lambda us: "<urlset>" + "".join(f"<url><loc>{u}</loc></url>" for u in us) + "</urlset>"
+        maps = run_shop.CONFIG["airsoftsports"]["sitemap"]
+        fake = FakeFetcher({maps[0]: sm(["https://airsoftsports.de/glock-gbb-airsoft-sparpaket/", "https://airsoftsports.de/kein-red-dot/"]),
+                            maps[1]: sm(["https://airsoftsports.de/specna-arms-sa-e05/"]),
+                            "https://airsoftsports.de/glock-gbb-airsoft-sparpaket/": WOO, "https://airsoftsports.de/specna-arms-sa-e05/": WOO})
+        with mock.patch.object(run_shop, "Fetcher", return_value=fake):
+            out, errors, stale = run_shop.scrape("airsoftsports", None)
+        self.assertEqual(len(out), 2)               # mindkét sitemapből, a „kein-…” opció nélkül
+
+    def test_taiwangun_uses_english_sitemap(self):
+        self.assertTrue(run_shop.CONFIG["taiwangun"]["sitemap"].endswith("_eng.xml"))
 
 
 if __name__ == "__main__":

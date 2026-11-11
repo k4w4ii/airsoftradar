@@ -38,6 +38,8 @@ jobs:
         env:
           FORCE_RECLASSIFY: ${{ inputs.force && '1' || '0' }}
       - uses: actions/upload-artifact@v4       # minőség-őr: javított és ellenőrizendő termékek listája
+        continue-on-error: true      # a GitHub tárhelye néha hibázik: a CSV nem kritikus, a futás ettől még sikeres
+        timeout-minutes: 3
         if: always()
         with:
           name: minoseg

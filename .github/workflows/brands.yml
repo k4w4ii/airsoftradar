@@ -23,6 +23,8 @@ jobs:
         with: { python-version: "3.12" }
       - run: python scraper/unknown_brands.py
       - uses: actions/upload-artifact@v4
+        continue-on-error: true      # a GitHub tárhelye néha hibázik: a CSV nem kritikus, a futás ettől még sikeres
+        timeout-minutes: 3
         with:
           name: ismeretlen-markak
           path: ismeretlen_markak.csv

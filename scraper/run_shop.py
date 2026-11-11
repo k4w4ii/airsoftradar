@@ -48,7 +48,8 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
         errors, out, urls, diag = [], [], [], {}
         try:
             if cfg["source"] == "sitemap":
-                maps = f.sitemaps(cfg["base_url"]) if cfg["sitemap"] == "auto" else [cfg["sitemap"]]
+                sm = cfg["sitemap"]
+                maps = f.sitemaps(cfg["base_url"]) if sm == "auto" else (list(sm) if isinstance(sm, list) else [sm])
                 diag["sitemapek"] = maps[:5]
                 urls = list(dict.fromkeys(u for m in maps for u in from_sitemap(f, m, cfg["product_pattern"], limit=60000, diag=diag)))
             else:
