@@ -538,5 +538,65 @@ null,
 null,
 18000,
 "acc_mag"
+],
+[
+"Complete Gearbox GATE EON V2 (SSG) with integrated TITAN II Bluetooth® chip (Front)",
+null,
+158000,
+"part_internal"
+],
+[
+"ARMY ARMAMENT R28 GBB - Black / Grey",
+null,
+40000,
+"pistol"
+],
+[
+"Umarex Elite Force Rogue 11 Co2",
+null,
+30000,
+"pistol"
+],
+[
+"Magpul MOE Carbine Stock Mil Spec Black",
+null,
+25000,
+"part_external"
+],
+[
+"Polarstar Micro Reg GEN2 HPA regulator",
+null,
+45000,
+"part_internal"
+],
+[
+"Banshee Rifle Plate Carrier - Coyote Brown - Shellback Tactical",
+null,
+60000,
+"acc_gear"
+],
+[
+"Arcturus Variable Cap Silent 30/135 Round Mid-Cap AEG AK12 Magazine (Package: 5 pack)",
+null,
+45000,
+"acc_mag"
+],
+[
+"PTS Centurion Arms CM4 with KWA AEG3 System AEG",
+null,
+209000,
+"rifle"
+],
+[
+"HPA tank 0.8l 48ci 3000psi",
+null,
+30000,
+"acc_power"
+],
+[
+"Zielfernrohr 3-9x50 EG, Banner, Bushnell",
+"https://airsoft-guns.eu/de/zielfernrohr-3-9x50",
+45000,
+"other"
 ]
 ]

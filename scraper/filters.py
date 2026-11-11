@@ -94,7 +94,7 @@ WEAPON_MIN_HUF = 30000
 # „X-hez / for X / pro X” + modellkód vagy platform: a termék valami MÁSHOZ készült -> alkatrész/tartozék,
 # akkor is, ha a szót nem ismerjük („Upgrade set pro CYMA M24 CM.702”, „RIS conversion for CM.030”).
 _TARGET = r"(?:\S+\s+){0,2}\S*(?:\d|m4|ak|glock|hi-?capa|vsr|mp5|g36|l96|aeg|gbb|pistol\w*|rifle\w*|pu[sš]k\w*|replik\w*|replic\w*|karabin\w*)"
-FOR_TARGET_RX = re.compile(r"(?<![\w])(?:for|f[uü]r|pour|para|compatible(?: with)?|kompatib\w*)\s+" + _TARGET, re.I)
+FOR_TARGET_RX = re.compile(r"(?<![\w])(?:for|f[uü]r|pour|compatible(?: with)?|kompatib\w*)\s+" + _TARGET, re.I)
 LOWER_FOR_RX = re.compile(r"(?<![\w])(?:pro|do|per)\s+" + _TARGET.replace("m4|ak|glock", "[Mm]4|AK|[Gg]lock"))   # kisbetűs cseh/lengyel/olasz „pro/do/per” (a „VSR-10 Pro” terméknév nem az)
 HOZ_RX = re.compile(r"\S*(?:\d|m4|ak|glock|vsr|mp5|g36)\S*-(?:hoz|hez|h[oö]z)(?![\w])", re.I)
 
@@ -196,6 +196,17 @@ def _num(s: str) -> str:
     return f"{v:g}"
 
 
+_GUN_CTX = re.compile(r"\b(aeg|aep|gbbr?|ebbr?|rifles?|carbines?|sniper|replica\w*|replik\w*|réplique|pistols?|pistole\w*|"
+                      r"pistolet\w*|pisztoly\w*|shotguns?|smg|lmg|machine ?gun|dmr|karabin\w*|puska|pušk\w*|fusil\w*)\b", re.I)
+_KIT_EXTRAS = {
+    "scope": re.compile(r"\b(scope|optic\w*|ottica|luneta|lunette|puškohled|zielfernrohr|távcső|céltávcső|red ?dot|kolim\w*)\b", re.I),
+    "bipod": re.compile(r"\b(bipod\w*|bipiede|dvojnož\w*|dwójnóg\w*|villaláb)\b", re.I),
+    "battery": re.compile(r"\b(batter(y|ies)|akku\w*|akumul\w*|batteria|charger|töltő|nabíječ\w*|ładowar\w*)\b", re.I),
+    "mags": re.compile(r"\b(\d+|extra|spare|additional|two|three) ?x? ?(extra )?(mag|magazine)s?\b|\bmagazines\b", re.I),
+    "case": re.compile(r"\b(hard ?case|gun ?case|rifle ?case|kufr\w*|valigia|walizk\w*|bag|táska|torba|carry ?case)\b", re.I),
+    "set": re.compile(r"\b(accessories|starter|kit|bundle|package|zestaw|souprava|sada|szett|set)\b", re.I),
+}
+_HV = re.compile(r"\b(high ?velocity|high ?power|hv)\b", re.I)
 _SPECNA_CODE = re.compile(r"\bsa-[a-z]{1,2}\d", re.I)
 _SPECNA_LINE = re.compile(r"\b(core|flex|edge|prime|vapor|one)\b", re.I)
 
@@ -209,6 +220,10 @@ def specs(title: str | None) -> dict[str, str]:
     import classify                                   # késleltetett import (classify -> dictionary -> names -> filters)
     if pw := classify.powers(t, gun=False):           # AEG ≠ GBB ≠ HPA ≠ rugós: soha nem ugyanaz a termék
         out["power"] = ",".join(pw)
+    if _GUN_CTX.search(title) and not is_part(title):          # fegyver: a csomag (távcső, bipod, akku…) és a HV változat
+        extras = sorted(k for k, rx in _KIT_EXTRAS.items() if rx.search(title))
+        out["kit"] = ",".join(extras) or "-"                    # „SA-S02 + scope + bipod” ≠ „SA-S02”
+        out["hv"] = "hv" if _HV.search(title) else "std"        # „High Velocity” ≠ alap
     if _SPECNA_CODE.search(t) and (m := _SPECNA_LINE.search(t)):
         out["line"] = m.group(1).lower()              # Specna: CORE ≠ FLEX ≠ EDGE ≠ PRIME ≠ VAPOR (azonos SA-kód mellett is)
     for key, rx in _SPEC_RULES:

@@ -85,7 +85,7 @@ def review(rows: dict[int, dict], by_product: dict[int, list[dict]], cats: dict[
         if mixed and len(mixed) < len(offs):
             add("vegyes ajánlatok", f"{len(mixed)}/{len(offs)} ajánlat {'nem fegyver' if gun else 'fegyver'}: {mixed[0]['title_raw'][:80]}")
         instock = [o["price_huf"] for o in offs if o["stock"] == "in_stock" and not o.get("outlier")]
-        if len(instock) >= 2 and max(instock) > 2.5 * min(instock):
+        if len(instock) >= 2 and max(instock) > 2.5 * min(instock) and max(instock) >= 20000:   # olcsó tételnél a felár zaj
             add("nagy árkülönbség", f"{min(instock)}–{max(instock)} Ft a raktáron lévők között")
         name = r["name"].lower()
         if (grp in ("parts", "acc") and r["price"] and r["price"] > EXPENSIVE_PART_HUF

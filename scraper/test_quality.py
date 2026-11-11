@@ -103,3 +103,15 @@ class TestPowers(unittest.TestCase):
         rows, _ = run(prods, [offer(1, 1, "CYMA CM.048 AKM AEG", 160, "EUR"), offer(2, 2, "Atom Airsoft Gift card", 50, "EUR")])
         self.assertEqual(rows[1]["powers"], ",aeg,")
         self.assertNotIn(2, rows)
+
+
+class TestKits(unittest.TestCase):
+    def test_bundles_and_hv_are_separate(self):
+        from filters import spec_conflict, specs
+        base = specs("SA-S02 CORE™ Sniper Rifle Replica - MC")
+        self.assertTrue(spec_conflict(base, specs("SA-S02 CORE™ sniper rifle replica with scope and bipod - tan")))
+        self.assertTrue(spec_conflict(base, specs("SA-S02 CORE™ High Velocity Sniper Rifle Replica - MC")))
+        self.assertFalse(spec_conflict(base, specs("Specna Arms SA-S02 CORE™ Sniper Rifle - Black")))   # csak a szín más
+        self.assertFalse(spec_conflict(specs("SNIPER RIFLE SA-S02 CORE + OPTIC E BIPOD - TAN"),
+                                       specs("Specna Arms SA-S02 CORE™ Sniper Rifle with scope and bipod - Black")))
+        self.assertNotIn("kit", specs("Bipod for sniper rifle"))

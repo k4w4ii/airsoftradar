@@ -6,10 +6,11 @@ generáltuk (\\y -> \\b); ha a szabály változik, mindkét helyen módosítsd (
 from __future__ import annotations
 
 import re
+from urllib.parse import urlsplit
 
 _C = {
     'BUNDLE': re.compile('(\\s\\+|\\sw/|\\b(with|incl|including|included|mit|avec|con|včetně|vcetne|vč|plus|és|w zestawie|z zestawem|set with)\\b).*$', re.I),
-    'W': re.compile('\\b(aeg|aep|gbbr?|gbber|nbb|hpa|ebbr?|sbr|mws|ptw|gas blowback|rifles?|carbines?|karabély\\w*|karabin\\w*|puska\\w*|pušk\\w*|pusk\\w*|pistols?|pistole\\w*|pistolet\\w*|pistola\\w*|pisztoly(?!tok)\\w*|replica\\w*|replik\\w*|réplique\\w*|gewehr\\w*|fusil\\w*|zbraň\\w*|zbran\\w*|shotguns?|sörétes|brokovnic\\w*|samopal\\w*|submachine|smg|lmg|sniper|revolver\\w*)\\b', 0),
+    'W': re.compile('\\b(aeg|aep|gbbr?|gbber|co2|nbb|hpa|ebbr?|sbr|mws|ptw|gas blowback|rifles?|carbines?|karabély\\w*|karabin\\w*|puska\\w*|pušk\\w*|pusk\\w*|pistols?|pistole\\w*|pistolet\\w*|pistola\\w*|pisztoly(?!tok)\\w*|replica\\w*|replik\\w*|réplique\\w*|gewehr\\w*|fusil\\w*|zbraň\\w*|zbran\\w*|shotguns?|sörétes|brokovnic\\w*|samopal\\w*|submachine|smg|lmg|sniper|revolver\\w*)\\b', 0),
     'F': re.compile('\\b(for|do|pro|für|pour|per|compatible|kompatib\\w*|\\w+(hoz|hez|höz))\\b', 0),
     'M1': re.compile('\\b(for|für|pour|compatible|kompatib\\w*)\\s+(\\S+\\s+){0,2}\\S*(\\d|m4|ak|glock|hi-?capa|vsr|mp5|g36|l96|aeg|gbb|pistol\\w*|rifle\\w*|pu[sš]k\\w*|replik\\w*|replic\\w*|karabin\\w*)', 0),
     'M2': re.compile('(^|\\s)(pro|do|per)\\s+(\\S+\\s+){0,2}\\S*(\\d|[Mm]4|AK|[Gg]lock|[Hh]i-?[Cc]apa|VSR|vsr|MP5|mp5|G36|g36|pistol|rifle|pu[sš]k|replik|karabin)', 0),
@@ -18,11 +19,11 @@ _C = {
     'PROTECT': re.compile('(\\bmasks?\\b|maszk|goggles?|szemüveg|\\bglasses\\b|helmets?|sisak|face ?shield|\\bear ?pro|kesztyű|\\bgloves?\\b|knee ?pads?|térdvédő)', 0),
     'MAG': re.compile('(magazin|magazyn|\\bmags?\\b|\\bhi-?caps?\\b|\\bmid-?caps?\\b|\\blow-?caps?\\b|\\btár(ak|at|ral)?\\b|zásobník|zasobnik|chargeur|cargador|caricator|\\bshells?\\b|speed ?loader|bb ?loader|magazynek|caricatore)', 0),
     'AMMO': re.compile('(\\bbbs?\\b|\\b\\d[.,]\\d{2} ?g\\b|\\bgolyó\\b|golyók\\b|kuličky\\b|kulki\\b|green ?gas|top ?gas|\\bpropane|co2 ?(cartridge|capsule|patron|bombičk|bombick|kapsuł|kapsul)|gáz ?palack|\\bgas ?(can|bottle|refill)s?\\b)', 0),
-    'POWER': re.compile('(batter(y|ies)|\\bakku|akkumul|\\bbaterie|akumul|batterie|\\bli-?po\\b|\\bli-?ion\\b|\\bli-?fe\\b|\\bnimh\\b|chargers?\\b|\\btöltő|nabíječk|ładowar|ladowar|\\bdeans\\b|akumulátor|akkumulátor|nabíječ)', 0),
+    'POWER': re.compile('(\\b(hpa|air|co2) ?(tanks?|bottles?)\\b|\\btanks?\\b|lahev|palack|batter(y|ies)|\\bakku|akkumul|\\bbaterie|akumul|batterie|\\bli-?po\\b|\\bli-?ion\\b|\\bli-?fe\\b|\\bnimh\\b|chargers?\\b|\\btöltő|nabíječk|ładowar|ladowar|\\bdeans\\b|akumulátor|akkumulátor|nabíječ)', 0),
     'OPTICS': re.compile('(scopes?\\b|céltávcs|red ?dots?|holo(graphic)? ?sights?|reflex|dot ?sights?|rangefinder|range ?finder|dalmierz|távolságmérő|night ?vision|éjjellátó|thermal|binocular|kolimátor|kolimator|celownik|zaměřovač|magnifier|\\boptics?\\b|flashlights?|lámpa|\\blasers?\\b|tracer|puškohled|puskohled|\\bluneta)', 0),
-    'HOPUP': re.compile('(hop-?up|hop ?up|bucking|inner ?barrel|belső ?cső|precision ?barrel|tight ?bore|\\br-?hop|hop ?chamber|\\bnub\\b|hlaveň|hlaven|\\blufa\\b|\\blauf\\b|\\bcanna\\b|gumičk|gumick)', 0),
+    'HOPUP': re.compile('(hop-?up|\\b6\\.0\\d ?mm\\b|barrel precision|précision|hop ?up|bucking|inner ?barrel|belső ?cső|precision ?barrel|tight ?bore|\\br-?hop|hop ?chamber|\\bnub\\b|hlaveň|hlaven|\\blufa\\b|\\blauf\\b|\\bcanna\\b|gumičk|gumick)', 0),
     'MOTOR': re.compile('(\\bmotors?\\b|mosfet|wiring|trigger ?unit)', 0),
-    'INTERNAL': re.compile('(gearbox|hard ?gears?|\\b\\d{2}:1\\b|bolt ?carrier|regulators?\\b|\\breg\\b|feed ?plate|adagolólap|\\btriggers?\\b|trigger ?(box|unit|set)|hpa ?engine|fusion ?engine|mosfet|mechabox|gear ?sets?|\\bgears\\b|fogaskerék|piston|dugattyú|cylinder|\\bhenger|nozzle|tappet|spring ?guide|rugóvezet|bushings?|bearings?|anti-?reversal|selector ?plate|air ?seal|o-?rings?|(main|aeg|upgrade|gearbox|power|valve|nozzle|hammer|recoil|tappet|trigger) ?springs?|\\bsprings? (m|sp)\\d{2,3}\\b|\\b(m|sp)\\d{2,3} ?springs?|\\brugó(szett|készlet|k)?\\b|pružin|sprężyn|sprezyn|blowback ?unit|\\bvalves?\\b|\\bsear\\b|\\bválec|\\bvalec|\\bválce|\\bpíst|\\bpist(u|y|em)?\\b|tłok|\\btlok|kolben|zylinder|cylindre|cilindro|pistone|\\bfeder\\b|ressort|\\bmolla\\b|muelle|těsnění|tesneni|tömítés|převod|prevod|ozuben|spoušť|spoust|ravasz|(upgrade|tuning) ?(set|kit)|ersatzteil|náhradní|nahradni|alkatrész|części|czesci)', 0),
+    'INTERNAL': re.compile('(gearbox|\\b(spare |original )?parts?\\b|hard ?gears?|\\b\\d{2}:1\\b|bolt ?carrier|regulators?\\b|\\breg\\b|feed ?plate|adagolólap|\\btriggers?\\b|trigger ?(box|unit|set)|hpa ?engine|fusion ?engine|mosfet|mechabox|gear ?sets?|\\bgears\\b|fogaskerék|piston|dugattyú|cylinder|\\bhenger|nozzle|tappet|spring ?guide|rugóvezet|bushings?|bearings?|anti-?reversal|selector ?plate|air ?seal|o-?rings?|(main|aeg|upgrade|gearbox|power|valve|nozzle|hammer|recoil|tappet|trigger) ?springs?|\\bsprings? (m|sp)\\d{2,3}\\b|\\b(m|sp)\\d{2,3} ?springs?|\\brugó(szett|készlet|k)?\\b|pružin|sprężyn|sprezyn|blowback ?unit|\\bvalves?\\b|\\bsear\\b|\\bválec|\\bvalec|\\bválce|\\bpíst|\\bpist(u|y|em)?\\b|tłok|\\btlok|kolben|zylinder|cylindre|cilindro|pistone|\\bfeder\\b|ressort|\\bmolla\\b|muelle|těsnění|tesneni|tömítés|převod|prevod|ozuben|spoušť|spoust|ravasz|(upgrade|tuning) ?(set|kit)|ersatzteil|náhradní|nahradni|alkatrész|części|czesci)', 0),
     'EXTERNAL': re.compile('(suppressor|silencer|hangtompító|tlumič|flash ?hider|compensator|bipod|villaláb|tłumik|tlumik|conversion ?kit|konverz)', 0),
     'STRONG_W': re.compile('\\b(aeg|aep|gbbr?|gbber|ebbr?|sniper|lmg|smg|machine ?gun|replica|replika|carbine|gas blowback)\\b', 0),
     'PISTOL_POWER': re.compile('\\b(gbb|gas blowback|co2|nbb|gnb)\\b', 0),
@@ -36,7 +37,7 @@ _C = {
     'SHOTGUN': re.compile('(shotgun|sörétes|brokovnic|fusil à pompe|\\bm870|\\bspas|\\bm1014|\\baa-?12|\\bmp-?153|\\bksg\\b|\\bm3 super|\\bpump\\b|flinta)', 0),
     'SMG': re.compile('(\\bsmg\\b|\\bpp-?2k\\b|\\bots-?126|géppisztoly|samopal|submachine|sub-machine|pistolet[- ]mitrailleur|\\bmp ?5|\\bmp ?7\\b|\\bp ?90\\b|\\bump|\\bvector\\b|kriss|scorpion|\\buzi\\b|\\bmp ?9\\b|\\bmac-?1[01]|\\bvmp|\\bpdw\\b|ppsh|thompson|\\bsten\\b|\\bmp ?40|\\bpp-?19|bizon|\\bpp-?2000)', 0),
     'PISTOL': re.compile('(pisztoly(?!tok)|\\bpistol|\\bpistole|\\bpistolet|\\bpistola|handgun|revolver|glock|\\bg ?1[789]\\b|hi-?capa|\\b1911|\\bm9\\b|\\bp226|\\bp320|\\busp\\b|beretta|desert eagle|\\bcz ?75|\\bcz ?p-?0\\d|\\bm&p|five-seven|walther|\\bppk|makarov|\\btt-?33|\\baep\\b)', 0),
-    'RIFLE': re.compile('(\\baeg\\b|\\bgbbr\\b|\\bgbber\\b|\\bhpa\\b|\\bebbr?\\b|\\bsbr\\b|\\bmws\\b|\\bptw\\b|\\bmtw\\b|\\bmcx\\b|\\bpc1\\b|\\bl85|\\bel?ak-?\\d{2}|\\blk-?33|\\bheretic labs|\\bgarand\\b|replica|replika|réplique|rifle|carbine|karabély|karabin|puska|puška|zbraň|zbran|fusil|gewehr|\\bm4\\b|\\bm16|\\bar-?15|\\bhk ?416|\\bak-?\\d{2}|\\baks|\\bakm|\\bg36|\\bscar|\\baug\\b|famas|\\bsa-[a-z]\\d|\\bcm\\.?\\d{3}|assault)', 0),
+    'RIFLE': re.compile('(\\baeg\\b|\\bgbbr\\b|\\bgbber\\b|\\bebbr?\\b|\\bsbr\\b|\\bmws\\b|\\bptw\\b|\\bmtw\\b|\\bmcx\\b|\\bpc1\\b|\\bl85|\\bel?ak-?\\d{2}|\\blk-?33|\\bheretic labs|\\bgarand\\b|replica|replika|réplique|rifle|carbine|karabély|karabin|puska|puška|zbraň|zbran|fusil|gewehr|\\bm4\\b|\\bm16|\\bar-?15|\\bhk ?416|\\bak-?\\d{2}|\\baks|\\bakm|\\bg36|\\bscar|\\baug\\b|famas|\\bsa-[a-z]\\d|\\bcm\\.?\\d{3}|assault)', 0),
     'URL_PARTS': re.compile('(parts|alkatr|części|czesci|díly|dily|ersatzteil|tuning|upgrade|ricambi|repuestos|pieces-detachees)', 0),
     'URL_ACC': re.compile('(accessor|kiegeszit|zubehor|prislusenstvi|akcesori|accessoires|accesorios)', 0),
     'URL_SNIPER': re.compile('(sniper|odstrel|mesterlovesz)', 0),
@@ -88,7 +89,7 @@ _MODEL_CODE = re.compile(r"(?<![\w])[A-Z]{1,5}[-.]?\d{2,4}[A-Z]?(?![\w])")   # C
 
 
 _TAIL_NOISE = re.compile(r"(\W+(black|tan|od|olive|fde|de|grey|gray|green|coyote|multicam|silver|red|blue|sand|desert|"
-                         r"dark earth|bronze|gold|white|airsoftpl[aá]za|airsoft|m-?lok|keymod|ris|\w{1,2}|\d+\w*))+\W*$")
+                         r"dark earth|bronze|gold|white|airsoftpl[aá]za|airsoft|m-?lok|keymod|ris|mil|spec|mil-spec|style|type|model|version|\w{1,2}|\d+\w*))+\W*$")
 _ENDS_PIECE = re.compile(r"\b(stocks?|handguards?|forends?|grips?|receivers?|body|slides?|mounts?|"
                          r"buffer tube|outer barrel|charging handle|dust cover|magwell|frame)\W*$")
 
@@ -107,7 +108,7 @@ def category(title: str | None, url: str | None = None, price: float | None = No
     extra = tt if tt and tt.lower() != title.lower() else ''
     o = (_BUNDLE_O.sub('', title) + ' ' + _BUNDLE_O.sub('', extra)).strip()
     c = (_C['BUNDLE'].sub('', title.lower()) + ' ' + _C['BUNDLE'].sub('', extra.lower())).strip()
-    u = (url or '').lower()
+    u = urlsplit(url or '').path.lower()            # csak az útvonal: az „airsoft-guns.eu” domain nem fegyver
     p = float(price or 0)
     has = lambda k, s=c: _C[k].search(s) is not None
     w, f = has('W'), has('F')
@@ -125,9 +126,11 @@ def category(title: str | None, url: str | None = None, price: float | None = No
         return sub or ('part_external' if has('M_EXTERNAL') else 'other')
     # „Sniper M82 … Scope + bipod”, „FMG-9 tracer GBB”, „KAR98K Green Gas”: a tartozékszó a fegyver része, nem a termék
     gun_typed = any(has(k) for k, _ in _WEAPON_RULES if k != 'PISTOL')
-    weapon_first = not f and sub != 'acc_protect' and (
-        (has('STRONG_W') and p >= 30000) or (gun_typed and p >= 90000 and sub != 'acc_optics'))   # „rifle scope” ≠ puska
-    if sub and not weapon_first and (sub in ('acc_optics', 'acc_protect', 'acc_ammo') or f or not (w and p >= 30000)):
+    weapon_first = not f and sub in ('acc_optics', 'acc_ammo', 'acc_gear', 'acc_mag', 'acc_power') and (
+        (has('STRONG_W') and p >= 30000 and sub != 'acc_mag')                     # 5-ös tárcsomag ≠ fegyver
+        or (gun_typed and p >= 90000 and sub != 'acc_optics'))                    # „rifle scope” ≠ puska
+    if sub and not weapon_first and (sub in ('acc_optics', 'acc_protect', 'acc_ammo', 'acc_gear', 'acc_mag') or f
+                                     or not (has('STRONG_W') and p >= 30000)):   # „HPA regulator”, „Rifle Plate Carrier”
         return sub
     if (not w or f) and p < 40000 and has('AMBIG_EXTERNAL'):
         return 'part_external'
@@ -142,8 +145,10 @@ def category(title: str | None, url: str | None = None, price: float | None = No
         if has(k):
             return name if _weapon_ok(name, p, explicit) else not_weapon
     # általános fegyverszó (GBB, gas blowback, HPA…) típus nélkül: drágán fegyver; GBB 120 000 Ft alatt pisztoly, felette puska
-    if explicit and p >= 60000:
-        return 'pistol' if (has('PISTOL_POWER') and p < 120000 and not platforms(o)) else 'rifle'
+    if explicit and p >= 12000 and has('PISTOL_POWER') and p < 120000 and not platforms(o):
+        return 'pistol'                                            # „Army Armament R28 GBB”, „Rogue 11 CO2”
+    if explicit and p >= 25000:
+        return 'rifle'
     if has('URL_PARTS', u) and p < 40000:
         return 'part_internal'
     if has('URL_ACC', u) and p < 40000:
@@ -152,7 +157,9 @@ def category(title: str | None, url: str | None = None, price: float | None = No
         if has(k, u):
             return name if _weapon_ok(name, p, explicit) else not_weapon
     # végső tartalék: drága, de semmi nem utal fegyverre -> csak akkor puska, ha modellkód vagy platform van a címben
-    if p >= 40000 and (platforms(o) or _MODEL_CODE.search(o)):
+    if p >= 40000 and ([x for x in platforms(o) if not x.startswith('gb_')] or _MODEL_CODE.search(o)):
+        return 'rifle'
+    if p >= 40000 and not f and _C['STRONG_W'].search(full) and not any(_C[k].search(full) for k, _ in _SUBS):
         return 'rifle'
     return 'other'
 

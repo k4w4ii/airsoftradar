@@ -33,7 +33,8 @@ def audit_specs(db, cat) -> int:
         for key in {k for _, sp in offers for k in sp}:
             if key not in keep:
                 vals = Counter(sp[key] for _, sp in offers if key in sp)
-                keep[key] = sorted(vals.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+                base = {"kit": "-", "hv": "std"}.get(key)        # csomag / HV: az alapváltozat marad, ha van ilyen ajánlat
+                keep[key] = base if base in vals else sorted(vals.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
         bad = [oid for oid, sp in offers if spec_conflict(sp, keep)]   # a „power” átfedésre is figyel
         if bad:
             detach += bad
