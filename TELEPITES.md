@@ -96,6 +96,12 @@ Repó → Settings → Secrets and variables → Actions:
   - `elrejt <bolti URL>` (az ajánlat soha többé nem jelenik meg)
   - Mentés → push → Actions → rematch.
 
+## 5/d. Védőhálók (automatikus, nem kell kézzel tesztelni)
+1. **Tesztek minden feltöltésnél** (Actions → **tests**): több mint 100 valós bolti címmel ellenőrzi a besorolást, a párosítást, a szűrőket és a weboldalt. Ha piros, e-mailt kapsz.
+2. **Tesztkapu:** az éjszakai frissítés, a rematch és a d1-sql csak akkor ír az adatbázisba, ha a tesztek zöldek – hibás kód soha nem rontja el az oldalt.
+3. **Biztosíték:** ha változatlan kód mellett egy éjjel tömegesen (300 terméknél vagy 3%-nál több) változna a kategória, vagy sok termék tűnne el, a változás nem kerül ki, a régi állapot marad, és a health piros (e-mail). Ha a változás szándékos: Actions → rematch → Run workflow → pipáld be a **force**-t.
+4. **Minőség-őr** a health-ben is: „Minőség-őr” sor (ellenőrizendő tételek száma).
+
 ## 6. Üzemeltetői adatok (ÁSZF, adatvédelem, impresszum)
 `web\lib\site.js` → `OPERATOR` rész (név, e-mail; cím, adószám, nyilvántartási szám csak ha kitöltöd). Mentés → push.
 

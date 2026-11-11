@@ -12,7 +12,10 @@ Minden éjjel (és minden kézi rematch-nél) fut, a summary.rebuild része:
 from __future__ import annotations
 
 import csv
+import hashlib
+import json
 import os
+from datetime import datetime, timezone
 import re
 import statistics
 from pathlib import Path
@@ -121,3 +124,69 @@ def report(issues: list[dict], fixed: list[dict], path: str = "minoseg.csv") -> 
             lines += ["", "</details>", ""]
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
             f.write("\n".join(lines) + "\n")
+
+
+# --- biztosíték (circuit breaker) -------------------------------------------------------------------------------------------
+# Ha VÁLTOZATLAN besoroló kód mellett egy éjjel tömegesen változna a kategória (pl. egy bolt átírta a címeit, vagy hibás
+# adat jött), a változás NEM kerül ki: a termékek a régi kategóriájukban maradnak, a health pirosat jelez (e-mail).
+# Új kódnál (új besorolási szabályok) a tömeges változás szándékos – azt a „tests” lépés már ellenőrizte.
+CODE_FILES = ["classify.py", "filters.py", "facets.py", "quality.py", "summary.py", "dictionary.py", "javitasok.txt"]
+MAX_CAT_CHANGES = (300, 0.03)      # legfeljebb 300 termék vagy 3% – amelyik nagyobb
+MAX_DELETES = (500, 0.05)
+
+
+def code_version() -> str:
+    h = hashlib.sha1()
+    base = Path(__file__).parent
+    for name in CODE_FILES + sorted(str(p.relative_to(base)) for p in (base / "dict").glob("*")):
+        p = base / name
+        if p.exists():
+            h.update(name.encode() + p.read_bytes())
+    return h.hexdigest()[:16]
+
+
+def _meta(db, key: str):
+    db.execute([("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)", [])])
+    rows = db.select("meta", select="value", key=f"eq.{key}")
+    return rows[0]["value"] if rows else None
+
+
+def _set_meta(db, key: str, value: str) -> None:
+    db.execute([("INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [key, value])])
+
+
+def circuit_breaker(db, rows: dict[int, dict], prev: dict[int, dict]) -> dict:
+    """Tömeges kategória-változás / törlés ellen. A rows sorait helyben visszaállítja, ha kell. Visszaad: állapot."""
+    ver, force = code_version(), os.environ.get("FORCE_RECLASSIFY") == "1"
+    same_code = _meta(db, "classifier_version") == ver
+    moved = [pid for pid, r in rows.items() if pid in prev and prev[pid]["category"] != r["category"]]
+    gone = [pid for pid in prev if pid not in rows]
+    lim_c = max(MAX_CAT_CHANGES[0], int(MAX_CAT_CHANGES[1] * len(prev)))
+    lim_d = max(MAX_DELETES[0], int(MAX_DELETES[1] * len(prev)))
+    out = {"moved": len(moved), "deleted": len(gone), "blocked_moves": 0, "keep_deleted": False, "code": ver,
+           "same_code": same_code}
+    if prev and same_code and not force and len(moved) > lim_c:
+        for pid in moved:                                  # régi kategória marad (a többi mező frissülhet)
+            r = rows[pid]
+            r["category"] = prev[pid]["category"]
+            r.pop("sig", None)
+            r["sig"] = hashlib.sha1(json.dumps(r, sort_keys=True, default=str).encode()).hexdigest()[:16]
+        out["blocked_moves"] = len(moved)
+        print(f"[minoseg] BIZTOSÍTÉK: {len(moved)} termék kategóriája változott volna kódváltozás nélkül (> {lim_c}) – "
+              "a régi kategóriák maradnak. Ha szándékos: Actions → rematch → force", flush=True)
+    if prev and not force and len(gone) > lim_d:
+        out["keep_deleted"] = True
+        print(f"[minoseg] BIZTOSÍTÉK: {len(gone)} termék tűnne el (> {lim_d}) – a törlés elmarad", flush=True)
+    if not out["blocked_moves"]:
+        _set_meta(db, "classifier_version", ver)
+    return out
+
+
+def save_status(db, issues: list[dict], fixed: list[dict], guard: dict) -> None:
+    """A health ellenőrzéshez: mennyi az ellenőrizendő, mennyit javított, megakadt-e a biztosíték."""
+    status = {"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"), "review": len(issues), "fixed": len(fixed),
+              **{k: guard[k] for k in ("moved", "deleted", "blocked_moves", "keep_deleted")}}
+    try:
+        _set_meta(db, "quality", json.dumps(status))
+    except Exception as e:                                 # pragma: no cover – az állapot mentése ne állítsa meg a frissítést
+        print(f"[minoseg] állapot mentése sikertelen: {e}", flush=True)

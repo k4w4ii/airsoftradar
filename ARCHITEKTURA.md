@@ -37,6 +37,7 @@ A scraper a D1-be a weboldal Workerének titkos végpontján (`/api/db`, Bearer 
 | `classify.py`, `summary.py` | kategória/platform-besorolás; `product_summary` + kiugró árak újraépítése (csak a változások) |
 | `dictionary.py`, `dict/` | ingyenes szótáras fordítás (cseh, lengyel, magyar, olasz, finn, holland, német → angol); a `names.clean_name` és a weboldal (`web/lib/dictionary.js` + `dictionary.json`) is ezt használja; `hu_words.lst`: magyar oldalon meghagyott szavak, `nem_forditando.lst`: átnézett márkák/angol szavak |
 | `quality.py`, `javitasok.txt` | minőség-őr: a `summary` része; kézi javítások (kategória, ajánlat elrejtése), biztos automatikus javítások (túl olcsó / alkatrész nevű „fegyver”), ellenőrizendő lista (`minoseg.csv` artifact + futás-összesítő) |
+| (védőhálók) | `tests.yml` minden pushnál (scraper + web); tesztkapu a rematch / napi frissítés / d1-sql előtt; biztosíték (`quality.circuit_breaker`): változatlan kódnál a tömeges kategóriaváltás és törlés visszatartva (`meta.classifier_version`), `FORCE_RECLASSIFY=1` = rematch → force; állapot: `meta.quality` → health |
 | `health_check.py` | állapot-ellenőrzés: D1 + weboldal (Actions → health, és a napi futás vége) |
 | `shops.json` | boltonkénti konfig (forrás, URL-minta, lapozás, extra fejlécek, `enabled`, `status`) |
 

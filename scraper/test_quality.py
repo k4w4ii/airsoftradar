@@ -131,3 +131,38 @@ class TestGrenades(unittest.TestCase):
         prods = {1: {"id": 1, "manufacturer_id": 1, "name": "CYMA Smoke grenade", "slug": "s"}}
         rows, _ = run(prods, [offer(1, 1, "CYMA Smoke grenade white", 3000)])
         self.assertEqual((rows[1]["category"], rows[1]["subtypes"]), ("grenade", ",gt=smoke,"))
+
+
+class TestCircuitBreaker(unittest.TestCase):
+    def _db(self):
+        from test_d1 import LocalD1
+        return LocalD1()
+
+    def test_blocks_mass_change_without_code_change(self):
+        db = self._db()
+        prev = {i: {"id": i, "category": "rifle", "sig": "x"} for i in range(1000)}
+        db.execute([("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)", []),
+                    ("INSERT INTO meta VALUES ('classifier_version', ?)", [quality.code_version()])])
+        rows = {i: {"id": i, "category": "acc_gear", "name": "x"} for i in range(1000)}       # minden „átkerülne”
+        g = quality.circuit_breaker(db, rows, prev)
+        self.assertEqual(g["blocked_moves"], 1000)
+        self.assertTrue(all(r["category"] == "rifle" for r in rows.values()))
+
+    def test_allows_change_with_new_code(self):
+        db = self._db()
+        prev = {i: {"id": i, "category": "rifle", "sig": "x"} for i in range(1000)}
+        rows = {i: {"id": i, "category": "acc_gear", "name": "x"} for i in range(1000)}
+        g = quality.circuit_breaker(db, rows, prev)                       # nincs tárolt verzió = új kód
+        self.assertEqual(g["blocked_moves"], 0)
+        self.assertEqual(rows[1]["category"], "acc_gear")
+        self.assertEqual(db.query("SELECT value FROM meta WHERE key='classifier_version'")[0]["value"], quality.code_version())
+
+    def test_small_changes_pass_and_mass_delete_blocked(self):
+        db = self._db()
+        db.execute([("CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)", []),
+                    ("INSERT INTO meta VALUES ('classifier_version', ?)", [quality.code_version()])])
+        prev = {i: {"id": i, "category": "rifle", "sig": "x"} for i in range(20000)}
+        rows = {i: {"id": i, "category": "acc_gear" if i < 50 else "rifle"} for i in range(5000)}  # 15000 eltűnne
+        g = quality.circuit_breaker(db, rows, prev)
+        self.assertEqual(g["blocked_moves"], 0)
+        self.assertTrue(g["keep_deleted"])

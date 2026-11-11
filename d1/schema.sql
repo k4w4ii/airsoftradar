@@ -79,3 +79,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS product_summary_slug ON product_summary (slug)
 CREATE INDEX IF NOT EXISTS product_summary_cat ON product_summary (category);
 CREATE INDEX IF NOT EXISTS product_summary_pop ON product_summary (offer_count DESC, price);
 CREATE INDEX IF NOT EXISTS product_summary_mfr ON product_summary (manufacturer);
+
+-- kulcs-érték tár (besoroló verzió, minőség-őr állapota)
+CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);

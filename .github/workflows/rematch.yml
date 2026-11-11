@@ -4,6 +4,11 @@ name: rematch
 # egységesíti a termékneveket és frissíti a weboldalt (pár perc). Takarító SQL (pl. 0012) után futtasd.
 on:
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Szándékos tömeges átsorolás (a biztosíték megkerülése)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -27,7 +32,11 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
+      - name: Tesztek (hibás besoroló kód soha nem ír az adatbázisba)
+        run: python -m unittest discover -s scraper -q
       - run: python scraper/rematch.py
+        env:
+          FORCE_RECLASSIFY: ${{ inputs.force && '1' || '0' }}
       - uses: actions/upload-artifact@v4       # minőség-őr: javított és ellenőrizendő termékek listája
         if: always()
         with:

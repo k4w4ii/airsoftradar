@@ -1,0 +1,28 @@
+name: tests
+
+# Minden feltöltésnél (push) lefut: a scraper (besoroló, párosító, minőség-őr) és a weboldal tesztjei.
+# Ha piros, a GitHub e-mailt küld, és az éjszakai frissítés sem ír az adatbázisba, amíg nincs javítva.
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scraper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - run: python -m unittest discover -s scraper -v
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun test tests
+        working-directory: web

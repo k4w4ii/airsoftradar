@@ -159,7 +159,8 @@ def rebuild(db) -> dict:
         for i in range(0, len(hide), 80):
             db.update("offers", {"product_id": None, "match_status": "manual"}, id=f"in.({','.join(map(str, hide[i:i + 80]))})")
     rows, outliers = compute(shops, mfrs, products, offers, rates, fixes, diag)
-    quality.report(quality.review(rows, diag["by_product"], diag["cats"]), diag["fixed"])
+    issues = quality.review(rows, diag["by_product"], diag["cats"])
+    quality.report(issues, diag["fixed"])
 
     # kiugró jelzők: csak a változókat
     now_out = {o["id"] for o in offers if o.get("is_outlier")}
@@ -170,9 +171,12 @@ def rebuild(db) -> dict:
 
     _ensure_powers_column(db)
     # összesítő: törlés + csak a megváltozott sorok írása
-    old = {r["id"]: r["sig"] for r in db.select("product_summary", select="id,sig")}
-    gone = sorted(set(old) - set(rows))
+    prev = {r["id"]: r for r in db.select("product_summary", select="id,sig,category")}
+    guard = quality.circuit_breaker(db, rows, prev)        # biztosíték: tömeges, gyanús változás nem kerül ki az oldalra
+    old = {pid: r["sig"] for pid, r in prev.items()}
+    gone = sorted(set(old) - set(rows)) if not guard["keep_deleted"] else []
     changed = [r for pid, r in rows.items() if old.get(pid) != r["sig"]]
+    quality.save_status(db, issues, diag["fixed"], guard)
     if gone:
         for i in range(0, len(gone), 80):
             db.execute([(f"DELETE FROM product_summary WHERE id IN ({','.join('?' * len(gone[i:i + 80]))})", gone[i:i + 80])])

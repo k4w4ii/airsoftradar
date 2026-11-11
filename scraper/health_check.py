@@ -110,6 +110,22 @@ def check_db(db, rep: Report, today: date) -> dict:
     pend = q("SELECT count(*) AS n FROM offers WHERE match_status = 'pending' AND is_active = 1")[0]["n"]
     rep.ok("Párosítás", f"{pend} párosítatlan ajánlat (ismeretlen márka), {outl} eltérő árú")
 
+    try:                                    # minőség-őr (summary.rebuild menti a meta táblába)
+        qs = json.loads(q("SELECT value FROM meta WHERE key = 'quality'")[0]["value"])
+    except Exception:
+        qs = None
+    if not qs:
+        rep.warn("Minőség-őr", "még nem futott – Actions → rematch")
+    elif qs.get("blocked_moves") or qs.get("keep_deleted"):
+        rep.fail("Minőség-őr", f"a biztosíték megakadt: {qs.get('blocked_moves', 0)} kategóriaváltás / "
+                 f"{qs.get('deleted', 0) if qs.get('keep_deleted') else 0} törlés visszatartva – a rematch naplója és Summary oldala "
+                 "mutatja; ha szándékos: Actions → rematch → force = igen")
+    elif qs.get("review", 0) > 60:
+        rep.warn("Minőség-őr", f"{qs['review']} ellenőrizendő termék (automatikusan javítva: {qs.get('fixed', 0)}) – "
+                 "Actions → rematch → Artifacts → minoseg")
+    else:
+        rep.ok("Minőség-őr", f"{qs.get('review', 0)} ellenőrizendő, {qs.get('fixed', 0)} automatikusan javítva")
+
     sample = q("""SELECT p.slug, p.name, (SELECT o.id FROM offers o WHERE o.product_id = p.id AND o.is_active = 1 LIMIT 1) AS offer_id
                   FROM product_summary p ORDER BY p.offer_count DESC LIMIT 1""")
     return sample[0] if sample else {}
