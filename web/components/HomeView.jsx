@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CAT_GROUPS, defaultCats, hrefFor, PLATFORMS, POWERS, withoutCat } from "../lib/catalog";
+import { CAT_GROUPS, defaultCats, GRENADE_TYPES, hrefFor, PLATFORMS, POWERS, withoutCat } from "../lib/catalog";
 import { money, plainMoney, t } from "../lib/i18n";
 import AutoSubmit from "./AutoSubmit";
 import PriceSlider from "./PriceSlider";
@@ -132,6 +132,29 @@ function CategoryTree({ locale, params, counts }) {
   );
 }
 
+function GrenadeFilter({ locale, params, counts }) {
+  const tr = t(locale);
+  if (!(params.cats || []).includes("grenade")) return null;    // csak a gránát-kategóriában
+  const sel = new Set(params.gts || []);
+  const items = GRENADE_TYPES.filter((g) => counts[g] || sel.has(g));
+  if (!items.length) return null;
+  return (
+    <section className="fgroup">
+      <h2>{tr.grenadeType}</h2>
+      <ul className="facet-list">
+        {items.map((g) => (
+          <li key={g}>
+            <label className={counts[g] || sel.has(g) ? "facet check" : "facet check zero"}>
+              <input type="checkbox" name="gt" value={g} defaultChecked={sel.has(g)} />
+              <span className="box" aria-hidden="true" /><span>{tr.gts[g]}</span><span className="n">{counts[g] || 0}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 function PowerFilter({ locale, params, counts }) {
   const tr = t(locale);
   const sel = new Set(params.pows || []);
@@ -258,6 +281,7 @@ function Chips({ locale, params, currency }) {
   if (params.q) chips.push({ label: `„${params.q}”`, href: hrefFor(locale, params, { q: "", cats: params.cats.length ? params.cats : defaultCats("") }) });
   const isDefault = params.cats.join() === defaultCats(params.q).join();
   if (!isDefault) for (const c of params.cats) chips.push({ label: tr.cats[c], href: hrefFor(locale, params, { cats: withoutCat(params.cats, c) }) });
+  for (const g of params.gts || []) chips.push({ label: tr.gts[g], href: hrefFor(locale, params, { gts: params.gts.filter((x) => x !== g) }) });
   for (const p of params.pows || []) chips.push({ label: tr.pows[p], href: hrefFor(locale, params, { pows: params.pows.filter((x) => x !== p) }) });
   for (const p of params.plats) chips.push({ label: tr.plats[p], href: hrefFor(locale, params, { plats: params.plats.filter((x) => x !== p) }) });
   for (const b of params.brands) chips.push({ label: b, href: hrefFor(locale, params, { brands: params.brands.filter((x) => x !== b) }) });
@@ -300,6 +324,7 @@ export default function HomeView({ locale, currency, rates, data, params }) {
           <h2>{tr.category}</h2>
           <CategoryTree locale={locale} params={params} counts={facets.categories || {}} />
         </section>
+        <GrenadeFilter locale={locale} params={params} counts={facets.grenade_types || {}} />
         <PowerFilter locale={locale} params={params} counts={facets.powers || {}} />
         <PlatformFilter locale={locale} params={params} counts={facets.platforms || {}} />
         <section className="fgroup">

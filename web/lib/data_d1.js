@@ -1,7 +1,7 @@
 // Cloudflare D1 adatréteg. A lib/data.js hívja.
 // A product_summary táblát a scraper építi (scraper/summary.py); itt csak olvasunk.
 // D1 korlát: legfeljebb 100 paraméter / lekérdezés – a szűrők ennél jóval kevesebbet használnak.
-import { CAT_GROUPS, PLATFORMS, POWERS } from "./catalog";
+import { CAT_GROUPS, GRENADE_TYPES, PLATFORMS, POWERS } from "./catalog";
 
 let testDB = null;
 /** Teszthez: helyi SQLite a D1 helyett. */
@@ -30,7 +30,7 @@ const SORT_SQL = {
 };
 
 /** Szűrő-darabok: mindegyik facet a SAJÁT szűrője nélkül számol (mint a catalog_search SQL). */
-export function buildFilters({ q, cats = [], pows = [], plats = [], brands = [], pmin, pmax, inStock }) {
+export function buildFilters({ q, cats = [], gts = [], pows = [], plats = [], brands = [], pmin, pmax, inStock }) {
   const f = {};
   const words = String(q || "").trim().split(/\s+/).filter(Boolean).slice(0, 5);
   if (words.length) {
@@ -47,6 +47,7 @@ export function buildFilters({ q, cats = [], pows = [], plats = [], brands = [],
     const leaves = [...new Set(cats.flatMap((c) => GROUP_LEAVES[c] || [c]))];
     f.cat = { sql: `category IN (${leaves.map(() => "?").join(",")})`, params: leaves };
   }
+  if (gts.length) f.gt = { sql: `(${gts.map(() => "subtypes LIKE ?").join(" OR ")})`, params: gts.map((g) => `%,${g},%`) };
   if (pows.length) f.pow = { sql: `(${pows.map(() => "powers LIKE ?").join(" OR ")})`, params: pows.map((p) => `%,${p},%`) };
   if (plats.length) f.plat = { sql: `(${plats.map(() => "platforms LIKE ?").join(" OR ")})`, params: plats.map((p) => `%,${p},%`) };
   if (brands.length) f.brand = { sql: `manufacturer IN (${brands.map(() => "?").join(",")})`, params: brands };
@@ -66,9 +67,9 @@ function whereExcept(f, except) {
 }
 
 /** A catalog_search RPC megfelelője: találatok + szűrő-darabszámok egy D1-kötegben. */
-export async function catalogSearchD1({ q, cats, pows, plats, brands, pmin, pmax, inStock, sort, lim, off, edges }) {
+export async function catalogSearchD1({ q, cats, gts, pows, plats, brands, pmin, pmax, inStock, sort, lim, off, edges }) {
   const db = await getDB();
-  const f = buildFilters({ q, cats, pows, plats, brands, pmin, pmax, inStock });
+  const f = buildFilters({ q, cats, gts, pows, plats, brands, pmin, pmax, inStock });
   const w = whereExcept(f, null);
   const T = "FROM product_summary";
   const cols = CARD_COLS;
@@ -94,6 +95,10 @@ export async function catalogSearchD1({ q, cats, pows, plats, brands, pmin, pmax
   const wpw = whereExcept(f, "pow");
   const powSums = POWERS.map((p) => `SUM(powers LIKE '%,${p},%') AS "${p}"`).join(", ");
   const powRow = await db.prepare(`SELECT ${powSums} ${T}${wpw.sql}`).bind(...wpw.params).first().catch(() => null);
+  const wgt = whereExcept(f, "gt");
+  const gtSums = GRENADE_TYPES.map((g) => `SUM(subtypes LIKE '%,${g},%') AS "${g}"`).join(", ");
+  const gtRow = (cats || []).includes("grenade")
+    ? await db.prepare(`SELECT ${gtSums} ${T}${wgt.sql}`).bind(...wgt.params).first().catch(() => null) : null;
   const [items, total, catRows, platRow, brandRows, priceRow, stockRow, bucketRows] = res;
   return {
     total: total[0]?.n || 0,
@@ -102,6 +107,7 @@ export async function catalogSearchD1({ q, cats, pows, plats, brands, pmin, pmax
       categories: Object.fromEntries(catRows.map((r) => [r.category, r.n])),
       platforms: Object.fromEntries(Object.entries(platRow[0] || {}).filter(([, n]) => n > 0)),
       powers: Object.fromEntries(Object.entries(powRow || {}).filter(([, n]) => n > 0)),
+      grenade_types: Object.fromEntries(Object.entries(gtRow || {}).filter(([, n]) => n > 0)),
       brands: brandRows,
       price: priceRow[0] || { min: null, max: null },
       buckets: bucketRows ? Object.fromEntries(bucketRows.map((r) => [String(r.bk), r.n])) : null,

@@ -115,3 +115,19 @@ class TestKits(unittest.TestCase):
         self.assertFalse(spec_conflict(specs("SNIPER RIFLE SA-S02 CORE + OPTIC E BIPOD - TAN"),
                                        specs("Specna Arms SA-S02 CORE™ Sniper Rifle with scope and bipod - Black")))
         self.assertNotIn("kit", specs("Bipod for sniper rifle"))
+
+
+class TestGrenades(unittest.TestCase):
+    def test_types(self):
+        import classify
+        self.assertEqual(classify.grenade_types("Smoke grenade Enola Gaye EG18", 3500), ["smoke"])
+        self.assertEqual(classify.grenade_types("TAG-67 BB impact grenade", 12000), ["bb"])
+        self.assertEqual(classify.grenade_types("APS M203 grenade launcher", 30000), ["launcher"])
+        self.assertEqual(classify.grenade_types("Moscart 40mm shell 72 BBs", 12000), ["shell"])
+        self.assertEqual(classify.grenade_types("Zestaw 12 skorup Pineapple do granatu Thunder B", 3000), ["part"])
+        self.assertIn("sound", classify.grenade_types("Thunder B Sonic Grenade Complete Set", 9000))
+
+    def test_summary_subtypes(self):
+        prods = {1: {"id": 1, "manufacturer_id": 1, "name": "CYMA Smoke grenade", "slug": "s"}}
+        rows, _ = run(prods, [offer(1, 1, "CYMA Smoke grenade white", 3000)])
+        self.assertEqual((rows[1]["category"], rows[1]["subtypes"]), ("grenade", ",smoke,"))

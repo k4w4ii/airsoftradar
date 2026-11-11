@@ -30,7 +30,7 @@ export async function catalogSearch(params, currency, rates) {
   const page = Math.max(1, Number(params.page) || 1);
   const edges = PRICE_EDGES[cur];
   const res = await d1.catalogSearchD1({
-    q: cleanQuery(params.q), cats: params.cats || [], pows: params.pows || [], plats: params.plats || [], brands: (params.brands || []).slice(0, 30),
+    q: cleanQuery(params.q), cats: params.cats || [], pows: params.pows || [], gts: params.gts || [], plats: params.plats || [], brands: (params.brands || []).slice(0, 30),
     pmin: params.min > 0 ? Math.floor(params.min * r) : null, pmax: params.max > 0 ? Math.ceil(params.max * r) : null,
     inStock: !!params.stock, sort: params.sort || "discount", lim: PAGE_SIZE, off: (page - 1) * PAGE_SIZE,
     edges: edges.map((e) => Math.round(e * r)),

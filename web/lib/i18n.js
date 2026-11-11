@@ -81,6 +81,11 @@ const DICT = {
       custom: "Egyedi és tuningolt fegyverek", custom_rifle: "Egyedi puskák, gépkarabélyok", custom_pistol: "Egyedi pisztolyok",
       custom_sniper: "Egyedi mesterlövész puskák",
     },
+    grenadeType: "Gránát típusa",
+    gts: {
+      sound: "Hanggránát (pl. Thunder B)", bb: "BB-szóró (szétnyíló) gránát", smoke: "Füstgránát", flash: "Villanógránát",
+      pyro: "Pirotechnikai gránát", launcher: "Gránátvető", shell: "40 mm-es gránát / lövedék", part: "Alkatrész, utántöltő",
+    },
     power: "Működés",
     pows: {
       aeg: "AEG (elektromos)", gbb: "GBB / GBBR (gázos)", gas: "Gáz, nem visszacsapó", co2: "CO2",
@@ -167,6 +172,11 @@ const DICT = {
       acc: "Accessories", acc_mag: "Magazines", acc_power: "Batteries & chargers", acc_optics: "Optics, lights, lasers",
       acc_ammo: "BBs & gas", acc_protect: "Protective gear", acc_gear: "Tactical gear & holsters", other: "Other",
       custom: "Custom & tuned guns", custom_rifle: "Custom rifles", custom_pistol: "Custom pistols", custom_sniper: "Custom sniper rifles",
+    },
+    grenadeType: "Grenade type",
+    gts: {
+      sound: "Sound grenade (e.g. Thunder B)", bb: "BB-spraying grenade", smoke: "Smoke grenade", flash: "Flashbang",
+      pyro: "Pyrotechnic grenade", launcher: "Grenade launcher", shell: "40 mm grenade / shell", part: "Parts, refills",
     },
     power: "Power type",
     pows: {

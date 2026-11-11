@@ -105,6 +105,7 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
             "search_code": re.sub(r"[^a-z0-9]", "", f"{mname} {p['name']} {p.get('model_code') or ''}".lower()),
             "category": cat, "platforms": ("," + ",".join(sorted(plats)) + ",") if plats else "",
             "powers": ("," + ",".join(sorted(pows)) + ",") if pows else "",
+            "subtypes": _subtypes(cat, p["name"], clean),
             "best_price_huf": best_huf,
             "best_price_eur": min((o["price_eur"] for o in instock if o["price_eur"] is not None), default=None),
             "max_price_huf": max((o["price_huf"] for o in instock), default=None),   # csak raktáron lévők egymás közt
@@ -122,13 +123,26 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
     return rows, outliers
 
 
+def _subtypes(cat: str, name: str, offers: list[dict]) -> str:
+    """Altípusok a kategórián belüli szűrőhöz (most: gránátok – hang, BB-szóró, füst, villanó, pirotechnikai, gránátvető…)."""
+    if cat != "grenade":
+        return ""
+    gt = set(classify.grenade_types(name, statistics.median(o["price_huf"] for o in offers)))
+    for o in offers:
+        gt.update(classify.grenade_types(o["title_raw"], o["price_huf"]))
+    if "part" in gt and len(gt) > 1 and statistics.median(o["price_huf"] for o in offers) >= 8000:
+        gt.discard("part")
+    return ("," + ",".join(sorted(gt)) + ",") if gt else ""
+
+
 def _ensure_powers_column(db) -> None:
-    """2026-11-11: új oszlop (működés-szűrő). Magától létrehozza, ha még nincs (nem kell kézi SQL)."""
-    try:
-        db.execute([("SELECT powers FROM product_summary LIMIT 1", [])])
-    except Exception:
-        db.execute([("ALTER TABLE product_summary ADD COLUMN powers TEXT NOT NULL DEFAULT ''", [])])
-        print("[summary] új oszlop: product_summary.powers", flush=True)
+    """2026-11-11: új oszlopok (működés- és gránát-szűrő). Magától létrehozza, ha még nincsenek (nem kell kézi SQL)."""
+    for col in ("powers", "subtypes"):
+        try:
+            db.execute([(f"SELECT {col} FROM product_summary LIMIT 1", [])])
+        except Exception:
+            db.execute([(f"ALTER TABLE product_summary ADD COLUMN {col} TEXT NOT NULL DEFAULT ''", [])])
+            print(f"[summary] új oszlop: product_summary.{col}", flush=True)
 
 
 def rebuild(db) -> dict:

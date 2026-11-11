@@ -17,12 +17,15 @@ export const PLATFORMS = ["m4", "ak", "g36", "mp5", "aug", "scar", "m14", "p90",
 // Működés (hajtás) – fegyvereknél és alkatrészeknél is (SQL: product_summary.powers „,aeg,gbb,”)
 export const POWERS = ["aeg", "gbb", "gas", "co2", "spring", "hpa", "aep"];
 
+// Gránát típusa (csak a gránát-kategóriában látszik; SQL: product_summary.subtypes)
+export const GRENADE_TYPES = ["sound", "bb", "smoke", "flash", "pyro", "launcher", "shell", "part"];
+
 export const SORTS = ["discount", "popular", "price", "price_desc", "name"];
 export const DEFAULT_SORT = "discount";          // legnagyobb árkülönbség (legolcsóbb vs. legdrágább bolt)
 export const VIEWS = ["grid", "list"];           // csempe az alap
 
 /** Üres cím (/hu, /en) = üdvözlő oldal; bármilyen paraméter = katalógus. */
-const CATALOG_KEYS = ["q", "cat", "pow", "plat", "brand", "min", "max", "stock", "sort", "view", "page"];
+const CATALOG_KEYS = ["q", "cat", "gt", "pow", "plat", "brand", "min", "max", "stock", "sort", "view", "page"];
 export const isWelcome = (sp) => !CATALOG_KEYS.some((k) => sp?.[k] !== undefined && sp[k] !== "");   // utm_*, gclid stb. nem számít
 
 /** Keresés nélkül a fegyverek az alap, kereséskor minden termék. */
@@ -49,11 +52,12 @@ export function parseCatalog(sp) {
   const cats = sp.cat === undefined ? defaultCats(q) : normalizeCats(rawCats);
   const plats = PLATFORMS.filter((p) => list(sp.plat).includes(p));
   const pows = POWERS.filter((p) => list(sp.pow).includes(p));
+  const gts = GRENADE_TYPES.filter((g) => list(sp.gt).includes(g));
   const brands = [].concat(sp.brand || []).filter((b) => typeof b === "string" && b).slice(0, 30);
   const num = (k) => Math.max(0, Math.round(Number(one(k)) || 0));
   let [min, max] = [num("min"), num("max")];
   if (min && max && min > max) [min, max] = [max, min];
-  return { q, cats, pows, plats, brands, min, max, stock: one("stock") === "1",
+  return { q, cats, gts, pows, plats, brands, min, max, stock: one("stock") === "1",
            sort: SORTS.includes(one("sort")) ? one("sort") : DEFAULT_SORT,
            view: VIEWS.includes(one("view")) ? one("view") : "grid", page: Math.max(1, num("page")) };
 }
@@ -68,6 +72,7 @@ export function hrefFor(locale, params, over = {}) {
     if (cats.length) cats.forEach((c) => sp.append("cat", c));
     else sp.set("cat", "all");
   }
+  for (const g of p.gts || []) sp.append("gt", g);
   for (const pw of p.pows || []) sp.append("pow", pw);
   for (const pl of p.plats || []) sp.append("plat", pl);
   for (const b of p.brands || []) sp.append("brand", b);

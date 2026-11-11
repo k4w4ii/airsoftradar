@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS match_candidates (
 -- A weboldal ebből olvas. A scraper (summary.py) építi újra a napi futás végén (csak a változott sorokat írja).
 CREATE TABLE IF NOT EXISTS product_summary (
   id INTEGER PRIMARY KEY, slug TEXT NOT NULL, name TEXT NOT NULL, model_code TEXT, image_url TEXT,
-  manufacturer TEXT NOT NULL, search_code TEXT NOT NULL DEFAULT '', category TEXT NOT NULL, platforms TEXT NOT NULL DEFAULT '', powers TEXT NOT NULL DEFAULT '',
+  manufacturer TEXT NOT NULL, search_code TEXT NOT NULL DEFAULT '', category TEXT NOT NULL, platforms TEXT NOT NULL DEFAULT '', powers TEXT NOT NULL DEFAULT '', subtypes TEXT NOT NULL DEFAULT '',
   best_price_huf REAL, best_price_eur REAL, max_price_huf REAL, min_price_any_huf REAL, min_price_any_eur REAL,
   offer_count INTEGER NOT NULL, in_stock_count INTEGER NOT NULL, shop_countries TEXT NOT NULL DEFAULT '',
   stock TEXT NOT NULL, updated_at TEXT, price REAL, sig TEXT
