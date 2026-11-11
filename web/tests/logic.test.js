@@ -65,3 +65,11 @@ test("shopTarget: közvetlen bolti link", async () => {
   expect(shopTarget("javascript:alert(1)", null)).toBeNull();
   expect(shopTarget(null, null)).toBeNull();
 });
+
+test("képcím-normalizálás", async () => {
+  const { imgSrc } = await import("../lib/links.js");
+  expect(imgSrc("https://atom-airsoft.fi/img/a b,c.jpg")).toBe("https://atom-airsoft.fi/img/a%20b,c.jpg");
+  expect(imgSrc("javascript:alert(1)")).toBe(null);
+  expect(imgSrc("")).toBe(null);
+  expect(imgSrc("nem url")).toBe(null);
+});

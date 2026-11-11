@@ -1,7 +1,7 @@
 import { translateTitle } from "../lib/dictionary";
-import { shopTarget } from "../lib/links";
+import { imgSrc, shopTarget } from "../lib/links";
 import Link from "next/link";
-import { dateFmt, money, shopMoney, t } from "../lib/i18n";
+import { dateFmt, money, shopMoney, shortDate, t } from "../lib/i18n";
 import { Ad, Price, StockBadge } from "./ui";
 
 /** Árdiagram SVG-ben (külső könyvtár nélkül). points: [{ observed_on, min_huf }] */
@@ -49,6 +49,7 @@ function OfferLadder({ offers, currency, rates, locale, odd = false, scaleMax })
             <span className="cc">{o.shop_country}</span>
             <StockBadge stock={o.stock} locale={locale} />
             {perShop[o.shop_name] > 1 || odd ? <span className="variant muted">{translateTitle(o.title_raw, locale)}</span> : null}
+            {o.last_seen_at ? <span className="checked muted">{tr.checked}: {shortDate(o.last_seen_at, locale)}</span> : null}
           </div>
           <div className="rung-bar" aria-hidden="true">
             <div style={{ width: `${Math.min(100, Math.max(4, (Number(o.price_huf) / max) * 100))}%` }} />
@@ -81,7 +82,7 @@ export default function ProductView({ locale, currency, rates, product, offers: 
       <Link href={`/${locale}?cat=weapons`} className="back">{tr.back}</Link>
       <div className="product-head">
         <div className="product-img">
-          {product.image_url ? <img src={product.image_url} alt={product.name} referrerPolicy="no-referrer" /> : null}
+          {imgSrc(product.image_url) ? <img src={imgSrc(product.image_url)} alt={product.name} referrerPolicy="no-referrer" /> : null}
         </div>
         <div className="product-info">
           <span className="row-mfr">{product.manufacturer}</span>

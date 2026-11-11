@@ -76,7 +76,7 @@ export default function SearchBox({ locale, defaultValue = "", placeholder, labe
               <><span className="sg-tag">◎</span><span>{b.label}</span><span className="sg-n">{b.n}</span></>))}
             {data.products.map((p) => opt({ ...p, kind: "product" }, (
               <>
-                <span className="sg-thumb">{p.image ? <img src={p.image} alt="" loading="lazy" referrerPolicy="no-referrer" /> : null}</span>
+                <span className="sg-thumb">{p.image ? <img src={p.image} alt={p.name} loading="lazy" referrerPolicy="no-referrer" /> : null}</span>
                 <span className="sg-main"><span className="sg-mfr">{p.manufacturer}</span><span className="sg-name">{p.name}</span></span>
                 <span className="sg-price">{p.price}<span className="sg-n">{p.shops}</span></span>
               </>

@@ -62,6 +62,7 @@ const DICT = {
     history: "Legalacsonyabb ár naponta",
     historyEmpty: "Az árelőzmény a következő napokban épül fel: minden éjjel új adatpont kerül ide.",
     updated: "Frissítve",
+    checked: "Ellenőrizve",
     back: "Vissza a listához",
     footer: "Az árak tájékoztató jellegűek, szállítási költség nélkül, a bolt pénznemében mért ár napi MNB-árfolyamon átszámítva. Vásárlás előtt mindig ellenőrizd a bolt oldalán.",
     otherLang: "English",
@@ -145,6 +146,7 @@ const DICT = {
     history: "Lowest price per day",
     historyEmpty: "Price history builds up over the next days: a new data point is added every night.",
     updated: "Updated",
+    checked: "Checked",
     back: "Back to the list",
     footer: "Prices are indicative, excluding shipping, converted from the shop's currency at the daily Hungarian central bank (MNB) rate. Always check the shop's page before buying.",
     otherLang: "Magyar",
@@ -216,6 +218,14 @@ export function dateFmt(iso, locale) {
   if (!iso) return "";
   return new Intl.DateTimeFormat(locale === "hu" ? "hu-HU" : "en-GB", {
     year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Budapest",
+  }).format(new Date(iso));
+}
+
+/** Rövid dátum a kártyákra / ajánlatsorokra: „nov. 11. 03:40” */
+export function shortDate(iso, locale) {
+  if (!iso) return "";
+  return new Intl.DateTimeFormat(locale === "hu" ? "hu-HU" : "en-GB", {
+    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Budapest",
   }).format(new Date(iso));
 }
 

@@ -19,3 +19,14 @@ export function shopTarget(url, template) {
   const target = template ? template.replace("{url}", encodeURIComponent(url)) : withUtm(url);
   return /^https?:\/\//i.test(target) ? target : null;
 }
+
+/** Külső képcím biztonságosan: csak http(s), a szóközök és egyéb tiltott karakterek kódolva (pl. atom-airsoft „a b,c.jpg”). */
+export function imgSrc(url) {
+  if (!url || typeof url !== "string") return null;
+  try {
+    const u = new URL(url.trim().replace(/ /g, "%20"));
+    return u.protocol === "https:" || u.protocol === "http:" ? u.href : null;
+  } catch {
+    return null;
+  }
+}

@@ -484,3 +484,8 @@ img { display: block; max-width: 100%; }
 .theme-btn:hover { color: var(--bone); border-color: var(--muted); }
 .theme-btn svg { width: 18px; height: 18px; }
 [data-theme="dark"] .theme-btn.to-dark, :root:not([data-theme="dark"]) .theme-btn.to-light { display: none; }
+
+/* frissítési idő: kártyán, listában, ajánlatsorban (ár-összehasonlítónál elvárt) */
+.tile-upd, .row-meta .upd, .rung-shop .checked { font-size: 11.5px; }
+.tile-upd { display: block; margin-top: 4px; }
+.rung-shop .checked { display: block; }

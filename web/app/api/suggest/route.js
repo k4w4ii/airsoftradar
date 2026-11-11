@@ -1,3 +1,4 @@
+import { imgSrc } from "../../../lib/links";
 import { hrefFor, LEAVES, GROUP_IDS } from "../../../lib/catalog";
 import { getRates, suggest } from "../../../lib/data";
 import { CURRENCIES, DEFAULT_CURRENCY, isLocale, money, t } from "../../../lib/i18n";
@@ -28,7 +29,7 @@ export async function GET(req) {
       .map((c) => ({ label: tr.cats[c], href: hrefFor(locale, { ...base, cats: [c] }) }));
     return json({
       products: res.products.map((p) => ({
-        name: p.name, manufacturer: p.manufacturer, image: p.image_url || null,
+        name: p.name, manufacturer: p.manufacturer, image: imgSrc(p.image_url),
         price: money(p.best_price_huf ?? p.min_price_any_huf, currency, rates, locale),
         shops: tr.shops(p.offer_count), href: `/${locale}/p/${p.slug}`,
       })),

@@ -16,7 +16,7 @@ export async function getDB() {
 }
 
 const all = async (stmt) => (await stmt.all()).results || [];
-const CARD_COLS = "id, slug, name, manufacturer, image_url, category, best_price_huf, max_price_huf, min_price_any_huf, offer_count, stock";
+const CARD_COLS = "id, slug, name, manufacturer, image_url, category, best_price_huf, max_price_huf, min_price_any_huf, offer_count, stock, updated_at";
 
 const GROUP_LEAVES = Object.fromEntries(CAT_GROUPS.map((g) => [g.id, g.leaves]));
 // árkülönbség: a legolcsóbb (raktáron lévő, ennek hiányában bármely) ár hány %-kal olcsóbb a legdrágább boltnál
@@ -185,6 +185,7 @@ export async function countProductsD1() {
 
 // kategóriák mintaképe: 0 = erős találat (első helyen), 1 = gyenge, 2 = egyéb; a „not” szavas termék sosem csempekép
 const TYPICAL_WORDS = {
+  lmg: { strong: ["m249", "mg42", "pkm", "m60", "minimi", "mk46", "mk48", "negev", "m240", "rpk"], weak: ["machine gun", "lmg"] },
   grenade: { strong: ["grenade launcher", "launcher"], weak: ["grenade", "gránát"] },
   acc_mag: { strong: ["mid-cap", "midcap", "mid cap", "hi-cap", "hicap"], weak: ["magazine", "tár "],
              not: ["pouch", "loader", "holder", "adapter", "speed", "coupler", "clamp", "zseb", "spring", "follower", "base", "pistol", "gbb", "pisztoly"] },
@@ -215,7 +216,6 @@ const TYPICAL = (() => {
 /** Üdvözlő oldal: kategóriánkénti darabszám és mintakép, legnagyobb árkülönbségek, népszerű márkák, számok. */
 export async function getWelcomeD1() {
   const db = await getDB();
-  const weapons = GROUP_LEAVES.weapons;
   const res = await db.batch([
     db.prepare("SELECT category, count(*) AS n FROM product_summary GROUP BY category"),
     // mintakép: kategóriánként 3 jelölt; előnyben a kategóriára jellemző nevű termék (pl. akkunál „lipo”), aztán a népszerű
@@ -224,11 +224,11 @@ export async function getWelcomeD1() {
                   FROM product_summary WHERE image_url LIKE 'https://%'
                     AND lower(name) NOT LIKE '%patch%' AND lower(name) NOT LIKE '%felvarr%') WHERE rn <= 3
                 ORDER BY category, rn`),
-    // valódi, raktáron lévő árkülönbség 2+ boltnál; a 70% feletti (gyanús) eltérés kimarad
+    // valódi, raktáron lévő árkülönbség (minden kategóriából) 2+ boltnál; a 70% feletti (gyanús) eltérés kimarad
     db.prepare(`SELECT ${CARD_COLS}, (max_price_huf - best_price_huf) * 1.0 / max_price_huf AS d FROM product_summary
-                WHERE category IN (${weapons.map(() => "?").join(",")}) AND offer_count > 1 AND best_price_huf IS NOT NULL
+                WHERE offer_count > 1 AND best_price_huf IS NOT NULL
                   AND max_price_huf > best_price_huf AND (max_price_huf - best_price_huf) * 1.0 / max_price_huf <= 0.7
-                ORDER BY d DESC, offer_count DESC LIMIT 8`).bind(...weapons),
+                ORDER BY d DESC, offer_count DESC LIMIT 8`),
     db.prepare("SELECT manufacturer AS name, count(*) AS n FROM product_summary GROUP BY manufacturer ORDER BY n DESC LIMIT 14"),
     db.prepare("SELECT count(*) AS n FROM shops WHERE is_active = 1 AND last_scraped_at IS NOT NULL"),
   ]);

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CAT_GROUPS, defaultCats, FACETS, hrefFor, PLATFORMS, visibleDims, withoutCat } from "../lib/catalog";
-import { money, plainMoney, t } from "../lib/i18n";
+import { money, plainMoney, shortDate, t } from "../lib/i18n";
+import { imgSrc } from "../lib/links";
 import AutoSubmit from "./AutoSubmit";
 import PriceSlider from "./PriceSlider";
 import { Ad, Price, SpreadBar, StockBadge } from "./ui";
@@ -21,7 +22,7 @@ function ProductRow({ p, locale, currency, rates }) {
     <li className="row">
       <Link href={`/${locale}/p/${p.slug}`} className="row-link">
         <div className="thumb">
-          {p.image_url ? <img src={p.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : null}
+          {imgSrc(p.image_url) ? <img src={imgSrc(p.image_url)} alt={p.name} loading="lazy" referrerPolicy="no-referrer" /> : null}
         </div>
         <div className="row-main">
           <span className="row-mfr">{p.manufacturer}</span>
@@ -29,6 +30,7 @@ function ProductRow({ p, locale, currency, rates }) {
           <span className="row-meta">
             <StockBadge stock={p.stock} locale={locale} />
             <span className="muted">{tr.shops(p.offer_count)}</span>
+            {p.updated_at ? <span className="muted upd">{tr.updated}: {shortDate(p.updated_at, locale)}</span> : null}
           </span>
         </div>
         <div className="row-spread">
@@ -52,7 +54,7 @@ export function ProductTile({ p, locale, currency, rates }) {
     <li className="tile">
       <Link href={`/${locale}/p/${p.slug}`} className="tile-link">
         <div className="tile-img">
-          {p.image_url ? <img src={p.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : null}
+          {imgSrc(p.image_url) ? <img src={imgSrc(p.image_url)} alt={p.name} loading="lazy" referrerPolicy="no-referrer" /> : null}
         </div>
         <div className="tile-body">
           <span className="row-mfr">{p.manufacturer}</span>
@@ -70,6 +72,7 @@ export function ProductTile({ p, locale, currency, rates }) {
               {tr.saveUpTo(money(p.max_price_huf - best, currency, rates, locale), pct)}
             </span>
           ) : null}
+          {p.updated_at ? <span className="tile-upd muted">{tr.updated}: {shortDate(p.updated_at, locale)}</span> : null}
         </div>
       </Link>
     </li>

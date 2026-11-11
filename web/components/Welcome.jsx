@@ -33,7 +33,7 @@ export default function Welcome({ locale, currency, rates, data }) {
           {tiles.map((c) => (
             <li key={c}>
               <Link href={hrefFor(locale, { ...BASE, cats: [c] })} className="cat-tile">
-                <span className="cat-img"><CatImg srcs={image(c)} /></span>
+                <span className="cat-img"><CatImg srcs={image(c)} alt={tr.cats[c]} /></span>
                 <span className="cat-name">{tr.cats[c]}</span>
                 <span className="cat-n">{tr.items(count(c))}</span>
               </Link>
@@ -49,7 +49,7 @@ export default function Welcome({ locale, currency, rates, data }) {
               <h2>{tr.bestDeals}</h2>
               <p className="muted small">{tr.bestDealsNote}</p>
             </div>
-            <Link href={hrefFor(locale, { ...BASE, cats: ["weapons"] })} className="see-all">{tr.seeAll} →</Link>
+            <Link href={hrefFor(locale, { ...BASE, cats: [], sort: "discount" })} className="see-all">{tr.seeAll} →</Link>
           </div>
           <ul className="tiles">
             {data.deals.map((p) => <ProductTile key={p.id} p={p} locale={locale} currency={currency} rates={rates} />)}
