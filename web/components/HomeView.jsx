@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CAT_GROUPS, defaultCats, GRENADE_TYPES, hrefFor, PLATFORMS, POWERS, withoutCat } from "../lib/catalog";
+import { CAT_GROUPS, defaultCats, FACETS, hrefFor, PLATFORMS, visibleDims, withoutCat } from "../lib/catalog";
 import { money, plainMoney, t } from "../lib/i18n";
 import AutoSubmit from "./AutoSubmit";
 import PriceSlider from "./PriceSlider";
@@ -132,49 +132,30 @@ function CategoryTree({ locale, params, counts }) {
   );
 }
 
-function GrenadeFilter({ locale, params, counts }) {
-  const tr = t(locale);
-  if (!(params.cats || []).includes("grenade")) return null;    // csak a gránát-kategóriában
-  const sel = new Set(params.gts || []);
-  const items = GRENADE_TYPES.filter((g) => counts[g] || sel.has(g));
-  if (!items.length) return null;
-  return (
-    <section className="fgroup">
-      <h2>{tr.grenadeType}</h2>
-      <ul className="facet-list">
-        {items.map((g) => (
-          <li key={g}>
-            <label className={counts[g] || sel.has(g) ? "facet check" : "facet check zero"}>
-              <input type="checkbox" name="gt" value={g} defaultChecked={sel.has(g)} />
-              <span className="box" aria-hidden="true" /><span>{tr.gts[g]}</span><span className="n">{counts[g] || 0}</span>
-            </label>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function PowerFilter({ locale, params, counts }) {
-  const tr = t(locale);
-  const sel = new Set(params.pows || []);
-  const items = POWERS.filter((p) => counts[p] || sel.has(p));
-  if (!items.length) return null;
-  return (
-    <section className="fgroup">
-      <h2>{tr.power}</h2>
-      <ul className="facet-list">
-        {items.map((p) => (
-          <li key={p}>
-            <label className={counts[p] || sel.has(p) ? "facet check" : "facet check zero"}>
-              <input type="checkbox" name="pow" value={p} defaultChecked={sel.has(p)} />
-              <span className="box" aria-hidden="true" /><span>{tr.pows[p]}</span><span className="n">{counts[p] || 0}</span>
-            </label>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
+// Kategóriánkénti extra szűrők (Működés, Gránát típusa, BB súlya…): mindig csak a kiválasztott kategóriához illők
+function AttrFilters({ locale, params, counts }) {
+  const hu = locale === "hu";
+  return visibleDims(params.cats).map((k) => {
+    const sel = new Set(params.attrs?.[k] || []);
+    const c = counts[k] || {};
+    const items = FACETS[k].values.filter(([v]) => c[v] || sel.has(v));
+    if (!items.length) return null;
+    return (
+      <section className="fgroup" key={k}>
+        <h2>{FACETS[k].label[hu ? 0 : 1]}</h2>
+        <ul className="facet-list">
+          {items.map(([v, lhu, len]) => (
+            <li key={v}>
+              <label className={c[v] || sel.has(v) ? "facet check" : "facet check zero"}>
+                <input type="checkbox" name={k} value={v} defaultChecked={sel.has(v)} />
+                <span className="box" aria-hidden="true" /><span>{hu ? lhu : len}</span><span className="n">{c[v] || 0}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  });
 }
 
 function PlatformFilter({ locale, params, counts }) {
@@ -281,8 +262,12 @@ function Chips({ locale, params, currency }) {
   if (params.q) chips.push({ label: `„${params.q}”`, href: hrefFor(locale, params, { q: "", cats: params.cats.length ? params.cats : defaultCats("") }) });
   const isDefault = params.cats.join() === defaultCats(params.q).join();
   if (!isDefault) for (const c of params.cats) chips.push({ label: tr.cats[c], href: hrefFor(locale, params, { cats: withoutCat(params.cats, c) }) });
-  for (const g of params.gts || []) chips.push({ label: tr.gts[g], href: hrefFor(locale, params, { gts: params.gts.filter((x) => x !== g) }) });
-  for (const p of params.pows || []) chips.push({ label: tr.pows[p], href: hrefFor(locale, params, { pows: params.pows.filter((x) => x !== p) }) });
+  for (const k of visibleDims(params.cats)) {
+    for (const v of params.attrs?.[k] || []) {
+      const lbl = FACETS[k].values.find((x) => x[0] === v)?.[locale === "hu" ? 1 : 2] || v;
+      chips.push({ label: lbl, href: hrefFor(locale, params, { attrs: { ...params.attrs, [k]: params.attrs[k].filter((x) => x !== v) } }) });
+    }
+  }
   for (const p of params.plats) chips.push({ label: tr.plats[p], href: hrefFor(locale, params, { plats: params.plats.filter((x) => x !== p) }) });
   for (const b of params.brands) chips.push({ label: b, href: hrefFor(locale, params, { brands: params.brands.filter((x) => x !== b) }) });
   if (params.min || params.max) {
@@ -324,8 +309,7 @@ export default function HomeView({ locale, currency, rates, data, params }) {
           <h2>{tr.category}</h2>
           <CategoryTree locale={locale} params={params} counts={facets.categories || {}} />
         </section>
-        <GrenadeFilter locale={locale} params={params} counts={facets.grenade_types || {}} />
-        <PowerFilter locale={locale} params={params} counts={facets.powers || {}} />
+        <AttrFilters locale={locale} params={params} counts={facets.attrs || {}} />
         <PlatformFilter locale={locale} params={params} counts={facets.platforms || {}} />
         <section className="fgroup">
           <h2>{tr.availability}</h2>

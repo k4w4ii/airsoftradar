@@ -22,7 +22,7 @@ export async function GET(req) {
   const tr = t(locale);
   try {
     const [res, rates] = await Promise.all([suggest(q), getRates()]);
-    const base = { q: "", cats: [], gts: [], pows: [], plats: [], brands: [], min: 0, max: 0, stock: false };
+    const base = { q: "", cats: [], attrs: {}, plats: [], brands: [], min: 0, max: 0, stock: false };
     const fq = fold(q);
     const cats = [...GROUP_IDS, ...LEAVES].filter((c) => fold(tr.cats[c]).includes(fq)).slice(0, 3)
       .map((c) => ({ label: tr.cats[c], href: hrefFor(locale, { ...base, cats: [c] }) }));

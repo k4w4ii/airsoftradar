@@ -15,6 +15,7 @@ import statistics
 from collections import Counter, defaultdict
 
 import classify
+import facets
 import quality
 from filters import is_variant
 
@@ -124,15 +125,14 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
 
 
 def _subtypes(cat: str, name: str, offers: list[dict]) -> str:
-    """Altípusok a kategórián belüli szűrőhöz (most: gránátok – hang, BB-szóró, füst, villanó, pirotechnikai, gránátvető…)."""
-    if cat != "grenade":
-        return ""
-    gt = set(classify.grenade_types(name, statistics.median(o["price_huf"] for o in offers)))
+    """Kategórián belüli szűrő-értékek (facets.py): „,gt=smoke,”, „,bbw=0.25,bbt=bio,” stb."""
+    mid = statistics.median(o["price_huf"] for o in offers)
+    vals = set(facets.attributes(cat, name, mid))
     for o in offers:
-        gt.update(classify.grenade_types(o["title_raw"], o["price_huf"]))
-    if "part" in gt and len(gt) > 1 and statistics.median(o["price_huf"] for o in offers) >= 8000:
-        gt.discard("part")
-    return ("," + ",".join(sorted(gt)) + ",") if gt else ""
+        vals |= facets.attributes(cat, o["title_raw"], o["price_huf"])
+    if cat == "grenade" and "gt=part" in vals and len(vals) > 1 and mid >= 8000:
+        vals.discard("gt=part")
+    return ("," + ",".join(sorted(vals)) + ",") if vals else ""
 
 
 def _ensure_powers_column(db) -> None:

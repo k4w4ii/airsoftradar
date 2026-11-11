@@ -1,0 +1,646 @@
+{
+ "pow": {
+  "cats": [
+   "rifle",
+   "pistol",
+   "smg",
+   "sniper",
+   "lmg",
+   "shotgun",
+   "custom_rifle",
+   "custom_pistol",
+   "custom_sniper",
+   "part_internal",
+   "part_hopup",
+   "part_motor",
+   "acc_mag"
+  ],
+  "label": [
+   "Működés",
+   "Power type"
+  ],
+  "values": [
+   [
+    "aeg",
+    "AEG (elektromos)",
+    "AEG (electric)"
+   ],
+   [
+    "gbb",
+    "GBB / GBBR (gázos)",
+    "GBB / GBBR (gas)"
+   ],
+   [
+    "gas",
+    "Gáz, nem visszacsapó",
+    "Gas, non-blowback"
+   ],
+   [
+    "co2",
+    "CO2",
+    "CO2"
+   ],
+   [
+    "spring",
+    "Rugós (manuális)",
+    "Spring (manual)"
+   ],
+   [
+    "hpa",
+    "HPA (sűrített levegő)",
+    "HPA (compressed air)"
+   ],
+   [
+    "aep",
+    "AEP (elektromos pisztoly)",
+    "AEP (electric pistol)"
+   ]
+  ]
+ },
+ "gt": {
+  "cats": [
+   "grenade"
+  ],
+  "label": [
+   "Gránát típusa",
+   "Grenade type"
+  ],
+  "values": [
+   [
+    "sound",
+    "Hanggránát (pl. Thunder B)",
+    "Sound grenade (e.g. Thunder B)"
+   ],
+   [
+    "bb",
+    "BB-szóró (szétnyíló) gránát",
+    "BB-spraying grenade"
+   ],
+   [
+    "smoke",
+    "Füstgránát",
+    "Smoke grenade"
+   ],
+   [
+    "flash",
+    "Villanógránát",
+    "Flashbang"
+   ],
+   [
+    "pyro",
+    "Pirotechnikai gránát",
+    "Pyrotechnic grenade"
+   ],
+   [
+    "launcher",
+    "Gránátvető",
+    "Grenade launcher"
+   ],
+   [
+    "shell",
+    "40 mm-es gránát / lövedék",
+    "40 mm grenade / shell"
+   ],
+   [
+    "part",
+    "Alkatrész, utántöltő",
+    "Parts, refills"
+   ]
+  ]
+ },
+ "pt": {
+  "cats": [
+   "part_internal",
+   "part_hopup",
+   "part_motor",
+   "part_external"
+  ],
+  "label": [
+   "Alkatrész típusa",
+   "Part type"
+  ],
+  "values": [
+   [
+    "gearbox",
+    "Gearbox (komplett / ház)",
+    "Gearbox (complete / shell)"
+   ],
+   [
+    "piston",
+    "Dugattyú, henger, fejek",
+    "Piston, cylinder, heads"
+   ],
+   [
+    "spring",
+    "Rugó, rugóvezető",
+    "Spring, spring guide"
+   ],
+   [
+    "gears",
+    "Fogaskerék, csapágy, persely",
+    "Gears, bearings, bushings"
+   ],
+   [
+    "nozzle",
+    "Fúvóka, tappet",
+    "Nozzle, tappet"
+   ],
+   [
+    "electronics",
+    "Mosfet, elektronika, kábelezés",
+    "Mosfet, electronics, wiring"
+   ],
+   [
+    "trigger",
+    "Ravasz, selector",
+    "Trigger, selector"
+   ],
+   [
+    "motor",
+    "Motor",
+    "Motor"
+   ],
+   [
+    "bucking",
+    "Hop-up gumi",
+    "Hop-up bucking"
+   ],
+   [
+    "barrel",
+    "Belső cső",
+    "Inner barrel"
+   ],
+   [
+    "hopunit",
+    "Hop-up egység",
+    "Hop-up unit"
+   ],
+   [
+    "valve",
+    "Szelep, tömítés (gáz)",
+    "Valve, seal (gas)"
+   ],
+   [
+    "stock",
+    "Tus",
+    "Stock"
+   ],
+   [
+    "handguard",
+    "Előagy, sín",
+    "Handguard, rail"
+   ],
+   [
+    "grip",
+    "Markolat",
+    "Grip"
+   ],
+   [
+    "muzzle",
+    "Hangtompító, lángrejtő",
+    "Suppressor, flash hider"
+   ],
+   [
+    "body",
+    "Test, tok, szán",
+    "Body, receiver, slide"
+   ],
+   [
+    "sights",
+    "Irányzék, szerelék",
+    "Sights, mounts"
+   ]
+  ]
+ },
+ "bbw": {
+  "cats": [
+   "acc_ammo"
+  ],
+  "label": [
+   "BB súlya",
+   "BB weight"
+  ],
+  "values": [
+   [
+    "0.12",
+    "0,12 g",
+    "0.12 g"
+   ],
+   [
+    "0.20",
+    "0,20 g",
+    "0.20 g"
+   ],
+   [
+    "0.23",
+    "0,23 g",
+    "0.23 g"
+   ],
+   [
+    "0.25",
+    "0,25 g",
+    "0.25 g"
+   ],
+   [
+    "0.28",
+    "0,28 g",
+    "0.28 g"
+   ],
+   [
+    "0.30",
+    "0,30 g",
+    "0.30 g"
+   ],
+   [
+    "0.32",
+    "0,32 g",
+    "0.32 g"
+   ],
+   [
+    "0.36",
+    "0,36 g",
+    "0.36 g"
+   ],
+   [
+    "0.38",
+    "0,38 g",
+    "0.38 g"
+   ],
+   [
+    "0.40",
+    "0,40 g",
+    "0.40 g"
+   ],
+   [
+    "0.43",
+    "0,43 g",
+    "0.43 g"
+   ],
+   [
+    "0.45",
+    "0,45 g",
+    "0.45 g"
+   ],
+   [
+    "0.48",
+    "0,48 g",
+    "0.48 g"
+   ],
+   [
+    "heavy",
+    "0,50 g felett",
+    "Over 0.50 g"
+   ]
+  ]
+ },
+ "bbt": {
+  "cats": [
+   "acc_ammo"
+  ],
+  "label": [
+   "BB fajta",
+   "BB kind"
+  ],
+  "values": [
+   [
+    "bio",
+    "Bio (lebomló)",
+    "Bio (biodegradable)"
+   ],
+   [
+    "std",
+    "Hagyományos",
+    "Standard"
+   ],
+   [
+    "tracer",
+    "Nyomjelző (tracer)",
+    "Tracer"
+   ]
+  ]
+ },
+ "bbq": {
+  "cats": [
+   "acc_ammo"
+  ],
+  "label": [
+   "BB kiszerelés",
+   "BB pack size"
+  ],
+  "values": [
+   [
+    "s",
+    "Kicsi (max. 1500 db)",
+    "Small (up to 1,500)"
+   ],
+   [
+    "m",
+    "Közepes (~1 kg, 2000–3500 db)",
+    "Medium (~1 kg)"
+   ],
+   [
+    "l",
+    "Nagy (4000–6000 db)",
+    "Large (4,000–6,000)"
+   ],
+   [
+    "xl",
+    "Óriás (2 kg felett)",
+    "Bulk (over 2 kg)"
+   ]
+  ]
+ },
+ "gas": {
+  "cats": [
+   "acc_ammo"
+  ],
+  "label": [
+   "Gáz típusa",
+   "Gas type"
+  ],
+  "values": [
+   [
+    "green",
+    "Zöld (standard)",
+    "Green (standard)"
+   ],
+   [
+    "high",
+    "Erős (red / black / ultra)",
+    "Strong (red / black / ultra)"
+   ],
+   [
+    "low",
+    "Gyenge (white / grey / blue)",
+    "Weak (white / grey / blue)"
+   ],
+   [
+    "propane",
+    "Propán",
+    "Propane"
+   ],
+   [
+    "co2_12",
+    "CO2 patron (12 g)",
+    "CO2 capsule (12 g)"
+   ],
+   [
+    "co2_big",
+    "CO2 palack (88–90 g)",
+    "CO2 bottle (88–90 g)"
+   ]
+  ]
+ },
+ "gml": {
+  "cats": [
+   "acc_ammo"
+  ],
+  "label": [
+   "Gáz kiszerelés",
+   "Gas size"
+  ],
+  "values": [
+   [
+    "small",
+    "500 ml-ig",
+    "Up to 500 ml"
+   ],
+   [
+    "mid",
+    "501–800 ml",
+    "501–800 ml"
+   ],
+   [
+    "big",
+    "800 ml felett",
+    "Over 800 ml"
+   ]
+  ]
+ },
+ "pk": {
+  "cats": [
+   "acc_power"
+  ],
+  "label": [
+   "Termék",
+   "Product"
+  ],
+  "values": [
+   [
+    "battery",
+    "Akkumulátor",
+    "Battery"
+   ],
+   [
+    "charger",
+    "Töltő",
+    "Charger"
+   ],
+   [
+    "accessory",
+    "Kábel, csatlakozó, tároló",
+    "Cable, connector, bag"
+   ]
+  ]
+ },
+ "chem": {
+  "cats": [
+   "acc_power"
+  ],
+  "label": [
+   "Akku típusa",
+   "Battery type"
+  ],
+  "values": [
+   [
+    "lipo",
+    "LiPo",
+    "LiPo"
+   ],
+   [
+    "liion",
+    "Li-Ion",
+    "Li-Ion"
+   ],
+   [
+    "life",
+    "LiFe",
+    "LiFe"
+   ],
+   [
+    "nimh",
+    "NiMH",
+    "NiMH"
+   ]
+  ]
+ },
+ "volt": {
+  "cats": [
+   "acc_power"
+  ],
+  "label": [
+   "Feszültség",
+   "Voltage"
+  ],
+  "values": [
+   [
+    "3.7",
+    "3,7 V",
+    "3.7 V"
+   ],
+   [
+    "6.6",
+    "6,6 V",
+    "6.6 V"
+   ],
+   [
+    "7.4",
+    "7,4 V",
+    "7.4 V"
+   ],
+   [
+    "8.4",
+    "8,4 V",
+    "8.4 V"
+   ],
+   [
+    "9.6",
+    "9,6 V",
+    "9.6 V"
+   ],
+   [
+    "9.9",
+    "9,9 V",
+    "9.9 V"
+   ],
+   [
+    "11.1",
+    "11,1 V",
+    "11.1 V"
+   ],
+   [
+    "14.8",
+    "14,8 V",
+    "14.8 V"
+   ]
+  ]
+ },
+ "conn": {
+  "cats": [
+   "acc_power"
+  ],
+  "label": [
+   "Csatlakozó",
+   "Connector"
+  ],
+  "values": [
+   [
+    "deans",
+    "Deans / T-plug",
+    "Deans / T-plug"
+   ],
+   [
+    "minitamiya",
+    "Mini Tamiya",
+    "Mini Tamiya"
+   ],
+   [
+    "tamiya",
+    "Nagy Tamiya",
+    "Large Tamiya"
+   ],
+   [
+    "xt30",
+    "XT30",
+    "XT30"
+   ],
+   [
+    "xt60",
+    "XT60",
+    "XT60"
+   ]
+  ]
+ },
+ "chg": {
+  "cats": [
+   "acc_power"
+  ],
+  "label": [
+   "Töltő – mihez",
+   "Charger for"
+  ],
+  "values": [
+   [
+    "lipo",
+    "LiPo / Li-Ion (balanszer)",
+    "LiPo / Li-Ion (balancer)"
+   ],
+   [
+    "nimh",
+    "NiMH",
+    "NiMH"
+   ],
+   [
+    "universal",
+    "Univerzális (minden típus)",
+    "Universal (all types)"
+   ],
+   [
+    "usb",
+    "USB-s",
+    "USB"
+   ]
+  ]
+ },
+ "ot": {
+  "cats": [
+   "acc_optics"
+  ],
+  "label": [
+   "Típus",
+   "Type"
+  ],
+  "values": [
+   [
+    "reddot",
+    "Red dot / holo",
+    "Red dot / holo"
+   ],
+   [
+    "scope",
+    "Céltávcső",
+    "Scope"
+   ],
+   [
+    "magnifier",
+    "Nagyító",
+    "Magnifier"
+   ],
+   [
+    "lamp",
+    "Lámpa",
+    "Flashlight"
+   ],
+   [
+    "laser",
+    "Lézer",
+    "Laser"
+   ],
+   [
+    "peq",
+    "PEQ / lézer-lámpa doboz",
+    "PEQ / laser-light box"
+   ],
+   [
+    "nv",
+    "Éjjellátó, hőkamera",
+    "Night vision, thermal"
+   ],
+   [
+    "mount",
+    "Szerelék, védő, kiegészítő",
+    "Mount, cover, accessory"
+   ]
+  ]
+ }
+}

@@ -1,3 +1,4 @@
+import FACETS_JSON from "./facets.json";
 // Katalógus-szűrők: kategóriafa, platformok, URL <-> szűrőállapot. Tiszta függvények (szerveren és tesztben is).
 
 export const CAT_GROUPS = [
@@ -14,18 +15,29 @@ export const groupOf = (leaf) => CAT_GROUPS.find((g) => g.leaves.includes(leaf))
 // „Mihez jó”: sorrend a szűrőben (SQL: airsoft_platforms)
 export const PLATFORMS = ["m4", "ak", "g36", "mp5", "aug", "scar", "m14", "p90", "vsr", "l96", "glock", "hicapa", "m9", "gb_v2", "gb_v3"];
 
-// Működés (hajtás) – fegyvereknél és alkatrészeknél is (SQL: product_summary.powers „,aeg,gbb,”)
-export const POWERS = ["aeg", "gbb", "gas", "co2", "spring", "hpa", "aep"];
+// Kategóriánkénti extra szűrők (Működés, Gránát típusa, BB súlya, Akku típusa, Optika típusa…): a scraper/facets.py-ból
+// generált facets.json írja le, melyik szűrő melyik kategóriához tartozik. SQL: powers („,aeg,”) és subtypes („,bbw=0.25,”).
+export const FACETS = FACETS_JSON;
+export const DIM_KEYS = Object.keys(FACETS);
+const GROUP_LEAVES_C = Object.fromEntries(CAT_GROUPS.map((g) => [g.id, g.leaves]));
 
-// Gránát típusa (csak a gránát-kategóriában látszik; SQL: product_summary.subtypes)
-export const GRENADE_TYPES = ["sound", "bb", "smoke", "flash", "pyro", "launcher", "shell", "part"];
+/** Mely extra szűrők látszanak a kiválasztott kategóriákhoz. Kompromisszum több kategóriánál: legfeljebb 3 kategóriánál
+ *  mindegyiké látszik; nagyobb választásnál (pl. „Airsoft fegyverek”) csak az, ami a kategóriák legalább 60%-ára vonatkozik. */
+export function visibleDims(cats) {
+  const leaves = [...new Set((cats || []).flatMap((c) => GROUP_LEAVES_C[c] || [c]))];
+  if (!leaves.length) return [];
+  return DIM_KEYS.filter((k) => {
+    const n = leaves.filter((l) => FACETS[k].cats.includes(l)).length;
+    return n > 0 && (leaves.length <= 3 || n / leaves.length >= 0.6);
+  });
+}
 
 export const SORTS = ["discount", "popular", "price", "price_desc", "name"];
 export const DEFAULT_SORT = "discount";          // legnagyobb árkülönbség (legolcsóbb vs. legdrágább bolt)
 export const VIEWS = ["grid", "list"];           // csempe az alap
 
 /** Üres cím (/hu, /en) = üdvözlő oldal; bármilyen paraméter = katalógus. */
-const CATALOG_KEYS = ["q", "cat", "gt", "pow", "plat", "brand", "min", "max", "stock", "sort", "view", "page"];
+const CATALOG_KEYS = ["q", "cat", ...Object.keys(FACETS_JSON), "plat", "brand", "min", "max", "stock", "sort", "view", "page"];
 export const isWelcome = (sp) => !CATALOG_KEYS.some((k) => sp?.[k] !== undefined && sp[k] !== "");   // utm_*, gclid stb. nem számít
 
 /** Keresés nélkül a fegyverek az alap, kereséskor minden termék. */
@@ -51,13 +63,17 @@ export function parseCatalog(sp) {
   const rawCats = list(sp.cat);
   const cats = sp.cat === undefined ? defaultCats(q) : normalizeCats(rawCats);
   const plats = PLATFORMS.filter((p) => list(sp.plat).includes(p));
-  const pows = POWERS.filter((p) => list(sp.pow).includes(p));
-  const gts = GRENADE_TYPES.filter((g) => list(sp.gt).includes(g));
+  const attrs = {};
+  for (const k of DIM_KEYS) {
+    const ok = FACETS[k].values.map((v) => v[0]);
+    const vals = ok.filter((v) => list(sp[k]).includes(v));
+    if (vals.length) attrs[k] = vals;
+  }
   const brands = [].concat(sp.brand || []).filter((b) => typeof b === "string" && b).slice(0, 30);
   const num = (k) => Math.max(0, Math.round(Number(one(k)) || 0));
   let [min, max] = [num("min"), num("max")];
   if (min && max && min > max) [min, max] = [max, min];
-  return { q, cats, gts, pows, plats, brands, min, max, stock: one("stock") === "1",
+  return { q, cats, attrs, plats, brands, min, max, stock: one("stock") === "1",
            sort: SORTS.includes(one("sort")) ? one("sort") : DEFAULT_SORT,
            view: VIEWS.includes(one("view")) ? one("view") : "grid", page: Math.max(1, num("page")) };
 }
@@ -72,8 +88,7 @@ export function hrefFor(locale, params, over = {}) {
     if (cats.length) cats.forEach((c) => sp.append("cat", c));
     else sp.set("cat", "all");
   }
-  for (const g of p.gts || []) sp.append("gt", g);
-  for (const pw of p.pows || []) sp.append("pow", pw);
+  for (const [k, vals] of Object.entries(p.attrs || {})) for (const v of vals) sp.append(k, v);
   for (const pl of p.plats || []) sp.append("plat", pl);
   for (const b of p.brands || []) sp.append("brand", b);
   if (p.min > 0) sp.set("min", String(p.min));

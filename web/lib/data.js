@@ -1,3 +1,4 @@
+import { visibleDims } from "./catalog";
 // Adatréteg: Cloudflare D1 (a lekérdezések: lib/data_d1.js). Szerveroldalon fut.
 import * as d1 from "./data_d1";
 import { PRICE_EDGES } from "./i18n";
@@ -29,8 +30,11 @@ export async function catalogSearch(params, currency, rates) {
   const r = rate || 1;
   const page = Math.max(1, Number(params.page) || 1);
   const edges = PRICE_EDGES[cur];
+  // csak a kiválasztott kategóriához tartozó extra szűrők számítanak (kategóriaváltáskor a régiek nem maradnak „láthatatlanul”)
+  const dims = visibleDims(params.cats || []);
+  const attrs = Object.fromEntries(Object.entries(params.attrs || {}).filter(([k]) => dims.includes(k)));
   const res = await d1.catalogSearchD1({
-    q: cleanQuery(params.q), cats: params.cats || [], pows: params.pows || [], gts: params.gts || [], plats: params.plats || [], brands: (params.brands || []).slice(0, 30),
+    q: cleanQuery(params.q), cats: params.cats || [], attrs, dims, plats: params.plats || [], brands: (params.brands || []).slice(0, 30),
     pmin: params.min > 0 ? Math.floor(params.min * r) : null, pmax: params.max > 0 ? Math.ceil(params.max * r) : null,
     inStock: !!params.stock, sort: params.sort || "discount", lim: PAGE_SIZE, off: (page - 1) * PAGE_SIZE,
     edges: edges.map((e) => Math.round(e * r)),

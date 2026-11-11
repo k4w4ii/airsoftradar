@@ -130,4 +130,4 @@ class TestGrenades(unittest.TestCase):
     def test_summary_subtypes(self):
         prods = {1: {"id": 1, "manufacturer_id": 1, "name": "CYMA Smoke grenade", "slug": "s"}}
         rows, _ = run(prods, [offer(1, 1, "CYMA Smoke grenade white", 3000)])
-        self.assertEqual((rows[1]["category"], rows[1]["subtypes"]), ("grenade", ",smoke,"))
+        self.assertEqual((rows[1]["category"], rows[1]["subtypes"]), ("grenade", ",gt=smoke,"))
