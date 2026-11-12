@@ -1,656 +1,830 @@
 [
-[
-"CYMA CM.522 Sport Line, GEN-2",
-"https://www.taiwangun.com/assault-rifle-aeg/cm-522",
-22389,
-"rifle"
-],
-[
-"Specna Arms Rock River Arms M4/AR15 SA-E03 EDGE Gen.2 AEG Assault Rifle 14.5\"",
-null,
-95534,
-"rifle"
-],
-[
-"Double Bell RK-10 AKMS AK47 Fém",
-null,
-69400,
-"rifle"
-],
-[
-"Airsoftová zbraň AK47 Arsenal SLR105",
-null,
-34258,
-"rifle"
-],
-[
-"WE GLOCK 18 GEN.3 GREEN GÁZ GBB - FEKETE",
-null,
-53900,
-"pistol"
-],
-[
-"Tokyo Marui Hi-Capa 5.1 GBB",
-null,
-70000,
-"pistol"
-],
-[
-"JG MP5SD5 Fix Tus Airsoft Géppisztoly",
-null,
-62990,
-"smg"
-],
-[
-"Krytac Kriss Vector AEG",
-null,
-150000,
-"smg"
-],
-[
-"Novritsch SSG10 A3 Sniper Rifle",
-null,
-120000,
-"sniper"
-],
-[
-"CYMA VSR10 sniper spring CM.701B",
-null,
-39997,
-"sniper"
-],
-[
-"Classic Army M249 MKII LMG",
-null,
-250000,
-"lmg"
-],
-[
-"Golden Eagle M870 Shotgun",
-null,
-45000,
-"shotgun"
-],
-[
-"Thunder B gas grenade 40mm",
-null,
-12000,
-"grenade"
-],
-[
-"Grenade pouch MOLLE",
-null,
-5000,
-"acc_gear"
-],
-[
-"M4 Midcap magazine 120 BB",
-null,
-3500,
-"acc_mag"
-],
-[
-"Magazine for CYMA CM.041K MP5K",
-null,
-2800,
-"acc_mag"
-],
-[
-"Zásobník pro AK47 hi-cap 600 ran",
-null,
-3000,
-"acc_mag"
-],
-[
-"Nimrod Green Gas 500ml",
-null,
-4500,
-"acc_ammo"
-],
-[
-"0.25g BB 4000 golyó",
-null,
-6000,
-"acc_ammo"
-],
-[
-"LiPo akku 11.1V 1500mAh",
-null,
-9000,
-"acc_power"
-],
-[
-"Pistol grip for M4 AEG",
-null,
-6000,
-"part_external"
-],
-[
-"Maple Leaf AEG Spring M100",
-"https://www.gunfire.com/aeg-parts/springs",
-3214,
-"part_internal"
-],
-[
-"SHS V2 tappet plate + dual sector gear",
-"https://x/aeg-parts/",
-5787,
-"part_internal"
-],
-[
-"Lonex inner barrel 6.03 363mm",
-null,
-9000,
-"part_hopup"
-],
-[
-"Maple Leaf hop-up bucking 70°",
-null,
-4500,
-"part_hopup"
-],
-[
-"SHS high torque motor long",
-null,
-8000,
-"part_motor"
-],
-[
-"GATE Titan V2 Expert mosfet",
-null,
-40000,
-"part_motor"
-],
-[
-"Specna Arms gearbox V2 complete",
-null,
-25000,
-"part_internal"
-],
-[
-"Specna Arms RRA SA-P17 Prime BLDC Aster II ETU Light Ops Stock Grey",
-null,
-132838,
-"rifle"
-],
-[
-"CYMA CM.028 AK47 AEG with battery and charger",
-null,
-41000,
-"rifle"
-],
-[
-"Glock 17 Gen.4 GBB pistol + 2 magazines",
-null,
-60000,
-"pistol"
-],
-[
-"Pistol magazine for Glock 17",
-null,
-9000,
-"acc_mag"
-],
-[
-"Crane stock for M4",
-null,
-7000,
-"part_external"
-],
-[
-"Metal slide for Hi-Capa 5.1",
-null,
-15000,
-"part_external"
-],
-[
-"Silencer 14mm CCW 150mm",
-null,
-6000,
-"part_external"
-],
-[
-"Vortex Strike Eagle rifle scope 1-6x24",
-null,
-150000,
-"acc_optics"
-],
-[
-"Red dot sight T1 replica",
-null,
-12000,
-"acc_optics"
-],
-[
-"Full face mesh mask",
-null,
-5000,
-"acc_protect"
-],
-[
-"Gun bag 120 cm",
-null,
-15000,
-"acc_gear"
-],
-[
-"Specna Arms SA-E07 EDGE 2.0 GATE Aster Black",
-null,
-94000,
-"rifle"
-],
-[
-"Karabinek szturmowy AEG Specna Arms SA-C04 CORE HAL ETU Gen. 2 - Black",
-null,
-80000,
-"rifle"
-],
-[
-"Pistolet GBB Glock 17 gen.4",
-null,
-55000,
-"pistol"
-],
-[
-"CYMA CM048",
-"https://www.airsoftplaza.hu/termek/cyma-cm048",
-30000,
-"rifle"
-],
-[
-"Tokyo Marui VSR-10 cylinder set",
-null,
-12000,
-"part_internal"
-],
-[
-"Holster for Glock 17",
-null,
-6000,
-"acc_gear"
-],
-[
-"Battery 9.6V NiMH mini for AEG",
-null,
-7000,
-"acc_power"
-],
-[
-"Odlehčený hybridní píst pro pušku CYMA M24 CM.702",
-null,
-2800,
-"part_internal"
-],
-[
-"Ocelový válec pro pušky CYMA M24 CM.702",
-null,
-9000,
-"part_internal"
-],
-[
-"AIRSOFTPRO CYMA M24 CM.702 HIBRID DUGATTYÚ (6721) - Airsoftpláza",
-null,
-17900,
-"part_internal"
-],
-[
-"Upgrade set pro CYMA M24 CM.702",
-null,
-19000,
-"part_internal"
-],
-[
-"AIRSOFTPRO ACÉL HENGER CYMA CM.702 M24-HEZ (12773)",
-null,
-25500,
-"part_internal"
-],
-[
-"CYMA RIS conversion for CM.030 and CM.127 replicas Black",
-null,
-4400,
-"part_external"
-],
-[
-"CYMA Zásobník pro M24 CM.702 na 20 ran C.112",
-null,
-6000,
-"acc_mag"
-],
-[
-"CYMA low-cap magazine 30 rounds for CM700 replicas",
-null,
-6200,
-"acc_mag"
-],
-[
-"Pojistka pro CYMA CM032",
-null,
-2000,
-"other"
-],
-[
-"Tokyo Marui VSR-10 Pro Sniper",
-null,
-90000,
-"sniper"
-],
-[
-"TOKYO MARUI VSR-10 PRO SNIPER",
-null,
-90000,
-"sniper"
-],
-[
-"CYMA M24 CM.702 sniper rifle",
-null,
-45000,
-"sniper"
-],
-[
-"Krytac Trident MK2 PDW Pro",
-null,
-150000,
-"smg"
-],
-[
-"Retro Arms Šroub pažbičky M4 2ks",
-null,
-673,
-"part_external"
-],
-[
-"AimTop Plastová přepouštěcí klapka pro SVD GBB",
-null,
-883,
-"other"
-],
-[
-"Madbull 4mm Bearings for 40mm Grenades Steel",
-null,
-691,
-"grenade"
-],
-[
-"JG Podložka přepínače střelby AK47",
-null,
-972,
-"part_external"
-],
-[
-"CYMA M14 rugószett",
-null,
-1000,
-"part_internal"
-],
-[
-"Range Solutions Légpuska Lőlap 14x14cm",
-null,
-50,
-"other"
-],
-[
-"Well Glock 17 rugós pisztoly",
-null,
-3500,
-"pistol"
-],
-[
-"Thunder B gas grenade",
-null,
-4000,
-"grenade"
-],
-[
-"WE Glock 17 Gen4 GBB",
-null,
-45000,
-"pistol"
-],
-[
-"Sightmark Ultra Shot A-Spec Reflex Sight FDE",
-null,
-60000,
-"acc_optics"
-],
-[
-"Vortex - Dalmierz laserowy Diamondback HD 2000",
-null,
-120000,
-"acc_optics"
-],
-[
-"Muela Colibri Black Micarta Satin",
-null,
-45000,
-"other"
-],
-[
-"Specna Arms SA-E07 EDGE with reflex sight",
-null,
-90000,
-"rifle"
-],
-[
-"CYMA CM048",
-null,
-60000,
-"rifle"
-],
-[
-"CYMA Fixed Sniper Stock w/ Adjustable Buttpad and Cheek Rest for CM.708 Series Airsoft Sniper Rifles",
-null,
-26500,
-"part_external"
-],
-[
-"E&C AK74 AEG w/ 2 magazines for AK",
-null,
-90000,
-"rifle"
-],
-[
-"Airsoft sniper CM.708 - černá",
-null,
-68000,
-"sniper"
-],
-[
-"ACM PATCH 0399 - DON'T RUN YODT GRENADE - BLACK - Airsoftpláza",
-null,
-1500,
-"acc_gear"
-],
-[
-"ACM Patch 0399 DON'T RUN YODT Grenade Black",
-null,
-null,
-"acc_gear"
-],
-[
-"A&K M249 Para AEG",
-null,
-195000,
-"lmg"
-],
-[
-"WE Tech L85 Bullpup Gas Blowback Model: Green Gas",
-null,
-181000,
-"rifle"
-],
-[
-"G&G Armament KAR98K Green Gas",
-null,
-231000,
-"sniper"
-],
-[
-"Snow Wolf sniper M82 BARRETT SW-02A Scope + bipod Black",
-null,
-156000,
-"sniper"
-],
-[
-"Hawke Optics Scope Airmax 30 10x44 rifle scope",
-null,
-158000,
-"acc_optics"
-],
-[
-"A&K M1A Airsoft Rifle Polymer Stock",
-null,
-20000,
-"part_external"
-],
-[
-"Specna Arms 8in1 AEG Maintenance kit",
-null,
-8000,
-"other"
-],
-[
-"KWA Evike.com Custom ATP Full Auto Gas Blowback Pistol with Angel Custom Upgrade Package",
-null,
-150000,
-"pistol"
-],
-[
-"BalystiK - Regulator HPR200 US - Titanium Silver",
-null,
-45000,
-"part_internal"
-],
-[
-"SPEGNIFIAMMA SHORTY - JING GONG",
-null,
-8000,
-"part_external"
-],
-[
-"E&C M4 AEG keymod",
-null,
-50000,
-"rifle"
-],
-[
-"WE G17 GBB green gas magazine",
-null,
-18000,
-"acc_mag"
-],
-[
-"Complete Gearbox GATE EON V2 (SSG) with integrated TITAN II Bluetooth® chip (Front)",
-null,
-158000,
-"part_internal"
-],
-[
-"ARMY ARMAMENT R28 GBB - Black / Grey",
-null,
-40000,
-"pistol"
-],
-[
-"Umarex Elite Force Rogue 11 Co2",
-null,
-30000,
-"pistol"
-],
-[
-"Magpul MOE Carbine Stock Mil Spec Black",
-null,
-25000,
-"part_external"
-],
-[
-"Polarstar Micro Reg GEN2 HPA regulator",
-null,
-45000,
-"part_internal"
-],
-[
-"Banshee Rifle Plate Carrier - Coyote Brown - Shellback Tactical",
-null,
-60000,
-"acc_gear"
-],
-[
-"Arcturus Variable Cap Silent 30/135 Round Mid-Cap AEG AK12 Magazine (Package: 5 pack)",
-null,
-45000,
-"acc_mag"
-],
-[
-"PTS Centurion Arms CM4 with KWA AEG3 System AEG",
-null,
-209000,
-"rifle"
-],
-[
-"HPA tank 0.8l 48ci 3000psi",
-null,
-30000,
-"acc_power"
-],
-[
-"Zielfernrohr 3-9x50 EG, Banner, Bushnell",
-"https://airsoft-guns.eu/de/zielfernrohr-3-9x50",
-45000,
-"other"
-],
-[
-"VFC Gas Tank Cordura Pouch M249 GBB Machine Gun",
-null,
-68846,
-"acc_gear"
-],
-[
-"King Arms CNC PDW M11 Kit for KWA/HFC Gas Blowback Sub-Machine Gun (Package: Kit Only)",
-null,
-105100,
-"part_external"
-],
-[
-"King Arms CNC PDW M11 Kit for KWA/HFC Gas Blowback Sub-Machine Gun (Package: Complete KWA M11)",
-null,
-165000,
-"smg"
-],
-[
-"AceTech VIK II Modular M-LOK Handguard for Krytac Kriss Vector Submachine Gun",
-null,
-43831,
-"part_external"
-],
-[
-"S&T 6mmProShop PPSH-41 WWII Airsoft Submachine Gun",
-null,
-115977,
-"smg"
-],
-[
-"Umarex Beretta GBB PMX gas-operated submachine gun",
-null,
-148681,
-"smg"
-],
-[
-"Vorsk VMP-1X GBB submachine gun Black",
-null,
-87843,
-"smg"
-],
-[
-"Cybergun FN Herstal M249 Para GBB Machine Gun",
-null,
-289996,
-"lmg"
-],
-[
-"Specna Arms SA-C02 CORE Carbine Replica Starter Kit",
-null,
-90000,
-"rifle"
-]
+ [
+  "CYMA CM.522 Sport Line, GEN-2",
+  "https://www.taiwangun.com/assault-rifle-aeg/cm-522",
+  22389,
+  "rifle"
+ ],
+ [
+  "Specna Arms Rock River Arms M4/AR15 SA-E03 EDGE Gen.2 AEG Assault Rifle 14.5\"",
+  null,
+  95534,
+  "rifle"
+ ],
+ [
+  "Double Bell RK-10 AKMS AK47 Fém",
+  null,
+  69400,
+  "rifle"
+ ],
+ [
+  "Airsoftová zbraň AK47 Arsenal SLR105",
+  null,
+  34258,
+  "rifle"
+ ],
+ [
+  "WE GLOCK 18 GEN.3 GREEN GÁZ GBB - FEKETE",
+  null,
+  53900,
+  "pistol"
+ ],
+ [
+  "Tokyo Marui Hi-Capa 5.1 GBB",
+  null,
+  70000,
+  "pistol"
+ ],
+ [
+  "JG MP5SD5 Fix Tus Airsoft Géppisztoly",
+  null,
+  62990,
+  "smg"
+ ],
+ [
+  "Krytac Kriss Vector AEG",
+  null,
+  150000,
+  "smg"
+ ],
+ [
+  "Novritsch SSG10 A3 Sniper Rifle",
+  null,
+  120000,
+  "sniper"
+ ],
+ [
+  "CYMA VSR10 sniper spring CM.701B",
+  null,
+  39997,
+  "sniper"
+ ],
+ [
+  "Classic Army M249 MKII LMG",
+  null,
+  250000,
+  "lmg"
+ ],
+ [
+  "Golden Eagle M870 Shotgun",
+  null,
+  45000,
+  "shotgun"
+ ],
+ [
+  "Thunder B gas grenade 40mm",
+  null,
+  12000,
+  "grenade"
+ ],
+ [
+  "Grenade pouch MOLLE",
+  null,
+  5000,
+  "acc_gear"
+ ],
+ [
+  "M4 Midcap magazine 120 BB",
+  null,
+  3500,
+  "acc_mag"
+ ],
+ [
+  "Magazine for CYMA CM.041K MP5K",
+  null,
+  2800,
+  "acc_mag"
+ ],
+ [
+  "Zásobník pro AK47 hi-cap 600 ran",
+  null,
+  3000,
+  "acc_mag"
+ ],
+ [
+  "Nimrod Green Gas 500ml",
+  null,
+  4500,
+  "acc_ammo"
+ ],
+ [
+  "0.25g BB 4000 golyó",
+  null,
+  6000,
+  "acc_ammo"
+ ],
+ [
+  "LiPo akku 11.1V 1500mAh",
+  null,
+  9000,
+  "acc_power"
+ ],
+ [
+  "Pistol grip for M4 AEG",
+  null,
+  6000,
+  "part_external"
+ ],
+ [
+  "Maple Leaf AEG Spring M100",
+  "https://www.gunfire.com/aeg-parts/springs",
+  3214,
+  "part_internal"
+ ],
+ [
+  "SHS V2 tappet plate + dual sector gear",
+  "https://x/aeg-parts/",
+  5787,
+  "part_internal"
+ ],
+ [
+  "Lonex inner barrel 6.03 363mm",
+  null,
+  9000,
+  "part_hopup"
+ ],
+ [
+  "Maple Leaf hop-up bucking 70°",
+  null,
+  4500,
+  "part_hopup"
+ ],
+ [
+  "SHS high torque motor long",
+  null,
+  8000,
+  "part_motor"
+ ],
+ [
+  "GATE Titan V2 Expert mosfet",
+  null,
+  40000,
+  "part_motor"
+ ],
+ [
+  "Specna Arms gearbox V2 complete",
+  null,
+  25000,
+  "part_internal"
+ ],
+ [
+  "Specna Arms RRA SA-P17 Prime BLDC Aster II ETU Light Ops Stock Grey",
+  null,
+  132838,
+  "rifle"
+ ],
+ [
+  "CYMA CM.028 AK47 AEG with battery and charger",
+  null,
+  41000,
+  "rifle"
+ ],
+ [
+  "Glock 17 Gen.4 GBB pistol + 2 magazines",
+  null,
+  60000,
+  "pistol"
+ ],
+ [
+  "Pistol magazine for Glock 17",
+  null,
+  9000,
+  "acc_mag"
+ ],
+ [
+  "Crane stock for M4",
+  null,
+  7000,
+  "part_external"
+ ],
+ [
+  "Metal slide for Hi-Capa 5.1",
+  null,
+  15000,
+  "part_external"
+ ],
+ [
+  "Silencer 14mm CCW 150mm",
+  null,
+  6000,
+  "part_external"
+ ],
+ [
+  "Vortex Strike Eagle rifle scope 1-6x24",
+  null,
+  150000,
+  "acc_optics"
+ ],
+ [
+  "Red dot sight T1 replica",
+  null,
+  12000,
+  "acc_optics"
+ ],
+ [
+  "Full face mesh mask",
+  null,
+  5000,
+  "acc_protect"
+ ],
+ [
+  "Gun bag 120 cm",
+  null,
+  15000,
+  "acc_gear"
+ ],
+ [
+  "Specna Arms SA-E07 EDGE 2.0 GATE Aster Black",
+  null,
+  94000,
+  "rifle"
+ ],
+ [
+  "Karabinek szturmowy AEG Specna Arms SA-C04 CORE HAL ETU Gen. 2 - Black",
+  null,
+  80000,
+  "rifle"
+ ],
+ [
+  "Pistolet GBB Glock 17 gen.4",
+  null,
+  55000,
+  "pistol"
+ ],
+ [
+  "CYMA CM048",
+  "https://www.airsoftplaza.hu/termek/cyma-cm048",
+  30000,
+  "rifle"
+ ],
+ [
+  "Tokyo Marui VSR-10 cylinder set",
+  null,
+  12000,
+  "part_internal"
+ ],
+ [
+  "Holster for Glock 17",
+  null,
+  6000,
+  "acc_gear"
+ ],
+ [
+  "Battery 9.6V NiMH mini for AEG",
+  null,
+  7000,
+  "acc_power"
+ ],
+ [
+  "Odlehčený hybridní píst pro pušku CYMA M24 CM.702",
+  null,
+  2800,
+  "part_internal"
+ ],
+ [
+  "Ocelový válec pro pušky CYMA M24 CM.702",
+  null,
+  9000,
+  "part_internal"
+ ],
+ [
+  "AIRSOFTPRO CYMA M24 CM.702 HIBRID DUGATTYÚ (6721) - Airsoftpláza",
+  null,
+  17900,
+  "part_internal"
+ ],
+ [
+  "Upgrade set pro CYMA M24 CM.702",
+  null,
+  19000,
+  "part_internal"
+ ],
+ [
+  "AIRSOFTPRO ACÉL HENGER CYMA CM.702 M24-HEZ (12773)",
+  null,
+  25500,
+  "part_internal"
+ ],
+ [
+  "CYMA RIS conversion for CM.030 and CM.127 replicas Black",
+  null,
+  4400,
+  "part_external"
+ ],
+ [
+  "CYMA Zásobník pro M24 CM.702 na 20 ran C.112",
+  null,
+  6000,
+  "acc_mag"
+ ],
+ [
+  "CYMA low-cap magazine 30 rounds for CM700 replicas",
+  null,
+  6200,
+  "acc_mag"
+ ],
+ [
+  "Pojistka pro CYMA CM032",
+  null,
+  2000,
+  "other"
+ ],
+ [
+  "Tokyo Marui VSR-10 Pro Sniper",
+  null,
+  90000,
+  "sniper"
+ ],
+ [
+  "TOKYO MARUI VSR-10 PRO SNIPER",
+  null,
+  90000,
+  "sniper"
+ ],
+ [
+  "CYMA M24 CM.702 sniper rifle",
+  null,
+  45000,
+  "sniper"
+ ],
+ [
+  "Krytac Trident MK2 PDW Pro",
+  null,
+  150000,
+  "smg"
+ ],
+ [
+  "Retro Arms Šroub pažbičky M4 2ks",
+  null,
+  673,
+  "part_external"
+ ],
+ [
+  "AimTop Plastová přepouštěcí klapka pro SVD GBB",
+  null,
+  883,
+  "other"
+ ],
+ [
+  "Madbull 4mm Bearings for 40mm Grenades Steel",
+  null,
+  691,
+  "grenade"
+ ],
+ [
+  "JG Podložka přepínače střelby AK47",
+  null,
+  972,
+  "part_external"
+ ],
+ [
+  "CYMA M14 rugószett",
+  null,
+  1000,
+  "part_internal"
+ ],
+ [
+  "Range Solutions Légpuska Lőlap 14x14cm",
+  null,
+  50,
+  "other"
+ ],
+ [
+  "Well Glock 17 rugós pisztoly",
+  null,
+  3500,
+  "pistol"
+ ],
+ [
+  "Thunder B gas grenade",
+  null,
+  4000,
+  "grenade"
+ ],
+ [
+  "WE Glock 17 Gen4 GBB",
+  null,
+  45000,
+  "pistol"
+ ],
+ [
+  "Sightmark Ultra Shot A-Spec Reflex Sight FDE",
+  null,
+  60000,
+  "acc_optics"
+ ],
+ [
+  "Vortex - Dalmierz laserowy Diamondback HD 2000",
+  null,
+  120000,
+  "acc_optics"
+ ],
+ [
+  "Muela Colibri Black Micarta Satin",
+  null,
+  45000,
+  "other"
+ ],
+ [
+  "Specna Arms SA-E07 EDGE with reflex sight",
+  null,
+  90000,
+  "rifle"
+ ],
+ [
+  "CYMA CM048",
+  null,
+  60000,
+  "rifle"
+ ],
+ [
+  "CYMA Fixed Sniper Stock w/ Adjustable Buttpad and Cheek Rest for CM.708 Series Airsoft Sniper Rifles",
+  null,
+  26500,
+  "part_external"
+ ],
+ [
+  "E&C AK74 AEG w/ 2 magazines for AK",
+  null,
+  90000,
+  "rifle"
+ ],
+ [
+  "Airsoft sniper CM.708 - černá",
+  null,
+  68000,
+  "sniper"
+ ],
+ [
+  "ACM PATCH 0399 - DON'T RUN YODT GRENADE - BLACK - Airsoftpláza",
+  null,
+  1500,
+  "acc_gear"
+ ],
+ [
+  "ACM Patch 0399 DON'T RUN YODT Grenade Black",
+  null,
+  null,
+  "acc_gear"
+ ],
+ [
+  "A&K M249 Para AEG",
+  null,
+  195000,
+  "lmg"
+ ],
+ [
+  "WE Tech L85 Bullpup Gas Blowback Model: Green Gas",
+  null,
+  181000,
+  "rifle"
+ ],
+ [
+  "G&G Armament KAR98K Green Gas",
+  null,
+  231000,
+  "sniper"
+ ],
+ [
+  "Snow Wolf sniper M82 BARRETT SW-02A Scope + bipod Black",
+  null,
+  156000,
+  "sniper"
+ ],
+ [
+  "Hawke Optics Scope Airmax 30 10x44 rifle scope",
+  null,
+  158000,
+  "acc_optics"
+ ],
+ [
+  "A&K M1A Airsoft Rifle Polymer Stock",
+  null,
+  20000,
+  "part_external"
+ ],
+ [
+  "Specna Arms 8in1 AEG Maintenance kit",
+  null,
+  8000,
+  "other"
+ ],
+ [
+  "KWA Evike.com Custom ATP Full Auto Gas Blowback Pistol with Angel Custom Upgrade Package",
+  null,
+  150000,
+  "pistol"
+ ],
+ [
+  "BalystiK - Regulator HPR200 US - Titanium Silver",
+  null,
+  45000,
+  "part_internal"
+ ],
+ [
+  "SPEGNIFIAMMA SHORTY - JING GONG",
+  null,
+  8000,
+  "part_external"
+ ],
+ [
+  "E&C M4 AEG keymod",
+  null,
+  50000,
+  "rifle"
+ ],
+ [
+  "WE G17 GBB green gas magazine",
+  null,
+  18000,
+  "acc_mag"
+ ],
+ [
+  "Complete Gearbox GATE EON V2 (SSG) with integrated TITAN II Bluetooth® chip (Front)",
+  null,
+  158000,
+  "part_internal"
+ ],
+ [
+  "ARMY ARMAMENT R28 GBB - Black / Grey",
+  null,
+  40000,
+  "pistol"
+ ],
+ [
+  "Umarex Elite Force Rogue 11 Co2",
+  null,
+  30000,
+  "pistol"
+ ],
+ [
+  "Magpul MOE Carbine Stock Mil Spec Black",
+  null,
+  25000,
+  "part_external"
+ ],
+ [
+  "Polarstar Micro Reg GEN2 HPA regulator",
+  null,
+  45000,
+  "part_internal"
+ ],
+ [
+  "Banshee Rifle Plate Carrier - Coyote Brown - Shellback Tactical",
+  null,
+  60000,
+  "acc_gear"
+ ],
+ [
+  "Arcturus Variable Cap Silent 30/135 Round Mid-Cap AEG AK12 Magazine (Package: 5 pack)",
+  null,
+  45000,
+  "acc_mag"
+ ],
+ [
+  "PTS Centurion Arms CM4 with KWA AEG3 System AEG",
+  null,
+  209000,
+  "rifle"
+ ],
+ [
+  "HPA tank 0.8l 48ci 3000psi",
+  null,
+  30000,
+  "acc_power"
+ ],
+ [
+  "Zielfernrohr 3-9x50 EG, Banner, Bushnell",
+  "https://airsoft-guns.eu/de/zielfernrohr-3-9x50",
+  45000,
+  "other"
+ ],
+ [
+  "VFC Gas Tank Cordura Pouch M249 GBB Machine Gun",
+  null,
+  68846,
+  "acc_gear"
+ ],
+ [
+  "King Arms CNC PDW M11 Kit for KWA/HFC Gas Blowback Sub-Machine Gun (Package: Kit Only)",
+  null,
+  105100,
+  "part_external"
+ ],
+ [
+  "King Arms CNC PDW M11 Kit for KWA/HFC Gas Blowback Sub-Machine Gun (Package: Complete KWA M11)",
+  null,
+  165000,
+  "smg"
+ ],
+ [
+  "AceTech VIK II Modular M-LOK Handguard for Krytac Kriss Vector Submachine Gun",
+  null,
+  43831,
+  "part_external"
+ ],
+ [
+  "S&T 6mmProShop PPSH-41 WWII Airsoft Submachine Gun",
+  null,
+  115977,
+  "smg"
+ ],
+ [
+  "Umarex Beretta GBB PMX gas-operated submachine gun",
+  null,
+  148681,
+  "smg"
+ ],
+ [
+  "Vorsk VMP-1X GBB submachine gun Black",
+  null,
+  87843,
+  "smg"
+ ],
+ [
+  "Cybergun FN Herstal M249 Para GBB Machine Gun",
+  null,
+  289996,
+  "lmg"
+ ],
+ [
+  "Specna Arms SA-C02 CORE Carbine Replica Starter Kit",
+  null,
+  90000,
+  "rifle"
+ ],
+ [
+  "Cyma MP5 AEG Rifle Receiver Metal",
+  null,
+  9000,
+  "part_external"
+ ],
+ [
+  "Cyma M4 Pistol Grip Metal",
+  null,
+  4000,
+  "part_external"
+ ],
+ [
+  "Double Eagle M900 Spring Shotgun",
+  null,
+  14000,
+  "shotgun"
+ ],
+ [
+  "Wolverine Inferno Gen2 HPA Engine AEG",
+  null,
+  90000,
+  "part_internal"
+ ],
+ [
+  "Selector Switch AK Cyma",
+  null,
+  2500,
+  "part_external"
+ ],
+ [
+  "G&G ARP9 Silencer Tracer Unit",
+  null,
+  9000,
+  "part_external"
+ ],
+ [
+  "Mag Catch for M4 GBB",
+  null,
+  3000,
+  "part_external"
+ ],
+ [
+  "Charging handle M4 GBB",
+  null,
+  6000,
+  "part_external"
+ ],
+ [
+  "Scabbard shotgun",
+  null,
+  9000,
+  "acc_gear"
+ ],
+ [
+  "Shotgun Bandolier shell holder",
+  null,
+  7000,
+  "acc_gear"
+ ],
+ [
+  "Glock 17 Frame Marui",
+  null,
+  8000,
+  "part_external"
+ ],
+ [
+  "Specna Arms M4 AEG Stock Crane",
+  null,
+  6000,
+  "part_external"
+ ],
+ [
+  "Cyma M4 AEG hand guard Rail",
+  null,
+  9000,
+  "part_external"
+ ],
+ [
+  "Cartridge CO2 M870",
+  null,
+  9000,
+  "acc_ammo"
+ ],
+ [
+  "Black gas 1000ml",
+  null,
+  3000,
+  "acc_ammo"
+ ],
+ [
+  "CO2 bulb 12g",
+  null,
+  1000,
+  "acc_ammo"
+ ],
+ [
+  "Pinio 13T Cyma",
+  null,
+  1500,
+  "part_motor"
+ ],
+ [
+  "Microswitch AK",
+  null,
+  900,
+  "part_motor"
+ ],
+ [
+  "Glock 17 Tamiya csatlakozó",
+  null,
+  3000,
+  "part_motor"
+ ],
+ [
+  "Nózi M4 teflon",
+  null,
+  2000,
+  "part_internal"
+ ],
+ [
+  "Hammer Marui Hi-Capa",
+  null,
+  2000,
+  "part_internal"
+ ],
+ [
+  "BDU Combat Shirt Multicam",
+  null,
+  15000,
+  "acc_gear"
+ ],
+ [
+  "ETU unit Gate Titan V2",
+  null,
+  30000,
+  "part_motor"
+ ],
+ [
+  "Cyma CM.040 AEG Rifle",
+  null,
+  30000,
+  "rifle"
+ ],
+ [
+  "Tokyo Marui Hi-Capa 5.1 GBB Pistol",
+  null,
+  42000,
+  "pistol"
+ ],
+ [
+  "Specna Arms SA-S02 Sniper AEG",
+  null,
+  90000,
+  "sniper"
+ ],
+ [
+  "A&K M249 Machine Gun AEG",
+  null,
+  130000,
+  "lmg"
+ ],
+ [
+  "G&G SMG MP5 AEG",
+  null,
+  50000,
+  "smg"
+ ],
+ [
+  "VFC HK416 A5 GBBR",
+  null,
+  190000,
+  "rifle"
+ ]
 ]
