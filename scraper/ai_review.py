@@ -15,6 +15,7 @@ Csak stdlib.
 """
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import sys
@@ -103,7 +104,7 @@ def call(key: str, batch: list[dict], opener=urllib.request.urlopen) -> tuple[di
                                      data=json.dumps(request_body(batch, thinking)).encode(),
                                      headers={"Content-Type": "application/json", "x-goog-api-key": key})
         try:
-            with opener(req, timeout=180) as r:
+            with opener(req, timeout=240) as r:
                 resp = json.loads(r.read())
         except urllib.error.HTTPError as e:
             msg = e.read().decode(errors="replace")[:400]
@@ -119,6 +120,13 @@ def call(key: str, batch: list[dict], opener=urllib.request.urlopen) -> tuple[di
                 time.sleep(20 * (attempt + 1))
                 continue
             raise RuntimeError(f"Gemini {e.code}: {msg}") from None
+        except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException, OSError) as e:
+            # „The read operation timed out”, megszakadt kapcsolat: várunk és újra (a Gemini néha lassan válaszol)
+            if attempt < 3:
+                print(f"[ai] hálózati hiba ({type(e).__name__}), újrapróbálás {attempt + 1}/3…", flush=True)
+                time.sleep(20 * (attempt + 1))
+                continue
+            raise RuntimeError(f"Gemini hálózati hiba: {e}") from None
         cand = (resp.get("candidates") or [{}])[0]
         text = "".join(p.get("text", "") for p in cand.get("content", {}).get("parts", []))
         return parse(text, batch), resp.get("usageMetadata", {})
@@ -180,6 +188,9 @@ def main() -> int:
             res, usage = call(key, batch)
         except QuotaExceeded as e:
             stop = f"elfogyott a keret (holnap folytatja): {str(e)[:160]}"
+            break
+        except RuntimeError as e:                    # az eddigiek már el vannak mentve; a következő futás innen folytatja
+            stop = f"hiba (a következő futás folytatja): {str(e)[:200]}"
             break
         used["in"] += usage.get("promptTokenCount", 0)
         used["out"] += usage.get("candidatesTokenCount", 0) + usage.get("thoughtsTokenCount", 0)

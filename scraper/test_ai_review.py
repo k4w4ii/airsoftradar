@@ -62,6 +62,24 @@ class TestAiReview(unittest.TestCase):
         with self.assertRaises(ai_review.QuotaExceeded):
             ai_review.call("KEY", [_p(0, "a")], opener)
 
+    def test_call_timeout_retries(self):
+        n = []
+        resp = {"candidates": [{"content": {"parts": [{"text": '[{"i":0,"c":"acc_gear"}]'}]}}], "usageMetadata": {}}
+
+        def opener(req, timeout=0):
+            n.append(1)
+            if len(n) < 3:
+                raise TimeoutError("The read operation timed out")
+            return FakeResp(json.dumps(resp).encode())
+        orig, ai_review.time.sleep = ai_review.time.sleep, lambda s: None
+        try:
+            self.assertEqual(ai_review.call("KEY", [_p(0, "a")], opener)[0], {0: "acc_gear"})
+            n.clear()
+            with self.assertRaises(RuntimeError):
+                ai_review.call("KEY", [_p(0, "a")], lambda req, timeout=0: (_ for _ in ()).throw(TimeoutError("x")))
+        finally:
+            ai_review.time.sleep = orig
+
     def test_estimate(self):
         est = ai_review.estimate([_p(i, "Specna Arms SA-E20 EDGE HAL ETU AEG") for i in range(250)], 100)
         self.assertEqual(est["keres"], 3)
