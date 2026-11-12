@@ -2,7 +2,7 @@
 export const TL = {
   hu: {
     unit: "Mértékegység", speed: "Mért sebesség", bb: "BB súlya", unitFps: "fps", unitMs: "m/s",
-    energy: "Torkolati energia", eq20: "0,20 g-os BB-vel egyenértékű", bbAdvice: "Ajánlott BB-súly",
+    energy: "Torkolati energia", bbFor: (a, b) => `Ehhez az energiához illő BB-k (${a}–${b} g)`, eq20: "0,20 g-os BB-vel egyenértékű", bbAdvice: "Ajánlott BB-súly",
     masz: "MASZ kategória",
     maszName: { hand: "Kézifegyver (≤ 1,5 J)", dmr: "Félautomata mesterlövész (≤ 2,2 J, 20 m min. lőtáv)",
                 bolt: "Ismétlő mesterlövész (≤ 3,3 J, 20 m min. lőtáv)", over: "3,3 J felett: nem airsoft légfegyver" },
@@ -30,7 +30,7 @@ export const TL = {
   },
   en: {
     unit: "Unit", speed: "Measured speed", bb: "BB weight", unitFps: "fps", unitMs: "m/s",
-    energy: "Muzzle energy", eq20: "Equivalent with 0.20 g BBs", bbAdvice: "Recommended BB weight",
+    energy: "Muzzle energy", bbFor: (a, b) => `BBs that suit this energy (${a}–${b} g)`, eq20: "Equivalent with 0.20 g BBs", bbAdvice: "Recommended BB weight",
     masz: "Hungarian rules (MASZ) class",
     maszName: { hand: "Standard gun (≤ 1.5 J)", dmr: "Semi-auto sniper / DMR (≤ 2.2 J, 20 m min. distance)",
                 bolt: "Bolt-action sniper (≤ 3.3 J, 20 m min. distance)", over: "Above 3.3 J: not an airsoft gun" },

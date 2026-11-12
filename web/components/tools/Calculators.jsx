@@ -127,7 +127,7 @@ export function FpsCalculator({ locale, currency, rates, initial = {} }) {
   const [bb, setBb] = useState(pick(initial.bb, BB_WEIGHTS, "0.25"));
   useQuerySync({ unit, speed, bb });
   const r = useMemo(() => fpsCalc({ speed, unit, bb }), [speed, unit, bb]);
-  const blocks = r ? [{ kind: "bb", q: { lo: r.bbRange[0], hi: r.bbRange[1] }, title: `${L.bbAdvice}: ${r.bbRange[0]}–${r.bbRange[1]} g` }] : [];
+  const blocks = r ? [{ kind: "bb", q: { lo: r.bbRange[0], hi: r.bbRange[1] }, title: L.bbFor(r.bbRange[0], r.bbRange[1]) }] : [];
   return (
     <>
       <div className="tcard">
@@ -143,13 +143,10 @@ export function FpsCalculator({ locale, currency, rates, initial = {} }) {
             </span>
           </label>
         </div>
-        <div className="tres">
+        <div className="tres single">
           {r ? (
             <>
-              <Out big label={L.energy} value={`${fmt(r.joule, locale, 2)} J`} sub={`${fmt(r.fps, locale)} fps · ${fmt(r.ms, locale, 1)} m/s`} />
-              <Out label={L.eq20} value={`${fmt(r.fps20, locale)} fps`} sub={`${fmt(r.ms20, locale, 1)} m/s`} />
-              <Out label={L.bbAdvice} value={`${r.bbRange[0]}–${r.bbRange[1]} g`} />
-              <Out label={L.masz} value={L.maszName[r.masz]} tone={r.masz === "over" ? "bad" : r.masz === "hand" ? "good" : "warn"} />
+              <Out big label={L.energy} value={`${fmt(r.joule, locale, 2)} J`} sub={`${fmt(r.fps, locale)} fps · ${fmt(r.ms, locale, 1)} m/s · ${fmt(bb, locale, 2)} g`} />
             </>
           ) : <p className="muted">–</p>}
         </div>
