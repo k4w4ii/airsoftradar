@@ -141,6 +141,17 @@ A `{url}` helyére kerül a termékoldal címe. Azonnal él (legfeljebb fél ór
 - **Cloudflare → airsofthunter.com → DNS → Settings → DNSSEC: Enable.**
 - A Workeren a titkok mindig **Secret** típusúak legyenek, ne „Variable”.
 
+## 11. AI-ellenőrzés: Gemini 3.1 Flash-Lite (egyszer kell beállítani)
+A Gemini a `scraper/ai_szabalyok.md` szabályrendszer szerint átnézi a termékek kategóriáját. Döntése a kézi javítás (5/c) után a legerősebb.
+1. **aistudio.google.com** → bejelentkezés → **Get API key** → **Create API key** → másold ki.
+2. **GitHub → repó → Settings → Secrets and variables → Actions → New repository secret:** Name: `GEMINI_API_KEY`, Secret: a kulcs.
+3. **Actions → ai-review → Run workflow**, mode: **becsles** → a futás Summary oldalán látod, hány termék, mennyi token, mennyibe kerülne. Ez nem küld semmit.
+4. Ha rendben: **Run workflow**, mode: **eles**. A Summary oldalon táblázat mutatja, mely termékek kerültek át és hova. Ha elfogy a napi ingyenes keret, megáll; a következő futás onnan folytatja.
+5. Utána az éjszakai frissítés magától átnézi az új termékeket (legfeljebb 10 kérés/éj).
+- Szabályt a `scraper/ai_szabalyok.md` szerkesztésével adhatsz hozzá. A már átnézett termékeket a Gemini nem nézi újra (csak ha a nevük változik).
+- Ha egy AI-döntés rossz: `javitasok.txt` → `kategoria <slug> = <kategória>` (a kézi javítás felülírja).
+- Kulcs nélkül minden a régi módon működik.
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|

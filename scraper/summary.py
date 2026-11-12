@@ -77,7 +77,9 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
         votes[classify.category(p["name"], None, None)] += 0.5
         cat = sorted(votes.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
         cat, why = quality.fix_category(cat, p, clean, cats, fixes)      # minőség-őr: kézi + biztos automatikus javítás
-        if why and why != "kézi javítás":
+        if why == quality.AI_WHY:
+            diag.setdefault("ai", set()).add(pid)
+        elif why and why != "kézi javítás":
             diag["fixed"].append({"tipus": why, "termek": p["name"], "kategoria": cat, "reszlet": "",
                                   "link": quality.SITE + p["slug"]})
         diag["cats"].update(cats)
@@ -177,6 +179,8 @@ def rebuild(db) -> dict:
     offers = db.select("offers", select="id,product_id,shop_id,url,title_raw,price,currency,stock,last_seen_at,is_outlier,image_url",
                        is_active="eq.1", product_id="not.is.null")
     fixes, diag = quality.load_fixes(), {}
+    import ai_review
+    fixes["ai"] = ai_review.load(db)    # Gemini-ellenőrzés eredménye (ha még nincs tábla: üres)
     if fixes["elrejt"]:                 # kézzel elrejtett ajánlat: soha ne párosuljon újra (manual = az automatika nem nyúl hozzá)
         hide = [o["id"] for o in offers if o["url"] in fixes["elrejt"]]
         for i in range(0, len(hide), 80):
@@ -195,7 +199,7 @@ def rebuild(db) -> dict:
     _ensure_powers_column(db)
     # összesítő: törlés + csak a megváltozott sorok írása
     prev = {r["id"]: r for r in db.select("product_summary", select="id,sig,category")}
-    guard = quality.circuit_breaker(db, rows, prev)        # biztosíték: tömeges, gyanús változás nem kerül ki az oldalra
+    guard = quality.circuit_breaker(db, rows, prev, diag.get("ai"))        # biztosíték: tömeges, gyanús változás nem kerül ki az oldalra
     old = {pid: r["sig"] for pid, r in prev.items()}
     gone = sorted(set(old) - set(rows)) if not guard["keep_deleted"] else []
     changed = [r for pid, r in rows.items() if old.get(pid) != r["sig"]]
@@ -208,3 +212,8 @@ def rebuild(db) -> dict:
     stats = {"termekek": len(rows), "valtozott": len(changed), "torolve": len(gone), "elteroar": len(outliers)}
     print(f"[summary] {stats}", flush=True)
     return stats
+
+
+if __name__ == "__main__":             # csak az összesítő újraépítése (pl. az AI-ellenőrzés után): python scraper/summary.py
+    from db import get_db
+    rebuild(get_db())

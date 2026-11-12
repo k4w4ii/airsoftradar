@@ -101,6 +101,13 @@ jobs:
         with: { python-version: "3.12" }
       - name: Tesztek (hibás besoroló kód soha nem ír az adatbázisba)
         run: python -m unittest discover -s scraper -q
+      - name: AI-ellenőrzés (Gemini, csak az új termékek; kulcs nélkül kihagyja, hiba esetén is továbbmegy)
+        continue-on-error: true
+        timeout-minutes: 15
+        run: python scraper/ai_review.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          AI_MAX_REQUESTS: "10"
       - run: python scraper/rematch.py
       - uses: actions/upload-artifact@v4       # minőség-őr: javított és ellenőrizendő termékek listája
         continue-on-error: true      # a GitHub tárhelye néha hibázik: a CSV nem kritikus, a futás ettől még sikeres

@@ -826,5 +826,47 @@
   null,
   190000,
   "rifle"
+ ],
+ [
+  "Invader Gear Padded Rifle Carrier",
+  null,
+  16385,
+  "acc_gear"
+ ],
+ [
+  "Invader Gear Padded Carrier",
+  null,
+  16385,
+  "acc_gear"
+ ],
+ [
+  "EPeS SorboPad AEG 60D set 4 pcs",
+  null,
+  7335,
+  "part_internal"
+ ],
+ [
+  "Tlumení EPeS SorboPad AEG 60D sada 4 ks",
+  null,
+  7335,
+  "part_internal"
+ ],
+ [
+  "Specna Arms SA-E05 EDGE Bolt Carrier",
+  null,
+  9000,
+  "part_internal"
+ ],
+ [
+  "Magpul MOE Rifle Stock Butt Pad",
+  null,
+  5000,
+  "part_external"
+ ],
+ [
+  "Cyma CM.522 Sport Line 2 db tárral",
+  null,
+  22000,
+  "rifle"
  ]
 ]

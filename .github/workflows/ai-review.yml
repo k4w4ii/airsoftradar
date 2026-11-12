@@ -1,0 +1,50 @@
+name: ai-review
+
+# AI-ellenőrzés (Gemini 3.1 Flash-Lite): a termékkategóriák átnézése a szabályrendszer (scraper/ai_szabalyok.md) szerint.
+# Kézi indítás: Actions -> ai-review -> Run workflow. Előbb „becsles” (ingyenes, nem küld semmit), utána „eles”.
+# Minden terméket csak egyszer néz át; ha elfogy a napi keret, a következő futás onnan folytatja.
+# Az éjszakai frissítés (daily-scrape) is lefuttatja, kis kerettel, az új termékekre.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "becsles = csak árbecslés, eles = átnézés és az oldal frissítése"
+        type: choice
+        options: [becsles, eles]
+        default: becsles
+      max_requests:
+        description: "Legfeljebb ennyi kérés (1 kérés = 100 termék)"
+        type: string
+        default: "50"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: airsofthunter-db
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: "1"
+  D1_API_URL: ${{ vars.D1_API_URL }}
+  D1_API_TOKEN: ${{ secrets.D1_API_TOKEN }}
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - name: Tesztek
+        run: python -m unittest discover -s scraper -q
+      - name: AI-ellenőrzés
+        run: python scraper/ai_review.py
+        env:
+          AI_DRY_RUN: ${{ inputs.mode == 'becsles' && '1' || '0' }}
+          AI_MAX_REQUESTS: ${{ inputs.max_requests }}
+      - name: Weboldal frissítése
+        if: inputs.mode == 'eles'
+        run: python scraper/summary.py

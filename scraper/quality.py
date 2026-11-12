@@ -58,14 +58,21 @@ def load_fixes(path: Path | None = None) -> dict:
     return out
 
 
+AI_WHY = "AI (Gemini)"
+
+
 def fix_category(cat: str, product: dict, clean: list[dict], cats: dict[int, str], fixes: dict) -> tuple[str, str | None]:
     """A szavazással kapott kategória végső ellenőrzése. Visszaad: (kategória, javítás oka vagy None)."""
     forced = fixes.get("kategoria", {}).get(product.get("slug"))
     if forced:
         return forced, "kézi javítás"
+    mid = statistics.median(o["price_huf"] for o in clean)
+    ai = fixes.get("ai", {}).get(product.get("slug"))
+    # AI (Gemini) döntése a szabályrendszer szerint – kivéve, ha fegyvernek mondana egy nyilvánvalóan túl olcsó tételt
+    if ai and not (ai in classify.WEAPONS and ai != "grenade" and mid < classify._FLOOR.get(ai, 6000)):
+        return ai, AI_WHY
     if cat not in classify.WEAPONS:
         return cat, None
-    mid = statistics.median(o["price_huf"] for o in clean)
     other = [c for c in (cats[o["id"]] for o in clean) if c not in classify.WEAPONS]
     fallback = max(set(other), key=other.count) if other else "other"
     if cat != "grenade" and mid < classify._FLOOR.get(cat, 6000):
@@ -155,11 +162,13 @@ def _set_meta(db, key: str, value: str) -> None:
     db.execute([("INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [key, value])])
 
 
-def circuit_breaker(db, rows: dict[int, dict], prev: dict[int, dict]) -> dict:
-    """Tömeges kategória-változás / törlés ellen. A rows sorait helyben visszaállítja, ha kell. Visszaad: állapot."""
+def circuit_breaker(db, rows: dict[int, dict], prev: dict[int, dict], exempt: set | None = None) -> dict:
+    """Tömeges kategória-változás / törlés ellen. A rows sorait helyben visszaállítja, ha kell. Visszaad: állapot.
+    exempt: szándékos változások (AI-ellenőrzés) – ezek nem számítanak bele és nem állnak vissza."""
     ver, force = code_version(), os.environ.get("FORCE_RECLASSIFY") == "1"
     same_code = _meta(db, "classifier_version") == ver
-    moved = [pid for pid, r in rows.items() if pid in prev and prev[pid]["category"] != r["category"]]
+    moved = [pid for pid, r in rows.items() if pid in prev and prev[pid]["category"] != r["category"]
+             and pid not in (exempt or set())]
     gone = [pid for pid in prev if pid not in rows]
     lim_c = max(MAX_CAT_CHANGES[0], int(MAX_CAT_CHANGES[1] * len(prev)))
     lim_d = max(MAX_DELETES[0], int(MAX_DELETES[1] * len(prev)))
