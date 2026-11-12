@@ -363,7 +363,7 @@
   "AimTop Plastová přepouštěcí klapka pro SVD GBB",
   null,
   883,
-  "other"
+  "part_internal"
  ],
  [
   "Madbull 4mm Bearings for 40mm Grenades Steel",
@@ -597,7 +597,7 @@
   "Zielfernrohr 3-9x50 EG, Banner, Bushnell",
   "https://airsoft-guns.eu/de/zielfernrohr-3-9x50",
   45000,
-  "other"
+  "acc_optics"
  ],
  [
   "VFC Gas Tank Cordura Pouch M249 GBB Machine Gun",
@@ -868,5 +868,3053 @@
   null,
   22000,
   "rifle"
+ ],
+ [
+  "VFC 84mm Vega Force Company M3 MAAWS BB module with 65mm adapter",
+  null,
+  48169,
+  "grenade"
+ ],
+ [
+  "Double Bell 779S GBB Pistol Green Gas",
+  null,
+  26870,
+  "pistol"
+ ],
+ [
+  "Vorsk VP-X 1911/MEU hybrid Green Gas",
+  null,
+  48990,
+  "pistol"
+ ],
+ [
+  "EMG Helios Salient Arms International S226 CO2 Powered Gas Blowback Pistol Model: Gun Only",
+  null,
+  52877,
+  "pistol"
+ ],
+ [
+  "Cybergun Colt Python.357 Magnum Revolver by King Arms (Color: Electroplated Black 2.5\" Green Gas)",
+  null,
+  63095,
+  "pistol"
+ ],
+ [
+  "EMG TTI JW3 2011 Combat Master Select Fire Full Auto Training Pistol (Model: Green Gas Gun Only)",
+  null,
+  80246,
+  "pistol"
+ ],
+ [
+  "APS Mantis X CO2 Powered Gas Blowback Pistol",
+  null,
+  80246,
+  "pistol"
+ ],
+ [
+  "EMG TTI JW4 2011 Pit Viper Training Pistol (Model: Standard Green Gas)",
+  null,
+  83895,
+  "pistol"
+ ],
+ [
+  "EMG TTI Tan Viper 2011 Optics Ready Training Pistol (Model: Standard Green Gas Gun Only)",
+  null,
+  83895,
+  "pistol"
+ ],
+ [
+  "EMG TTI 2011 Combat Master Alpha Optic Ready Training Pistol (Model: Standard Semi-Auto Green Gas Pi",
+  null,
+  87544,
+  "pistol"
+ ],
+ [
+  "EMG TTI JW4 2011 Pit Viper Full Auto Select Fire Training Pistol (Model: Standard Green Gas)",
+  null,
+  91194,
+  "pistol"
+ ],
+ [
+  "EMG TTI Tan Viper 2011 Full Auto Select Fire Training Pistol (Model: Standard Green Gas)",
+  null,
+  91194,
+  "pistol"
+ ],
+ [
+  "EMG Salient Arms International 2011 DS 4.3 Training Weapon (Color: CNC Full Steel Limited Edition Gr",
+  null,
+  485307,
+  "pistol"
+ ],
+ [
+  "King Arms CO2 Powered Gas Blowback M1A1 Paratrooper Model",
+  null,
+  175125,
+  "rifle"
+ ],
+ [
+  "Golden Eagle M8877 Shotgun Green Gas Powered Wood",
+  null,
+  52468,
+  "shotgun"
+ ],
+ [
+  "TAGInn Game Innovation trigger/shell PRO EVO CO2",
+  null,
+  42491,
+  "grenade"
+ ],
+ [
+  "WE 1911 3.8 A Gas blowback Full Metal 2x Magazine",
+  null,
+  37275,
+  "pistol"
+ ],
+ [
+  "WE P08 S Luger 4 hüvelykes GBB",
+  null,
+  59800,
+  "pistol"
+ ],
+ [
+  "KWA Evike.com Exclusive Heckler & Koch USP Match Gas Blowback Pistol by (Package: Pistol and Spare M",
+  null,
+  103966,
+  "pistol"
+ ],
+ [
+  "Snow Wolf PPSh-41 EBB Full Metal ABS ,2x Magazine SW-09A",
+  null,
+  72440,
+  "smg"
+ ],
+ [
+  "Snow Wolf PPSh-41 EBB Full Metal right Wood 2x Magazine SW-09W",
+  null,
+  88173,
+  "smg"
+ ],
+ [
+  "ASG CZ P-10C Optics Ready Metal bolt CO2 blowback FDE",
+  null,
+  55239,
+  "pistol"
+ ],
+ [
+  "Vorsk Hi-Capa 3.8 PRO with red dot GBB pink",
+  null,
+  55239,
+  "pistol"
+ ],
+ [
+  "Tokyo Marui Hi-Capa 4.3 D.O.R Direct Optic Ready",
+  null,
+  58351,
+  "pistol"
+ ],
+ [
+  "APS EMG F-1 Firearms BSF-19 Optics Ready CO2 Powered 7~8mm Gel Ball Pistol Color: Black-Bronze",
+  null,
+  65649,
+  "pistol"
+ ],
+ [
+  "ASG CZ P-09 Optic Ready Metal bolt CO2 blowback + case",
+  null,
+  70060,
+  "pistol"
+ ],
+ [
+  "ASG CZ P-09 Optic Ready Co2 Black",
+  null,
+  76341,
+  "pistol"
+ ],
+ [
+  "Tokyo Marui White Hi Capa D.O.R. Direct Optics Ready",
+  null,
+  83895,
+  "pistol"
+ ],
+ [
+  "CYMA Glock 18C MOSFET+LIPO Gen.4 Tan",
+  null,
+  36456,
+  "pistol"
+ ],
+ [
+  "CYMA Beretta M9 A1 MOSFET+LIPO Gen.4",
+  null,
+  36456,
+  "pistol"
+ ],
+ [
+  "Saigo Defense Glock 18C Yakuza MK2 LIPO+MOSFET Gen.4 Tan",
+  null,
+  36456,
+  "pistol"
+ ],
+ [
+  "Specna Arms SA-FX01 FLEX™ Gen.2 HAL ETU with charger a battery Black",
+  null,
+  64221,
+  "rifle"
+ ],
+ [
+  "Mancraft QD HPA Pistol Lanyard Pistol Lanyard KJW/WE",
+  null,
+  17319,
+  "acc_gear"
+ ],
+ [
+  "Action Army AAP-01 \"Drill\" Custom Gas Blowback Pistol (Color: Matrix Blue Kit Only)",
+  null,
+  25508,
+  "part_external"
+ ],
+ [
+  "Armorer Works AW Custom \"VX\" Tactical Pistol Conversion Kit Black",
+  null,
+  36456,
+  "part_external"
+ ],
+ [
+  "Wolverine Airsoft Wolverine BOLT -TM VSR-10",
+  null,
+  87544,
+  "part_internal"
+ ],
+ [
+  "Wolverine Airsoft WOLVERINE BOLT M Silverback SRS",
+  null,
+  87544,
+  "part_internal"
+ ],
+ [
+  "PolarStar F2 SR25 A&K",
+  null,
+  193371,
+  "part_internal"
+ ],
+ [
+  "PolarStar F2 SR25 G&G",
+  null,
+  193371,
+  "part_internal"
+ ],
+ [
+  "PolarStar F2 SVD Real Sword",
+  null,
+  193371,
+  "part_internal"
+ ],
+ [
+  "PolarStar F2 G&G M14 not ETU compatible",
+  null,
+  193371,
+  "part_internal"
+ ],
+ [
+  "PolarStar F2 G&P Cyma M14",
+  null,
+  193371,
+  "part_internal"
+ ],
+ [
+  "PolarStar F2 Tokyo Marui M14",
+  null,
+  193371,
+  "part_internal"
+ ],
+ [
+  "PolarStar F2 SVD Cyma",
+  null,
+  193371,
+  "part_internal"
+ ],
+ [
+  "FMA TMC W&T Kydex Quick Draw Holster for M320 Grenade Launcher (Color: Black Belt Loop w/ QD System)",
+  null,
+  20399,
+  "acc_gear"
+ ],
+ [
+  "TMC W&T Kydex Quick Draw Holster for M320 Grenade Launcher (Color: Dark Earth Belt Loop w/ QD System",
+  null,
+  20399,
+  "acc_gear"
+ ],
+ [
+  "Tactical Tailor Belt for 12 40mm grenades Black",
+  null,
+  36456,
+  "acc_gear"
+ ],
+ [
+  "Stingray Carry Case for AT4 Compressed-Air Rocket Launcher",
+  null,
+  71123,
+  "acc_gear"
+ ],
+ [
+  "Fenix Flashlight for GL06",
+  null,
+  29297,
+  "acc_optics"
+ ],
+ [
+  "Fenix Flashlight LED GL06-365",
+  null,
+  29297,
+  "acc_optics"
+ ],
+ [
+  "Stingray Claymore Motion Sensor",
+  null,
+  71123,
+  "other"
+ ],
+ [
+  "G&P USSOCOM M203 Type Flip-up QD Front Sight Leaf Sight",
+  null,
+  18574,
+  "part_external"
+ ],
+ [
+  "G&P M203 Quadrant Sight",
+  null,
+  20399,
+  "part_external"
+ ],
+ [
+  "EMG Spike's Tactical Kaos Stock System for M203 Havoc Grenade Launcher Model: 9\" Rail",
+  null,
+  29522,
+  "part_external"
+ ],
+ [
+  "Warrior Assault Systems 200 Rd 5.56 SAW M249 Drum Multicam",
+  null,
+  21877,
+  "acc_mag"
+ ],
+ [
+  "ACM Crveni sight PK-A 1x30",
+  null,
+  35167,
+  "acc_optics"
+ ],
+ [
+  "ACM Mira point rojo PK-A 1x30",
+  null,
+  35167,
+  "acc_optics"
+ ],
+ [
+  "VFC M249 GBB foregrip picatinny rail",
+  null,
+  20034,
+  "part_external"
+ ],
+ [
+  "Classic Army M249 Railed Metal Feed Cover A&K Echo1 MK1 MK2 Para AEG",
+  null,
+  20399,
+  "part_external"
+ ],
+ [
+  "VFC M249 GBB Metal rail Handguard kit",
+  null,
+  30252,
+  "part_external"
+ ],
+ [
+  "TAGInn Master Key Buckshot round for ML-36",
+  null,
+  1077,
+  "grenade"
+ ],
+ [
+  "Enola Gaye Smoke EG25 Micro Smoke Red",
+  null,
+  1788,
+  "grenade"
+ ],
+ [
+  "Enola Gaye purple Wire Pull Micro Smoke EG25",
+  null,
+  1788,
+  "grenade"
+ ],
+ [
+  "Enola Gaye Smoke EG25 Micro Smoke Bianco",
+  null,
+  1788,
+  "grenade"
+ ],
+ [
+  "Enola Gaye Smoke EG25 Micro Smoke Viola",
+  null,
+  1788,
+  "grenade"
+ ],
+ [
+  "Enola Gaye Smoke EG25 Micro Smoke Yellow",
+  null,
+  1788,
+  "grenade"
+ ],
+ [
+  "Enola Gaye EG25 Micro Smoke Rauchbombe weiss",
+  null,
+  2171,
+  "grenade"
+ ],
+ [
+  "Enola Gaye EG18X Paintball Rauchbombe with Reißzünder rot",
+  null,
+  5456,
+  "grenade"
+ ],
+ [
+  "Enola Gaye Mk5 Thunderflash 3pcs package",
+  null,
+  5751,
+  "grenade"
+ ],
+ [
+  "VFC Set 10 Capsules 65 mm Vega Force Company for M3 MAAWS",
+  null,
+  5803,
+  "grenade"
+ ],
+ [
+  "TAGInn Master Key Buckshot Round 10 pcs",
+  null,
+  16735,
+  "grenade"
+ ],
+ [
+  "Storm Airsoft Storm 360 Lime Green",
+  null,
+  17115,
+  "grenade"
+ ],
+ [
+  "Storm Airsoft Storm 360 Red",
+  null,
+  17115,
+  "grenade"
+ ],
+ [
+  "Storm Airsoft Storm Apocalypse Orange",
+  null,
+  20034,
+  "grenade"
+ ],
+ [
+  "TAGInn Game Innovation Paladin MK2 projectile 10pcs",
+  null,
+  22078,
+  "grenade"
+ ],
+ [
+  "Enola Gaye SD75 Paintball Rauchbombe with Reißzünder Green",
+  null,
+  25526,
+  "grenade"
+ ],
+ [
+  "Krytac Tornado 3 Timer Frag",
+  null,
+  30982,
+  "grenade"
+ ],
+ [
+  "TAGInn Reaper MK2 3.5S 10 pcs",
+  null,
+  33985,
+  "grenade"
+ ],
+ [
+  "Madbull Spikes Tactical Havoc 12\" Black",
+  null,
+  53972,
+  "grenade"
+ ],
+ [
+  "Madbull Spikes Tactical Havoc 9\" Black",
+  null,
+  53972,
+  "grenade"
+ ],
+ [
+  "VFC M3 MAAWS 65mm laucher module set",
+  null,
+  72948,
+  "grenade"
+ ],
+ [
+  "Cybergun Smith & Wesson M&P40 Spring Black & Tan",
+  null,
+  3613,
+  "pistol"
+ ],
+ [
+  "Cybergun Colt 25 Spring Black",
+  null,
+  3649,
+  "pistol"
+ ],
+ [
+  "Cybergun M&P40 Spring Black & Tan",
+  null,
+  5437,
+  "pistol"
+ ],
+ [
+  "Umarex Beretta 90Two Spring Black",
+  null,
+  7262,
+  "pistol"
+ ],
+ [
+  "Cybergun FN Herstal FNS-9 Spring Dual Tone",
+  null,
+  7295,
+  "pistol"
+ ],
+ [
+  "Cybergun PT92 Spring ABS Version Black",
+  null,
+  7295,
+  "pistol"
+ ],
+ [
+  "Cybergun FN FNS-9 Spring Black",
+  null,
+  7295,
+  "pistol"
+ ],
+ [
+  "SRC HsC 7.65 NBB Black",
+  null,
+  9087,
+  "pistol"
+ ],
+ [
+  "Cybergun Taurus PT92 Spring Silver",
+  null,
+  9087,
+  "pistol"
+ ],
+ [
+  "ASG DL60 SOCOM Spring Black",
+  null,
+  9087,
+  "pistol"
+ ],
+ [
+  "SRC Python.357 Magnum ST357 Gas Black",
+  null,
+  10911,
+  "pistol"
+ ],
+ [
+  "Umarex CO2 Elite Force TXP 2.6576",
+  null,
+  13703,
+  "pistol"
+ ],
+ [
+  "Tokyo Marui Python 4\" Spring Stainless",
+  null,
+  15655,
+  "pistol"
+ ],
+ [
+  "Tokyo Marui Python 6\" Spring Stainless",
+  null,
+  15655,
+  "pistol"
+ ],
+ [
+  "ASG M92F NBB Black STTI",
+  null,
+  21859,
+  "pistol"
+ ],
+ [
+  "HFC Savaging Bull 6\" Gas Black",
+  null,
+  21859,
+  "pistol"
+ ],
+ [
+  "HFC Savaging Bull 4\" Gas Black",
+  null,
+  22041,
+  "pistol"
+ ],
+ [
+  "HFC M10 4\" Gas Black",
+  null,
+  25508,
+  "pistol"
+ ],
+ [
+  "HFC M10 4\" Gas Silver",
+  null,
+  27333,
+  "pistol"
+ ],
+ [
+  "ASG CLPD Dan Wesson 715 Wood -Limited Edition- blau",
+  null,
+  33554,
+  "pistol"
+ ],
+ [
+  "Cybergun Colt 2009 Rail Concept gaz",
+  null,
+  72948,
+  "pistol"
+ ],
+ [
+  "SIG Sauer PRO Force P320 Xcarry Full Metal GBB",
+  null,
+  79917,
+  "pistol"
+ ],
+ [
+  "EMG Salient Arms International 2011 DS Training Weapon w/ Custom Cerakote Model: 4.3 Hive Camo",
+  null,
+  138998,
+  "pistol"
+ ],
+ [
+  "A&K Winchester 1892A",
+  null,
+  80282,
+  "rifle"
+ ],
+ [
+  "Wolverine Airsoft Wolverine Heretic Labs Article I Speedsoft HPA Black",
+  null,
+  324761,
+  "rifle"
+ ],
+ [
+  "Double Eagle M401 M870 Breacher Spring Black",
+  null,
+  7262,
+  "shotgun"
+ ],
+ [
+  "Cybergun Mossberg M590 Chainsaw Spring Clear",
+  null,
+  9123,
+  "shotgun"
+ ],
+ [
+  "Double Eagle M58A Mossberg M500 Spring Black",
+  null,
+  18210,
+  "shotgun"
+ ],
+ [
+  "Double Eagle M56B Benelli M3 Shorty Spring Black",
+  null,
+  21859,
+  "shotgun"
+ ],
+ [
+  "Double Eagle M58B Mossberg M500 shorty Spring Black",
+  null,
+  21859,
+  "shotgun"
+ ],
+ [
+  "BO Manufacture Fabarm STF12 18\" Spring Dark Earth Double Eagle",
+  null,
+  36456,
+  "shotgun"
+ ],
+ [
+  "Double Eagle M37F Vz.61 Skorpion Spring Black",
+  null,
+  5437,
+  "smg"
+ ],
+ [
+  "Double Eagle 2EM42F MAC-10 Spring Black",
+  null,
+  5437,
+  "smg"
+ ],
+ [
+  "Double Eagle 2EM40 MP40 Spring Black",
+  null,
+  10911,
+  "smg"
+ ],
+ [
+  "G&G Armament ARP 9 M-LOCK 5\"",
+  null,
+  102141,
+  "smg"
+ ],
+ [
+  "G&G Armament ARP 9 M-LOCK 5\"- Battleship Grey",
+  null,
+  105790,
+  "smg"
+ ],
+ [
+  "Tokyo Marui P90TR with silencer AEG Black",
+  null,
+  110855,
+  "smg"
+ ],
+ [
+  "G&G Armament PRK9L RTS with ETU & Mosfet AEG Black",
+  null,
+  142282,
+  "smg"
+ ],
+ [
+  "Cybergun Mauser SR Spring Black",
+  null,
+  26968,
+  "sniper"
+ ],
+ [
+  "Cybergun FN Herstal SPR A2 Spring 1 Joule Version Tan",
+  null,
+  43754,
+  "sniper"
+ ],
+ [
+  "Swiss Arms SAS 10 Spring Black Cybergun Well",
+  null,
+  54702,
+  "sniper"
+ ],
+ [
+  "ASG AW 308 Spring Black",
+  null,
+  72948,
+  "sniper"
+ ],
+ [
+  "EMG Barrett Fieldcraft Spring Blackout",
+  null,
+  91194,
+  "sniper"
+ ],
+ [
+  "APS Barrett Fieldcraft Spring Multicam",
+  null,
+  94843,
+  "sniper"
+ ],
+ [
+  "APS Barrett Fieldcraft Spring Black & Wood",
+  null,
+  109440,
+  "sniper"
+ ],
+ [
+  "Snow Wolf Barrett M107A1 Spring Black 6mmProShop",
+  null,
+  119657,
+  "sniper"
+ ],
+ [
+  "EMG Barrett Fieldcraft Gaz Silver Wood",
+  null,
+  174395,
+  "sniper"
+ ],
+ [
+  "CYMA Pump Action Type Air Cocking M203 Attachment for M4 M16 Series AEG",
+  null,
+  6897,
+  "grenade"
+ ],
+ [
+  "TAGInn ML-36 Granatwerfer Standalone Chasis einzeln",
+  null,
+  182445,
+  "grenade"
+ ],
+ [
+  "CYMA Cm.126 M92F AEP",
+  null,
+  3600,
+  "pistol"
+ ],
+ [
+  "ASG DL60 SOCOM with silencer",
+  null,
+  10329,
+  "pistol"
+ ],
+ [
+  "Y&P MK23 Special operation with silencer CO2 version",
+  null,
+  23189,
+  "pistol"
+ ],
+ [
+  "STTI MK23 gaz fixed slide",
+  null,
+  25508,
+  "pistol"
+ ],
+ [
+  "ASG MK23 Special Operation with silencer Gas",
+  null,
+  25748,
+  "pistol"
+ ],
+ [
+  "Tokyo Marui BODYGUARD 380 Fixed slide",
+  null,
+  29157,
+  "pistol"
+ ],
+ [
+  "Tokyo Marui Compact Carry LCP Fixed slide",
+  null,
+  30982,
+  "pistol"
+ ],
+ [
+  "Tokyo Marui Compact Carry CURVE Fixed Slide",
+  null,
+  32806,
+  "pistol"
+ ],
+ [
+  "WE GP1799A GBB Black Metal bolt Black frame",
+  null,
+  38772,
+  "pistol"
+ ],
+ [
+  "WE GP1799B GBB silver Metal bolt Black frame",
+  null,
+  38772,
+  "pistol"
+ ],
+ [
+  "WE Tech Gen2 Heavy Weight 1911 MEU Gas Blowback Pistol (Color: Dark Earth Railed Frame)",
+  null,
+  43754,
+  "pistol"
+ ],
+ [
+  "WE G Series 17 Gen. 3 Gas pistol Metal slide Black",
+  null,
+  44195,
+  "pistol"
+ ],
+ [
+  "WE E99 GBB pistol Metal slide Black",
+  null,
+  44195,
+  "pistol"
+ ],
+ [
+  "WE M&P9 Big Bird GBB Metal slide Black",
+  null,
+  47290,
+  "pistol"
+ ],
+ [
+  "WE G Series 17 Gen.5 Gas pistol Metal slide Black",
+  null,
+  47593,
+  "pistol"
+ ],
+ [
+  "ASG CZ P-09 GBB Gas pistol composite slide Black",
+  null,
+  51071,
+  "pistol"
+ ],
+ [
+  "EMG Strike Industries ARK17 CO2 blowback GBB STRIKE frame Black",
+  null,
+  58233,
+  "pistol"
+ ],
+ [
+  "CYMA Carabina M4 Keymod plastic Black Sport CM.515",
+  null,
+  33478,
+  "rifle"
+ ],
+ [
+  "CYMA M4 SD Suppressor Stock Emod nylon Black Sport CM.631",
+  null,
+  43922,
+  "rifle"
+ ],
+ [
+  "CYMA M4-Karabiner SD Silencer Emod-Schaft Nylon Black Sport CM.631",
+  null,
+  43922,
+  "rifle"
+ ],
+ [
+  "CYMA AKS74UN Steel body CM.045",
+  null,
+  59132,
+  "rifle"
+ ],
+ [
+  "E&C M4 RIS CQB with silencer e COLT Black",
+  null,
+  70209,
+  "rifle"
+ ],
+ [
+  "E&C EC-108 RAHG 10.39' with silencer Black",
+  null,
+  82185,
+  "rifle"
+ ],
+ [
+  "E&C EC-108 RAHG 10.39' with silencer Tan",
+  null,
+  82185,
+  "rifle"
+ ],
+ [
+  "E&C HK416 RAHG 10.4\" Silencer SA-H08",
+  null,
+  102000,
+  "rifle"
+ ],
+ [
+  "E&C HK416 Geissele Silencer SA-H06",
+  null,
+  102000,
+  "rifle"
+ ],
+ [
+  "S&T M870 Type Full Metal Training Shotgun (Version: Standard Black Polymer Stock)",
+  null,
+  54702,
+  "shotgun"
+ ],
+ [
+  "Double Eagle manual M24 with silencer",
+  null,
+  6871,
+  "sniper"
+ ],
+ [
+  "Matrix M1903A3 Bolt Action Spring Powered by S&T Model: Faux Wood Stock",
+  null,
+  58351,
+  "sniper"
+ ],
+ [
+  "G&G Armament ARP 556 V2S polymer electronic Trigger",
+  null,
+  94161,
+  "rifle"
+ ],
+ [
+  "G&G Armament CM16 SRL Sportline Black electronic Trigger",
+  null,
+  103143,
+  "rifle"
+ ],
+ [
+  "G&G Armament ARP 556 3.0 electronic Trigger Black",
+  null,
+  116616,
+  "rifle"
+ ],
+ [
+  "G&G Armament ARP 556 Full Metal electronic Trigger",
+  null,
+  118113,
+  "rifle"
+ ],
+ [
+  "G&G Armament GC16 Predator Full Metal electronic Trigger Hunter Green",
+  null,
+  119610,
+  "rifle"
+ ],
+ [
+  "G&G Armament CM16 SRXL Red Edition Sportline Black electronic Trigger",
+  null,
+  119610,
+  "rifle"
+ ],
+ [
+  "G&G Armament ARP 556 2.0 electronic Trigger Black",
+  null,
+  119610,
+  "rifle"
+ ],
+ [
+  "G&G Armament CM16 Predator M-LOK Black electronic Trigger",
+  null,
+  119610,
+  "rifle"
+ ],
+ [
+  "G&G Armament GC16 SRL Full Metal electronic Trigger",
+  null,
+  119715,
+  "rifle"
+ ],
+ [
+  "G&G Armament GC16 MPW 12' Keymod Full Metal electronic Trigger",
+  null,
+  125598,
+  "rifle"
+ ],
+ [
+  "G&G Armament GC16 Wild Hog 9' Full Metal electronic Trigger",
+  null,
+  128592,
+  "rifle"
+ ],
+ [
+  "G&G Armament MCP 556 electronic Trigger",
+  null,
+  129940,
+  "rifle"
+ ],
+ [
+  "G&G Armament GC16 Warthog 9' Full Metal electronic Trigger",
+  null,
+  133083,
+  "rifle"
+ ],
+ [
+  "G&G Armament RK74-E Elite Full Metal electronic Trigger",
+  null,
+  134580,
+  "rifle"
+ ],
+ [
+  "G&G Armament GC16 Warthog 12' Full Metal electronic Trigger",
+  null,
+  134580,
+  "rifle"
+ ],
+ [
+  "G&G Armament GC16 Wild Hog 12' Full Metal electronic Trigger",
+  null,
+  139071,
+  "rifle"
+ ],
+ [
+  "G&G Armament GC16 Wild Hog 13,5' Full Metal electronic Trigger",
+  null,
+  139071,
+  "rifle"
+ ],
+ [
+  "G&G Armament TR16 MBR 308 M-LOK Advanced G2 Technology Full Metal elekt. Trigger",
+  null,
+  140568,
+  "rifle"
+ ],
+ [
+  "G&G Armament RK74-CQB Full Metal electronic Trigger",
+  null,
+  142065,
+  "rifle"
+ ],
+ [
+  "G&G Armament L85 A2 ETU Full Metal electronic Trigger",
+  null,
+  142065,
+  "rifle"
+ ],
+ [
+  "G&G Armament TR16 SBR 308MK1 Advanced G2 Technology Full Metal electronic Trigger",
+  null,
+  146407,
+  "rifle"
+ ],
+ [
+  "G&G Armament RK74-T Tactical Full Metal electronic Trigger",
+  null,
+  149550,
+  "rifle"
+ ],
+ [
+  "G&G Armament TR16 MBR 308SR Advanced G2 Technology Full Metal electronic Trigger",
+  null,
+  149550,
+  "rifle"
+ ],
+ [
+  "G&G Armament TR16 SBR 308 MK2 Advanced G2 Technology Full Metal electronic Trigger",
+  null,
+  155538,
+  "rifle"
+ ],
+ [
+  "G&G Armament TR16 MBR 556WH Advanced G2 Technology Full Metal electronic Trigger",
+  null,
+  155538,
+  "rifle"
+ ],
+ [
+  "G&G Armament L85 A1 ETU Full Metal electronic Trigger",
+  null,
+  164520,
+  "rifle"
+ ],
+ [
+  "G&G Armament BAMF Recon COBALT Kinetics G2 Full Metal electronic Trigger",
+  null,
+  164520,
+  "rifle"
+ ],
+ [
+  "G&G Armament BAMF Team COBALT Kinetics G2 Full Metal electronic Trigger",
+  null,
+  194460,
+  "rifle"
+ ],
+ [
+  "G&G Armament ARP 9 electronic Trigger",
+  null,
+  97155,
+  "smg"
+ ],
+ [
+  "G&G Armament ARP 9 3.0P electronic Trigger",
+  null,
+  104640,
+  "smg"
+ ],
+ [
+  "CYMA CM030 G18C AEP Mosfet Version Dark Earth",
+  null,
+  27333,
+  "pistol"
+ ],
+ [
+  "CYMA CM127S Mosfet AEP",
+  null,
+  29157,
+  "pistol"
+ ],
+ [
+  "CYMA CM131 Gen3 AEP mosfet Black CM.131S",
+  null,
+  29486,
+  "pistol"
+ ],
+ [
+  "CYMA HI-CAPA MOSFET Edition CM.128S",
+  null,
+  41500,
+  "pistol"
+ ],
+ [
+  "Specna Arms SA-FX01 FLEX™ 1.14J mosfet GATE X-ASR Black",
+  null,
+  44760,
+  "rifle"
+ ],
+ [
+  "Specna Arms SA-FX01 FLEX™ mosfet GATE X-ASR Black Tan",
+  null,
+  47141,
+  "rifle"
+ ],
+ [
+  "Specna Arms SA-F03 FLEX mosfet GATE X-ASR Black",
+  null,
+  47754,
+  "rifle"
+ ],
+ [
+  "Specna Arms SA-F01 FLEX Gen.2 mosfet GATE X-ASR Half-TAN",
+  null,
+  47754,
+  "rifle"
+ ],
+ [
+  "Specna Arms SA-FX01 FLEX™ gen.2 mosfet GATE X-ASR Black",
+  null,
+  49251,
+  "rifle"
+ ],
+ [
+  "Specna Arms SA-F03 FLEX Gen.2 mosfet GATE X-ASR Black",
+  null,
+  49251,
+  "rifle"
+ ],
+ [
+  "Specna Arms SA-F02 FLEX Gen.2 mosfet GATE X-ASR Half-TAN",
+  null,
+  50748,
+  "rifle"
+ ],
+ [
+  "Specna Arms SA-F11 FLEX™ Gen.2 Gate X-ASR mosfet circuit Half-Tan",
+  null,
+  50994,
+  "rifle"
+ ],
+ [
+  "Specna Arms M4 E19 MK18 EDGE MOSFET HALF Tan",
+  null,
+  85756,
+  "rifle"
+ ],
+ [
+  "Specna Arms M4 E19 MK18 EDGE MOSFET Daniel Defence Special Edition Chaos Bronze",
+  null,
+  104002,
+  "rifle"
+ ],
+ [
+  "G&G Armament M4 CM16 WILD HOG 9'' MOSFET ETU",
+  null,
+  112760,
+  "rifle"
+ ],
+ [
+  "G&G Armament M4 CM16 WILD HOG 7'' MOSFET ETU",
+  null,
+  112760,
+  "rifle"
+ ],
+ [
+  "E&L ELAK105 Essential Mosfet Version",
+  null,
+  123160,
+  "rifle"
+ ],
+ [
+  "E&L AK Elakm MOSFET Edition",
+  null,
+  123708,
+  "rifle"
+ ],
+ [
+  "G&G Armament ARP 556 V2S MOSFET ETU",
+  null,
+  123708,
+  "rifle"
+ ],
+ [
+  "E&L EL-AK12 Essential Mosfet version Steel body",
+  null,
+  127095,
+  "rifle"
+ ],
+ [
+  "E&L ELAKM Essential Mosfet Version",
+  null,
+  127722,
+  "rifle"
+ ],
+ [
+  "E&L ELAK74N Essential Mosfet",
+  null,
+  149990,
+  "rifle"
+ ],
+ [
+  "G&G Armament TR16 SBR 308 MKII MOSFET",
+  null,
+  160565,
+  "rifle"
+ ],
+ [
+  "G&G Armament M4 BAMF TEAM Recon MOSFET G2 Desert Tan",
+  null,
+  176986,
+  "rifle"
+ ],
+ [
+  "G&G Armament PCC-45 Black electronic Trigger mosfet",
+  null,
+  116018,
+  "smg"
+ ],
+ [
+  "G&G Armament FAR 9 MOSFET ETU",
+  null,
+  120059,
+  "smg"
+ ],
+ [
+  "5.11 Poche Double Pistol Flex Covert Multicam",
+  null,
+  16385,
+  "acc_gear"
+ ],
+ [
+  "Blackhawk Pistol lanyard with swivel",
+  null,
+  17177,
+  "acc_gear"
+ ],
+ [
+  "Helikon-Tex Multi Pistol Wallet Black",
+  null,
+  17480,
+  "acc_gear"
+ ],
+ [
+  "Nimrod Multi-Pistol Polymer Case",
+  null,
+  31000,
+  "acc_gear"
+ ],
+ [
+  "WADSN T-A HL Gun Light Type B Black",
+  null,
+  16385,
+  "acc_optics"
+ ],
+ [
+  "Night Evolution CREE LED Pistol Light for USP Style Pistols",
+  null,
+  21859,
+  "acc_optics"
+ ],
+ [
+  "WADSN X300 Pistol Light Dark Earth",
+  null,
+  21877,
+  "acc_optics"
+ ],
+ [
+  "UTG 400 Lumen Sub-compact LED Ambidextrous Pistol Light",
+  null,
+  22953,
+  "acc_optics"
+ ],
+ [
+  "WADSN X300 Pistol Weapon Light Black",
+  null,
+  23782,
+  "acc_optics"
+ ],
+ [
+  "Night Evolution M910A Vertical Foregrip Weapon Light DE",
+  null,
+  30288,
+  "acc_optics"
+ ],
+ [
+  "Atom Airsoft Vaide Scrapper Subcompact Pistol Light",
+  null,
+  30584,
+  "acc_optics"
+ ],
+ [
+  "Nitecore NPL25 Pistol Light Black",
+  null,
+  32806,
+  "acc_optics"
+ ],
+ [
+  "Holosun Tactical lamp P.ID K",
+  null,
+  63825,
+  "acc_optics"
+ ],
+ [
+  "Powertac Huntsman 1200 Lumen Tactical + Filtre IR",
+  null,
+  65649,
+  "acc_optics"
+ ],
+ [
+  "Umarex Air gun CO2 SPA Expert 4 5mm pellet 2.4392",
+  null,
+  16677,
+  "other"
+ ],
+ [
+  "Umarex Pistol Spray AL Pepper P2P PGS II NERO/RED",
+  null,
+  20034,
+  "other"
+ ],
+ [
+  "Umarex Air gun UX 2011 4,5mm 5.8438",
+  null,
+  20293,
+  "other"
+ ],
+ [
+  "Umarex Air gun CO2 BlaMer 4,5mm 5.8439",
+  null,
+  22274,
+  "other"
+ ],
+ [
+  "Umarex KIT Pistol AL Pepper PDP PGS + Holster IN Cordura",
+  null,
+  23683,
+  "other"
+ ],
+ [
+  "Umarex Air gun Strike Point 5,5mm Pellet PCA 2.4367",
+  null,
+  24211,
+  "other"
+ ],
+ [
+  "Umarex KIT Pistol AL Pepper PDP PGS + Ricarica Pepper",
+  null,
+  25508,
+  "other"
+ ],
+ [
+  "Umarex KIT Pistol Spray Pepper P2P PGS II + Shrill Alarm SA1 125 DB",
+  null,
+  28062,
+  "other"
+ ],
+ [
+  "Umarex Air gun Glock 19 gen3 4,5mm 5.8358",
+  null,
+  33467,
+  "other"
+ ],
+ [
+  "Umarex Air gun CO2 Glock 17 gen3 4,5mm 5.8361",
+  null,
+  44659,
+  "other"
+ ],
+ [
+  "Umarex Air gun Glock 17 gen4 4,5mm 5.8364",
+  null,
+  55852,
+  "other"
+ ],
+ [
+  "Umarex Air gun Glock 19 gen5 MOS 4 5mm 5.8460",
+  null,
+  62449,
+  "other"
+ ],
+ [
+  "Tokyo Marui Dr.Black TM Hi-Capa 5.1 GBB Bolt release Type B Silver",
+  null,
+  15655,
+  "part_external"
+ ],
+ [
+  "Dr.Black Dr. Black TM Hi-Capa 5.1 GBB Bolt release Type B Black",
+  null,
+  15655,
+  "part_external"
+ ],
+ [
+  "Nineball G19 Gen4 \"2 Way Fixed\" Non-Recoiling External Barrel Silver",
+  null,
+  20071,
+  "part_external"
+ ],
+ [
+  "Pro Arms CNC Aluminum 14mm CCW Negative Threaded Barrel for SIG Sauer ProForce P226 MK25 GBB Pistols",
+  null,
+  20399,
+  "part_external"
+ ],
+ [
+  "Dr.Black Dr. Black TM Hi-Capa 5.1 GBB Grip Safety Type C Black",
+  null,
+  27333,
+  "part_external"
+ ],
+ [
+  "G&P GBB Roller Bolt w/ Buffer Tube for TM M4A1 MWS Gas Blowback Rifles Length: Long",
+  null,
+  30982,
+  "part_external"
+ ],
+ [
+  "Cybergun Strike Face Front End Muzzle for Umarex G17 GBB CNC Aluminum Black MITA",
+  null,
+  34266,
+  "part_external"
+ ],
+ [
+  "Tokyo Marui Gunsmith Bros WildCat Tracker aluminum slide Hi-Capa 5.1 compatible",
+  null,
+  40791,
+  "part_external"
+ ],
+ [
+  "Cybergun CNC Steel Sight Set for Umarex GLOCK Series GBB Pro-Arms",
+  null,
+  45579,
+  "part_external"
+ ],
+ [
+  "Laylax Nine Ball 10\" Outer Barrel Extension for Tokyo Marui Desert Eagle Gas Blowback Pistols Color",
+  null,
+  56526,
+  "part_external"
+ ],
+ [
+  "CTM Tactical NAVIARA Hi-Capa 5.1 Upper split side Gold",
+  null,
+  78421,
+  "part_external"
+ ],
+ [
+  "Tokyo Marui Dr.Black TM Hi-Capa 4.3 GBB Frame Type 02 Black",
+  null,
+  80246,
+  "part_external"
+ ],
+ [
+  "Dr.Black Dr. Black TM Hi-Capa 5.1 GBB Frame Type 05 Black",
+  null,
+  83895,
+  "part_external"
+ ],
+ [
+  "Tokyo Marui CTM Tactical Frame X-Fire CNC Hi-Capa TM Grey",
+  null,
+  96667,
+  "part_external"
+ ],
+ [
+  "ACM Co2 12g adapter with pressure regulator AP-0103",
+  null,
+  17500,
+  "part_internal"
+ ],
+ [
+  "PPS CO2 Adapter transfer Aluminium",
+  null,
+  18990,
+  "part_internal"
+ ],
+ [
+  "ICS Master Mods Hi-capa M4 HPA Adapter",
+  null,
+  19304,
+  "part_internal"
+ ],
+ [
+  "Super Shooter PPS Co2 12g adapter with pressure regulator PPS-14001-12G",
+  null,
+  19800,
+  "part_internal"
+ ],
+ [
+  "Viper Tactical Assault backpanel Green",
+  null,
+  16385,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Slimline Harness Multicam",
+  null,
+  16403,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Removable front panel with three open top magazine pockets OD",
+  null,
+  16976,
+  "acc_gear"
+ ],
+ [
+  "Helikon-Tex Swagman Scarf NEON Orange Helikon TEX",
+  null,
+  17115,
+  "acc_gear"
+ ],
+ [
+  "Helikon-Tex Swagman Scarf Taiga Green Helikon TEX",
+  null,
+  17115,
+  "acc_gear"
+ ],
+ [
+  "Helikon-Tex Swagman Scarf Helikon TEX",
+  null,
+  17115,
+  "acc_gear"
+ ],
+ [
+  "Negrini CASE Rigid FOR Rifles 121,5 x 26 x 10,5",
+  null,
+  21859,
+  "acc_gear"
+ ],
+ [
+  "Specna Arms V4 double bag Tan",
+  null,
+  25143,
+  "acc_gear"
+ ],
+ [
+  "Negrini CASE Rigid FOR Rifles 90 x 33 x 11",
+  null,
+  25508,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Detachable Front Panel MK1- Multicam",
+  null,
+  27183,
+  "acc_gear"
+ ],
+ [
+  "ACM Plattenträger Ciras MTS Multicam",
+  null,
+  28102,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Cargo PACK Warrior 8 Litres Tan Warrior Assault",
+  null,
+  30982,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Cargo Pack OD Green",
+  null,
+  32806,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Cargo Pack Coyote",
+  null,
+  32825,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Elite ops cargo pack hydration pack/pocket OD",
+  null,
+  33985,
+  "acc_gear"
+ ],
+ [
+  "Nimrod Gun 100cm Case with wave foam",
+  null,
+  36456,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Assaulters Back Panel Mk1 back panel MultiCam",
+  null,
+  45892,
+  "acc_gear"
+ ],
+ [
+  "Nimrod Gun 100cm Case with cutted foam",
+  null,
+  47403,
+  "acc_gear"
+ ],
+ [
+  "Clawgear Raider Pant Mk IV 29 32 RAL7014",
+  null,
+  47403,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Personal Retention Lanyard FROG Clip + TANGO Carabiner Black",
+  null,
+  54720,
+  "acc_gear"
+ ],
+ [
+  "Tasmanian Tiger MKII Medic Assault Pack Coyote Brown",
+  null,
+  69298,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Pegasus Pack Black",
+  null,
+  69317,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Pegasus Pack Multicam",
+  null,
+  69317,
+  "acc_gear"
+ ],
+ [
+  "Mayflower Research and Consulting Whisper Light Assault Back Panel Type 1 Mod 2 Ranger Green",
+  null,
+  81341,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Predator Pack Ranger Green",
+  null,
+  91194,
+  "acc_gear"
+ ],
+ [
+  "Warrior Assault Systems Predator Pack Black",
+  null,
+  91194,
+  "acc_gear"
+ ],
+ [
+  "D-Boys Magacin G36 xhi-cap 3000 metaka",
+  null,
+  16126,
+  "acc_mag"
+ ],
+ [
+  "WE Magacin CO2 M4 GBB 30 metaka",
+  null,
+  19505,
+  "acc_mag"
+ ],
+ [
+  "G&G Armament PCC45 drum 1500rds",
+  null,
+  29157,
+  "acc_mag"
+ ],
+ [
+  "Classic Army Magacin CA249 xhi-cap 1200 metaka",
+  null,
+  56668,
+  "acc_mag"
+ ],
+ [
+  "Classic Army Magacin M16 M4 M15 xhi-cap 2500 metaka",
+  null,
+  61274,
+  "acc_mag"
+ ],
+ [
+  "Aim-O DBAL-A2 Dark Earth",
+  null,
+  18246,
+  "acc_optics"
+ ],
+ [
+  "ACM Mira point rojo Aimpoint M4 1x30 killflash",
+  null,
+  19505,
+  "acc_optics"
+ ],
+ [
+  "ACM Rotpunktvisier Aimpoint M4 1x30 Killflash",
+  null,
+  19505,
+  "acc_optics"
+ ],
+ [
+  "JJ Airsoft 553 Red Dot Sight Black",
+  null,
+  31930,
+  "acc_optics"
+ ],
+ [
+  "WADSN Tactical Flashlight K-2U Black",
+  null,
+  31930,
+  "acc_optics"
+ ],
+ [
+  "JJ Airsoft XPS 3-2 QD Red Dot Sight Tan",
+  null,
+  36492,
+  "acc_optics"
+ ],
+ [
+  "ACM Visor ACOG 4x32 TA31 cruz roja",
+  null,
+  42845,
+  "acc_optics"
+ ],
+ [
+  "ACM Zielfernrohr ACOG 4x32 TA31 rotes Fadenkreuz",
+  null,
+  42845,
+  "acc_optics"
+ ],
+ [
+  "ACM Cannocchiale ACOG 4x32 TA31 croce rossa",
+  null,
+  42845,
+  "acc_optics"
+ ],
+ [
+  "JJ Airsoft ACOG Style 4x32 Scope with Lighting and QD Mount Black",
+  null,
+  57475,
+  "acc_optics"
+ ],
+ [
+  "JJ Airsoft JA-5396 1P76 Optical Sight with RIS Mount Black",
+  null,
+  67510,
+  "acc_optics"
+ ],
+ [
+  "Streamlight TLR-7 X USB Gun Light Black",
+  null,
+  90464,
+  "acc_optics"
+ ],
+ [
+  "Sightmark Wolfhound 3x24 HS-223 LQD",
+  null,
+  120387,
+  "acc_optics"
+ ],
+ [
+  "Holosun HS510C Circle Dot & Solar",
+  null,
+  145932,
+  "acc_optics"
+ ],
+ [
+  "Holosun HS507C X2 ACSS Vulcan Reticle",
+  null,
+  204319,
+  "acc_optics"
+ ],
+ [
+  "Earmor M32X Plus Hearing Protection Set for ARC Helmet Rails Coyote",
+  null,
+  41948,
+  "acc_protect"
+ ],
+ [
+  "Specna Arms Taktyczne headphones active Bluetooth HD-16 Black",
+  null,
+  43112,
+  "acc_protect"
+ ],
+ [
+  "Earmor M20T Bluetooth Ohrstöpsel/Kopfhörer Black",
+  null,
+  43772,
+  "acc_protect"
+ ],
+ [
+  "Earmor M32 PLUS Tactical Aktiv Headset Black",
+  null,
+  43772,
+  "acc_protect"
+ ],
+ [
+  "ESS Gogle Influx AVS Black EE7018-09",
+  null,
+  49663,
+  "acc_protect"
+ ],
+ [
+  "ESS Crossblade 3LS EE9032-07",
+  null,
+  49663,
+  "acc_protect"
+ ],
+ [
+  "ESS Gogle Influx Pivot Ops Core Terrain Tan EE7018-21",
+  null,
+  57954,
+  "acc_protect"
+ ],
+ [
+  "Magpul BEV™ Block AR15/M4",
+  null,
+  21859,
+  "other"
+ ],
+ [
+  "Umarex Air gun UX Canex 4,5mm 2.4313",
+  null,
+  23427,
+  "other"
+ ],
+ [
+  "Umarex Conversion T4E TR 68 2.4061",
+  null,
+  25391,
+  "other"
+ ],
+ [
+  "Vortex Air gun Optima by Hatsan AirTact ED 4,5mm",
+  null,
+  31228,
+  "other"
+ ],
+ [
+  "Magpul Armorer's Wrench AR15/M4",
+  null,
+  42294,
+  "other"
+ ],
+ [
+  "Umarex Air gun PCP Iconix 4,5mm 2.4321",
+  null,
+  44659,
+  "other"
+ ],
+ [
+  "Umarex Air gun PCP Iconix 5,5mm 2.4324",
+  null,
+  44659,
+  "other"
+ ],
+ [
+  "Specna Arms TG-25 Wall Panel Black",
+  null,
+  44703,
+  "other"
+ ],
+ [
+  "Vortex Air gun Optima by Hatsan Striker 1000S 4,5mm",
+  null,
+  46149,
+  "other"
+ ],
+ [
+  "Vortex Air gun Optima by Hatsan 90 4,5mm",
+  null,
+  46898,
+  "other"
+ ],
+ [
+  "Umarex Air gun PCP UX SPA Master 4,5mm 2.4395",
+  null,
+  48499,
+  "other"
+ ],
+ [
+  "Umarex Air gun Patrol 4,5mm 2.4996-1",
+  null,
+  52417,
+  "other"
+ ],
+ [
+  "Raven Knife Fox Windage OD Wood Satin BECUT by Knives Design FX-661 OL",
+  null,
+  53726,
+  "other"
+ ],
+ [
+  "Vortex Air gun Optima by Hatsan 55S 4,5mm",
+  null,
+  54767,
+  "other"
+ ],
+ [
+  "Vortex Air gun Optima by Hatsan 60S 5,5mm",
+  null,
+  54767,
+  "other"
+ ],
+ [
+  "Umarex Air gun Legends P08 4,5mm 5.8142",
+  null,
+  54767,
+  "other"
+ ],
+ [
+  "Umarex Air gun HK VP9 4,5mm 5.8344",
+  null,
+  54767,
+  "other"
+ ],
+ [
+  "Umarex Air gun CPS 4,5mm diablo 412.02.02",
+  null,
+  57594,
+  "other"
+ ],
+ [
+  "Midland G15 Pro",
+  null,
+  58351,
+  "other"
+ ],
+ [
+  "Poseidon Dark Energy Pro powerbank 10.200 mAh waterdicht IP68 Green",
+  null,
+  58369,
+  "other"
+ ],
+ [
+  "Vortex Air gun Optima by Hatsan 95 5,5mm",
+  null,
+  59468,
+  "other"
+ ],
+ [
+  "Umarex Air gun Ruger SR1911 Competition 4,5mm 5.8407",
+  null,
+  62449,
+  "other"
+ ],
+ [
+  "Umarex Air gun UX Synergis Elite Kit 4,5mm 2.4311",
+  null,
+  64169,
+  "other"
+ ],
+ [
+  "Blackhawk UH-60 Black Hawk Battle Brick Customs",
+  null,
+  64189,
+  "other"
+ ],
+ [
+  "Umarex Air gun Airmagnum 850 M2 5,5mm 464.01.30",
+  null,
+  83834,
+  "other"
+ ],
+ [
+  "UTG ACCU SYNC® AR15 MNT-757 Flip-up front sight Black",
+  null,
+  16385,
+  "part_external"
+ ],
+ [
+  "ARES M4 Blast Shield Type B",
+  null,
+  16385,
+  "part_external"
+ ],
+ [
+  "Maple Leaf Barrel exterior CNC 12 5 pulgadas para M4/AR15 GBBR",
+  null,
+  16586,
+  "part_external"
+ ],
+ [
+  "5KU Calcio M4 ULTRA-LIGHT",
+  null,
+  18210,
+  "part_external"
+ ],
+ [
+  "PTS Syndicate Battle Arms Development BAD-ASS Ambidextrous Selector Set for KWA KSC LM4 GBBR Black",
+  null,
+  18210,
+  "part_external"
+ ],
+ [
+  "JG Metal bolt with optic for AUG military",
+  null,
+  19311,
+  "part_external"
+ ],
+ [
+  "Classic Army Fiksni kundak M15 M16",
+  null,
+  19812,
+  "part_external"
+ ],
+ [
+  "Classic Army Culata fija M15 M16",
+  null,
+  19812,
+  "part_external"
+ ],
+ [
+  "Classic Army Fester Schaft M15 M16",
+  null,
+  19812,
+  "part_external"
+ ],
+ [
+  "Classic Army Crosse fixe M15 M16",
+  null,
+  19812,
+  "part_external"
+ ],
+ [
+  "Classic Army Calcio fisso M15 M16",
+  null,
+  19812,
+  "part_external"
+ ],
+ [
+  "Magpul Stock MOE Stock M4 Commercial-Spec MAG401",
+  null,
+  21776,
+  "part_external"
+ ],
+ [
+  "Laylax SIG Sauer MCX Virtus Barrel Supporter",
+  null,
+  22953,
+  "part_external"
+ ],
+ [
+  "Magpul Stock MOE Stock M4 Mil-Spec FDE MAG400 FDE",
+  null,
+  22972,
+  "part_external"
+ ],
+ [
+  "LCT ZPT flask adapter for AS VAL replicas",
+  null,
+  22990,
+  "part_external"
+ ],
+ [
+  "Matrix G36V Style Carrying Handle w/ Integrated Dot Sight & 3.5X Scope For G36 Series AEG Rifles Col",
+  null,
+  24048,
+  "part_external"
+ ],
+ [
+  "Madbull Daniel Defense CNC Aluminum Outer Barrel (Model: 14.5\" Length Profile)",
+  null,
+  25873,
+  "part_external"
+ ],
+ [
+  "VFC Umarex HK416 GBBR Retractable Buttstock",
+  null,
+  26603,
+  "part_external"
+ ],
+ [
+  "Magpul MOE® TR™ Stock AR15/M16 Mil-Spec OD Green",
+  null,
+  27351,
+  "part_external"
+ ],
+ [
+  "CAA CBS+ACP M4 AEG Stock Color: Dark Earth",
+  null,
+  29157,
+  "part_external"
+ ],
+ [
+  "Magpul Stock DT Stock AR Mil-Spec Black MAG1377-BLK",
+  null,
+  29804,
+  "part_external"
+ ],
+ [
+  "Angry Gun HK Style Front & Rear Sights Black",
+  null,
+  32806,
+  "part_external"
+ ],
+ [
+  "EMG Handguard RIS III 12.5\" Daniel Defense Grey Metal",
+  null,
+  33026,
+  "part_external"
+ ],
+ [
+  "Angry Gun CNC Stock Adapter with Milspec Buffer Tube Krytac KRISS VECTOR AEG",
+  null,
+  34631,
+  "part_external"
+ ],
+ [
+  "Hogue AR-15 OverMolded Collapsible Buttstock Mil-Spec Black",
+  null,
+  36091,
+  "part_external"
+ ],
+ [
+  "Magpul Crosse STR Mil-Spec Grey",
+  null,
+  36456,
+  "part_external"
+ ],
+ [
+  "Magpul ACS- Stock Com-spec Black",
+  null,
+  39010,
+  "part_external"
+ ],
+ [
+  "Laylax First Factory Adjustable Outer Barrel Set for Sig Sauer ProForce MCX Virtus AEG",
+  null,
+  40105,
+  "part_external"
+ ],
+ [
+  "EMG Daniel Defense MK18 RIS II Handguard by CYMA Color: Dark Earth 12\"",
+  null,
+  40105,
+  "part_external"
+ ],
+ [
+  "Madbull PWS SRX SCAR Rail Extension",
+  null,
+  40123,
+  "part_external"
+ ],
+ [
+  "WE Tech CQB Outer Barrel Assembly for MSK Series GBB Rifles",
+  null,
+  41929,
+  "part_external"
+ ],
+ [
+  "Laylax Next Generation AKS74U Keymod mounting rail",
+  null,
+  41966,
+  "part_external"
+ ],
+ [
+  "PTS Syndicate PTS Kinetic SAS Scar Adaptable Stock Kit Black",
+  null,
+  43754,
+  "part_external"
+ ],
+ [
+  "LCT Top cover with Picatinny for AK AEG Black",
+  null,
+  43754,
+  "part_external"
+ ],
+ [
+  "5KU AAP-01 kit Type-A Black",
+  null,
+  43754,
+  "part_external"
+ ],
+ [
+  "Madbull Noveske Rifleworks Free Float 12.658inch Handguard Rail",
+  null,
+  43754,
+  "part_external"
+ ],
+ [
+  "PTS Syndicate PTS Kinetic Scar MREX M-Lok MK 2 2.2inch Rail Black",
+  null,
+  43754,
+  "part_external"
+ ],
+ [
+  "PTS Syndicate Kinetic SAS Scar Adaptable Stock Kit Black",
+  null,
+  44849,
+  "part_external"
+ ],
+ [
+  "VFC MK18 collapsible stock kit",
+  null,
+  47403,
+  "part_external"
+ ],
+ [
+  "CTM Tactical FUKU-2 AAP-01 upper Baby Shark Cut out Black",
+  null,
+  47403,
+  "part_external"
+ ],
+ [
+  "Madbull MK18 9.5 Inch Daniel Defense SOPMOD II-RIS II Black",
+  null,
+  47403,
+  "part_external"
+ ],
+ [
+  "GHK G5 12\" KIT",
+  null,
+  48900,
+  "part_external"
+ ],
+ [
+  "Madbull PWS MK112 Rail Black",
+  null,
+  51052,
+  "part_external"
+ ],
+ [
+  "Madbull PWS MK112 Rail Dark Earth",
+  null,
+  51052,
+  "part_external"
+ ],
+ [
+  "CTM Tactical FUKU-2 CNC Upper Skeleton fo AAP-01 Red Gold",
+  null,
+  53242,
+  "part_external"
+ ],
+ [
+  "CTM Tactical FUKU-2 AAP-01 Shark Upper Cut out Electroplated Chameleon",
+  null,
+  54702,
+  "part_external"
+ ],
+ [
+  "Madbull MK18 12.5 Inch Daniel Defense RIS II Black",
+  null,
+  54702,
+  "part_external"
+ ],
+ [
+  "Magpul ZHUKOV Hand Guard AK47/AK74- Black",
+  null,
+  54702,
+  "part_external"
+ ],
+ [
+  "Madbull Daniel Defense AR15 RIS Rail 9.5 inches Tan",
+  null,
+  57800,
+  "part_external"
+ ],
+ [
+  "Madbull Daniel Defense AR15 RIS Rail 12 inches Black",
+  null,
+  59500,
+  "part_external"
+ ],
+ [
+  "Airsoft Artisan Handguard 8.5 inch MCX Virtus Rattler Sig Sauer Black",
+  null,
+  62000,
+  "part_external"
+ ],
+ [
+  "Hera Arms CQR AR15 stock Black",
+  null,
+  62000,
+  "part_external"
+ ],
+ [
+  "Laylax Nitro.VO SIG AIR MCX Short Handguard and Outer Barrel Set",
+  null,
+  65649,
+  "part_external"
+ ],
+ [
+  "VFC Artisan 9 Inch Spear handguard set for MCX Virtus Sig Air Dark Earth",
+  null,
+  69298,
+  "part_external"
+ ],
+ [
+  "Madbull Daniel Defense L85 RIS",
+  null,
+  69298,
+  "part_external"
+ ],
+ [
+  "Daniel Defense AR-15 Iron Sight Set Rock & Lock®",
+  null,
+  72948,
+  "part_external"
+ ],
+ [
+  "TTI Airsoft TTI AAP01 PCC upper KIT- Black",
+  null,
+  72948,
+  "part_external"
+ ],
+ [
+  "Airsoft Artisan DD Style 10.5 MK18 M-LOK Handguard Rail Tan",
+  null,
+  77691,
+  "part_external"
+ ],
+ [
+  "Rare Arms 10.3\" steel outer barrel AR-15 GBBER",
+  null,
+  81618,
+  "part_external"
+ ],
+ [
+  "Rare Arms 14.5″ steel outer barrel AR-15 GBBER",
+  null,
+  85015,
+  "part_external"
+ ],
+ [
+  "Airsoft Artisan 12 Inch SUR300 handguard set for MCX Virtus Sig Air AEG Black",
+  null,
+  85720,
+  "part_external"
+ ],
+ [
+  "EMG SAI QD Rail with JailBrake Muzzle Device (Model: Gas Blowback Rifles Length)",
+  null,
+  91194,
+  "part_external"
+ ],
+ [
+  "Hogue AR-15/M-16 12,5 inch Free Float OverMolded Forend with Attachments OD Green",
+  null,
+  107615,
+  "part_external"
+ ],
+ [
+  "Mancraft CNC M4 Body Ver.2 Blue",
+  null,
+  113089,
+  "part_external"
+ ],
+ [
+  "EMG Sharp Bros. M4 \"Jack\" Complete receiver Black",
+  null,
+  116738,
+  "part_external"
+ ],
+ [
+  "Mancraft CNC M4 Superlight Body Ver.2 Silver",
+  null,
+  125861,
+  "part_external"
+ ],
+ [
+  "Hogue AR-15/M-16 15 inch Free Float OverMolded Forend with Attachments Black",
+  null,
+  133159,
+  "part_external"
+ ],
+ [
+  "ARES M110 Selector Black OUTLET",
+  null,
+  137849,
+  "part_external"
+ ],
+ [
+  "Mancraft M4 CNC Ultralight speedsoft body Silver raw",
+  null,
+  143377,
+  "part_external"
+ ],
+ [
+  "Specna Arms x Mancraft CNC Superlight M4 Speedsoft body ver.2 Gold",
+  null,
+  145877,
+  "part_external"
+ ],
+ [
+  "Mancraft M4 AR15 CNC Skeleton Body Black Red pins",
+  null,
+  147756,
+  "part_external"
+ ],
+ [
+  "Mancraft CNC M4 Superlight Body Ver.2 Black",
+  null,
+  151405,
+  "part_external"
+ ],
+ [
+  "Mancraft CNC M4 Body Ver.2 Black",
+  null,
+  151405,
+  "part_external"
+ ],
+ [
+  "Mancraft CNC M4 Superlight Body Ver.2 Red",
+  null,
+  153230,
+  "part_external"
+ ],
+ [
+  "Mancraft CNC M4 Body Ver.2 Red",
+  null,
+  153230,
+  "part_external"
+ ],
+ [
+  "Mancraft CNC M4 purple skeleton body and handguard Limited Edition",
+  null,
+  186073,
+  "part_external"
+ ],
+ [
+  "Maxx Model CNC aluminum hop-up unit M4G AEG M4",
+  null,
+  30584,
+  "part_hopup"
+ ],
+ [
+  "Silent Industries AEG Alpha CNC hop-up chamber Gen.2",
+  null,
+  32806,
+  "part_hopup"
+ ],
+ [
+  "KPP Hop Up Unit AEG Standard V2",
+  null,
+  32806,
+  "part_hopup"
+ ],
+ [
+  "PDI 6.03mm AEG precision barrel 360mm",
+  null,
+  33985,
+  "part_hopup"
+ ],
+ [
+  "Da Vinci Raizen 6.01 AEG precision barrel 595mm",
+  null,
+  33985,
+  "part_hopup"
+ ],
+ [
+  "PDI 6.05 Precision Inner Barrel AEG 455mm",
+  null,
+  34631,
+  "part_hopup"
+ ],
+ [
+  "APS TNT -X Hop-Up System KWA Gas Blowback Retrofit Kit Length: 265mm",
+  null,
+  51052,
+  "part_hopup"
+ ],
+ [
+  "APS Stainless barrel 6.01mm -2 Type 96 AEG 495mm PDI",
+  null,
+  54519,
+  "part_hopup"
+ ],
+ [
+  "APS Stainless cijev 6.01mm -2 Type 96 AEG 495mm PDI",
+  null,
+  54519,
+  "part_hopup"
+ ],
+ [
+  "APS Edelstahllauf 6 01 mm -2 Typ 96 AEG 495 mm PDI",
+  null,
+  54519,
+  "part_hopup"
+ ],
+ [
+  "TNT Studio TNT APS-X Hop-Up System GHK M4 Gas Blowback Retrofit Kit Length: 320mm",
+  null,
+  63825,
+  "part_hopup"
+ ],
+ [
+  "RA-Tech Marui AR/MWS GBBR Aluminum \"CNC Super Recoil Buffer\" Set",
+  null,
+  17998,
+  "part_internal"
+ ],
+ [
+  "Tokyo Marui T8 MWS GBBR Mix & Match Counter Weight Buffer spring set V2",
+  null,
+  18680,
+  "part_internal"
+ ],
+ [
+  "Wii Tech CNC Bolt Lock for Tokyo Marui Next Generation Recoil Shock M4 EBB Rifles",
+  null,
+  24048,
+  "part_internal"
+ ],
+ [
+  "WE Aluminium CNC bolt 7075 for SCAR L Black",
+  null,
+  33832,
+  "part_internal"
+ ],
+ [
+  "APS Edge II Version 2 AEG Gearbox w/ Micro MOSFET Model: Standard",
+  null,
+  36456,
+  "part_internal"
+ ],
+ [
+  "Siegetek Concepts Cyclone Dual-Sector Gear for PTW",
+  null,
+  40105,
+  "part_internal"
+ ],
+ [
+  "Perun V2 HYBRID front wired",
+  null,
+  29157,
+  "part_motor"
+ ],
+ [
+  "Perun V2 HYBRID rear wired",
+  null,
+  29157,
+  "part_motor"
+ ],
+ [
+  "Lonex TITAN AEG Motor (Type: Short Type Torque & Speed)",
+  null,
+  30982,
+  "part_motor"
+ ],
+ [
+  "Jefftron Leviathan optical Bluetooth V2 front",
+  null,
+  38280,
+  "part_motor"
+ ],
+ [
+  "GATE ASTER II Bluetooth® V2 GB Controller Set + Quantum Trigger 2 [AEG & HPA] [FRONT Wired] EXPERT r",
+  null,
+  42528,
+  "part_motor"
+ ],
+ [
+  "Perun Processor unit for AUG",
+  null,
+  43263,
+  "part_motor"
+ ],
+ [
+  "Jefftron Leviathan V2 BLUE M4/M16 WITH Trigger",
+  null,
+  45800,
+  "part_motor"
+ ],
+ [
+  "GATE TITAN II Bluetooth Expert V2 microcontroller unit AEG wiring to the rear",
+  null,
+  47611,
+  "part_motor"
+ ],
+ [
+  "GATE TITAN II Bluetooth® V2 Expert Controller Set AEG Rear",
+  null,
+  52169,
+  "part_motor"
+ ],
+ [
+  "PPS Cartuchos escopeta M870 CO2 Metal 5 unidades",
+  null,
+  28409,
+  "acc_mag"
+ ],
+ [
+  "Umarex UX PCP hand pump 300 bar",
+  null,
+  40791,
+  "other"
+ ],
+ [
+  "Tokyo Marui Muzzle brake for KSG Marui Gas CNC Steel Black WiiTech",
+  null,
+  16385,
+  "part_external"
+ ],
+ [
+  "Tokyo Marui PDI T-Muzzle Brake for KSG GBB",
+  null,
+  29157,
+  "part_external"
+ ],
+ [
+  "AceTech Quark K BiFrost RGB Tracer for Tokyo Marui KSG Shotguns",
+  null,
+  109440,
+  "part_external"
+ ],
+ [
+  "SRC 68.5 cm SMG Hard Case Tan",
+  null,
+  32806,
+  "acc_gear"
+ ],
+ [
+  "ASG Scorpion EVO 3 A1 Reinforced Case Black",
+  null,
+  45579,
+  "acc_gear"
+ ],
+ [
+  "VFC PPSH-41 GBB drum box Gas tank",
+  null,
+  40791,
+  "acc_mag"
+ ],
+ [
+  "Night Evolution Gen.1 Vector Tactical Light Black",
+  null,
+  24413,
+  "acc_optics"
+ ],
+ [
+  "Specna Arms Calcio PDW Tan",
+  null,
+  16385,
+  "part_external"
+ ],
+ [
+  "Krytac Kriss Vector Lower Housing Assembly Black",
+  null,
+  22953,
+  "part_external"
+ ],
+ [
+  "Classic Army Taktika sklopiva kundak MP5",
+  null,
+  25953,
+  "part_external"
+ ],
+ [
+  "Classic Army Culata tactical retractable MP5",
+  null,
+  25953,
+  "part_external"
+ ],
+ [
+  "AceTech VIK II Modular M-LOK Rail System for KRISS Vector Gas Blowback & AEG Sub Machine Guns",
+  null,
+  44119,
+  "part_external"
+ ],
+ [
+  "Krytac Angry Gun Complete AR Stock Kit for KRISS VECTOR AEG",
+  null,
+  47403,
+  "part_external"
+ ],
+ [
+  "Krytac Nitro.Vo Strike Rail System for KRISS VECTOR AEG",
+  null,
+  54702,
+  "part_external"
+ ],
+ [
+  "Laylax RIS PER Kriss Vector MLOK XL",
+  null,
+  96704,
+  "part_external"
+ ],
+ [
+  "TNT Studio TNT APS-X Hop-Up System KSC MP9 Gas Blowback SMG Retrofit Kit Length: 370mm Black",
+  null,
+  65649,
+  "part_hopup"
+ ],
+ [
+  "Wii Tech CNC Hardened Steel Disconnector For KSC KWA MP9 GBB SMGs",
+  null,
+  24048,
+  "part_internal"
+ ],
+ [
+  "Perun Krytac Kriss Vector",
+  null,
+  34631,
+  "part_motor"
+ ],
+ [
+  "Perun P90 ETU unit",
+  null,
+  47593,
+  "part_motor"
+ ],
+ [
+  "Mil-Tec Ghillie DA Sniper Parka Woodland",
+  null,
+  16385,
+  "acc_gear"
+ ],
+ [
+  "Invader Gear Kaptur Sniper Flecktarn",
+  null,
+  20103,
+  "acc_gear"
+ ],
+ [
+  "Mil-Tec Ghillie Sniper CAPE Flecktarn",
+  null,
+  21129,
+  "acc_gear"
+ ],
+ [
+  "Invader Gear Sniper Bolero Base Leaf Partizan",
+  null,
+  31712,
+  "acc_gear"
+ ],
+ [
+  "Invader Gear Sniper Bolero Base Leaf Everglade",
+  null,
+  31712,
+  "acc_gear"
+ ],
+ [
+  "Invader Gear Kaptur Sniper with Leaves Partizan",
+  null,
+  32564,
+  "acc_gear"
+ ],
+ [
+  "Invader Gear Sniper Bolero camouflage cape Woodland",
+  null,
+  33985,
+  "acc_gear"
+ ],
+ [
+  "Invader Gear Sniper Bolero Leaf Flecktarn",
+  null,
+  33985,
+  "acc_gear"
+ ],
+ [
+  "Tanaka Magacin Mauser KAR98K 10 metaka Works",
+  null,
+  22880,
+  "acc_mag"
+ ],
+ [
+  "WADSN M300A Mini Scout Tactical Light Black",
+  null,
+  15673,
+  "acc_optics"
+ ],
+ [
+  "WADSN M600C Scout Tactical Light WL0005 weapon light Black",
+  null,
+  16976,
+  "acc_optics"
+ ],
+ [
+  "WADSN M300B MINI SCOUT Weapon Light with 2 Switches Black",
+  null,
+  16976,
+  "acc_optics"
+ ],
+ [
+  "WADSN M600C Mini Scout Weapon Light with Pressure Switch Dark Earth",
+  null,
+  16976,
+  "acc_optics"
+ ],
+ [
+  "Night Evolution M600C Scout Weapon Light Tan",
+  null,
+  20377,
+  "acc_optics"
+ ],
+ [
+  "Night Evolution M600B Mini Scout Light DE",
+  null,
+  20399,
+  "acc_optics"
+ ],
+ [
+  "Night Evolution M600U Ultra Scout Weaponlight Dark Earth",
+  null,
+  21859,
+  "acc_optics"
+ ],
+ [
+  "Matrix Tactical CREE LED Scout Mini Weapon Light with Strobe Function and Pressure Pad Black",
+  null,
+  23683,
+  "acc_optics"
+ ],
+ [
+  "Night Evolution M620P Scout Weaponlight Black",
+  null,
+  30252,
+  "acc_optics"
+ ],
+ [
+  "Aim-O Sniper LT 4X32 combo Scope",
+  null,
+  32806,
+  "acc_optics"
+ ],
+ [
+  "Aim-O 3.5-10x40E-SF Scope Black",
+  null,
+  33901,
+  "acc_optics"
+ ],
+ [
+  "Matrix 3.5-10x40E-SF Illuminated Red/Green Reticle Sniper Scope Color: Black",
+  null,
+  34996,
+  "acc_optics"
+ ],
+ [
+  "Aim-O 3.5-10x40E-SF Scope Desert",
+  null,
+  38280,
+  "acc_optics"
+ ],
+ [
+  "Aim-O 8-32x50E-SF Scope Black",
+  null,
+  52877,
+  "acc_optics"
+ ],
+ [
+  "Aim-O 8-32x50E-SF Scope Desert",
+  null,
+  60175,
+  "acc_optics"
+ ],
+ [
+  "T-Eagle Sight SVD 3-9X24 osvjetljenje crna",
+  null,
+  60507,
+  "acc_optics"
+ ],
+ [
+  "T-Eagle Visor SVD 3-9X24 illumination Black",
+  null,
+  60507,
+  "acc_optics"
+ ],
+ [
+  "T-Eagle Cannocchiale SVD 3-9X24 illuminazione Black",
+  null,
+  60507,
+  "acc_optics"
+ ],
+ [
+  "Vortex Air gun Optima by Hatsan 125 Sniper 4,5mm",
+  null,
+  87192,
+  "other"
+ ],
+ [
+  "ARES CNC Cocking Handle for STRIKER Matt Grey Type 3",
+  null,
+  16750,
+  "part_external"
+ ],
+ [
+  "Silverback SRS A1 A2 16 inches Sport Barrel",
+  null,
+  17845,
+  "part_external"
+ ],
+ [
+  "WE Tech Front Sight Assembly for SVD Series GBB Sniper Rifles",
+  null,
+  18574,
+  "part_external"
+ ],
+ [
+  "Maple Leaf Twisted VSR-10 outer pipe 300mm",
+  null,
+  23782,
+  "part_external"
+ ],
+ [
+  "Action Army AAC T10 Monopod",
+  null,
+  29157,
+  "part_external"
+ ],
+ [
+  "Silverback HTI.50 Muzzle Brake",
+  null,
+  33171,
+  "part_external"
+ ],
+ [
+  "Silverback SRS A1 A2 18 inch fluted Barrel",
+  null,
+  34631,
+  "part_external"
+ ],
+ [
+  "Silverback SRS A1 A2 22 inch fluted Barrel",
+  null,
+  41929,
+  "part_external"
+ ],
+ [
+  "Silverback SRS A1 A2 26 inch fluted Barrel",
+  null,
+  47403,
+  "part_external"
+ ],
+ [
+  "Silverback TAC-41 Receiver",
+  null,
+  47403,
+  "part_external"
+ ],
+ [
+  "GHK G5 16\" DMR KIT",
+  null,
+  48900,
+  "part_external"
+ ],
+ [
+  "Madbull Daniel Defense MK12 12\" M4A1 RIS II CNC Aluminum RIS Color: Black",
+  null,
+  51052,
+  "part_external"
+ ],
+ [
+  "CYMA Fixed Sniper Stock w/ Adjustable Buttpad and Cheek Rest for CM.708 Series Sniper Rifles",
+  null,
+  64221,
+  "part_external"
+ ],
+ [
+  "Tokyo Marui VSR-10 Barrel and Chamber Set 430mm",
+  null,
+  21859,
+  "part_hopup"
+ ],
+ [
+  "PDI Canon inoxydable 6 05 mm VSR-10 AEG long 554 mm",
+  null,
+  48527,
+  "part_hopup"
+ ],
+ [
+  "Silverback SRS Monolithic Steel Bolt Head Assembly",
+  null,
+  17115,
+  "part_internal"
+ ],
+ [
+  "Maple Leaf VSR-10 cilindar OD stainless steel",
+  null,
+  18275,
+  "part_internal"
+ ],
+ [
+  "Maple Leaf VSR-10 cilindar OD steel Black Mamba",
+  null,
+  18275,
+  "part_internal"
+ ],
+ [
+  "Silverback TAC-41 Complete bolt",
+  null,
+  50687,
+  "part_internal"
+ ],
+ [
+  "G&G Armament TR80 DMR G3 Split Gearbox",
+  null,
+  156677,
+  "part_internal"
  ]
 ]

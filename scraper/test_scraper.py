@@ -579,3 +579,19 @@ class TestThrottle(unittest.TestCase):
         self.assertIn("korlátozza", errors[-1]["error"])
         self.assertIn("40/100", errors[-1]["error"])
         self.assertIsNone(stale)                                      # csonka futás: semmit nem inaktivál
+
+
+class TestOneLanguage(unittest.TestCase):
+    def test_keeps_one_language(self):
+        u = ["https://s.eu/hu/termek-1", "https://s.eu/de/produkt-1", "https://s.eu/hr/proizvod-1", "https://s.eu/en/product-1",
+             "https://s.eu/hu/termek-2", "https://s.eu/de/produkt-2"]
+        self.assertEqual(run_shop.one_language(u), ["https://s.eu/en/product-1"])
+        self.assertEqual(run_shop.one_language(u, "de"), ["https://s.eu/de/produkt-1", "https://s.eu/de/produkt-2"])
+        no_en = [x for x in u if "/en/" not in x]
+        self.assertEqual(run_shop.one_language(no_en), ["https://s.eu/hu/termek-1", "https://s.eu/hu/termek-2"])
+
+    def test_single_language_untouched(self):
+        u = ["https://s.eu/en/a", "https://s.eu/en/b", "https://s.eu/products/c"]
+        self.assertEqual(run_shop.one_language(u), u)
+        u2 = ["https://s.eu/airsoft/a", "https://s.eu/rifles/b"]
+        self.assertEqual(run_shop.one_language(u2), u2)

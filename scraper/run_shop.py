@@ -37,6 +37,26 @@ THROTTLE_STREAK = 20
 COOLDOWN_S = 600
 
 
+LANGS = {"en", "hu", "de", "fr", "it", "es", "pl", "cs", "cz", "sk", "hr", "sl", "ro", "nl", "pt", "sv", "fi", "da", "no", "bg",
+         "el", "lt", "lv", "et", "ru", "uk", "ua", "sr", "gb", "at", "be", "ch"}
+PREFERRED_LANGS = ("en", "gb", "hu")
+
+
+def one_language(urls: list[str], lang: str | None = None) -> list[str]:
+    """Többnyelvű bolt: ugyanaz a termék /hu/…, /de/…, /hr/… címen is szerepel a sitemapben, és mindegyik külön termék lett
+    („Töltéscsökkentés”, „Ladungsreduzierung”, „Redukcja ładunku”…). Ha a címek első útvonal-eleme nyelvkód, és legalább két
+    nyelv van, csak egyet tartunk meg: a shops.json „lang” értékét, különben angolt, magyart, végül a leggyakoribbat."""
+    seg = lambda u: urlsplit(u).path.strip("/").split("/", 1)[0].lower()
+    by = {}
+    for u in urls:
+        by.setdefault(seg(u), []).append(u)
+    langs = [k for k in by if k in LANGS]
+    if len(langs) < 2 or sum(len(by[k]) for k in langs) < 0.6 * len(urls):
+        return urls
+    keep = lang if lang in by else next((l for l in PREFERRED_LANGS if l in by), max(langs, key=lambda k: len(by[k])))
+    return [u for u in urls if seg(u) not in LANGS or seg(u) == keep]
+
+
 def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict], int | None]:
     """Visszaad: (ajánlatok, hibák, stale_days). stale_days: hány nap után inaktiválható egy nem látott
     ajánlat; None = ne inaktiváljunk (teszt-limit vagy időkorlát miatt csonka futás).
@@ -68,6 +88,7 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
             break
         print(f"[{slug}] felderítés: csak átmeneti hiba ({dict(f.stats)}), 2 perc múlva újra", file=sys.stderr)
         time.sleep(120)
+    urls = one_language(urls, cfg.get("lang"))
     # ruházat kiszűrése még letöltés előtt (URL-ben gyakran ott a kategória), + boltonkénti kizáró minta
     excl = re.compile(cfg["exclude_pattern"], re.I) if cfg.get("exclude_pattern") else None
     skip = lambda u: is_clothing(urlsplit(u).path) or (excl is not None and bool(excl.search(u)))

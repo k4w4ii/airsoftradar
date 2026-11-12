@@ -174,8 +174,13 @@ def write_csv(rows: list[dict], path: str = CSV) -> None:
 
 
 def report(db, products: list[dict]) -> list[str]:
-    rows = suggestions(products, load(db))
+    ai = load(db)
+    rows = suggestions(products, ai)
     write_csv(rows)
+    # teljes lista (egyezők is): ebből ellenőrizhető, hogy az új szabályok nem rontják-e el a már jó besorolásokat
+    write_csv([{"termek": p["name"], "gyarto": p.get("manufacturer") or "", "ar_ft": round(p.get("price") or 0),
+                "eddig": p["category"], "ai_javaslat": ai[p["slug"]], "link": SITE + p["slug"]}
+               for p in products if p["slug"] in ai], "ai_osszes.csv")
     guns = sum(classify.is_gun(r["eddig"]) != classify.is_gun(r["ai_javaslat"]) for r in rows)
     return [f"**Javaslat-lista:** {len(rows)} eltérés (ebből {guns} fegyver ↔ nem fegyver). "
             f"Letöltés: a futás oldalán lent, **Artifacts → ai-javaslatok** (CSV). Az oldal kategóriái nem változtak."]

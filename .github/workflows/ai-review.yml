@@ -59,6 +59,8 @@ jobs:
         if: always()
         with:
           name: ai-javaslatok
-          path: ai_javaslatok.csv
+          path: |
+            ai_javaslatok.csv
+            ai_osszes.csv
           if-no-files-found: ignore
           retention-days: 30
