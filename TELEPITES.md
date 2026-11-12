@@ -171,6 +171,12 @@ A termékoldalon a látogató regisztráció nélkül kérhet értesítést (új
 - Márka-gyűjtőoldalak: `/hu/b/cyma`, `/hu/b/cyma/rifle` stb. (legalább 3 termék), saját címmel és bevezetővel; a sitemapben: `/sitemaps/brands.xml`.
 - Szűrt listák: a keresés nem indexelődik (noindex); egy márka (+ egy kategória) szűrése a gyűjtőoldalra mutat (canonical); a rendezés és a nézet nem számít külön oldalnak.
 
+## 14. Kalkulátorok (automatikus)
+- `/hu/tools` (`/en/tools`): FPS/Joule/BB súly (MASZ-kategóriával), AEG rugó- és motorválasztó, henger–cső térfogatarány, LiPo/ROF.
+- Mindegyik oldal saját címet, leírást, magyarázatot és GYIK-et kap (FAQ JSON-LD), és bekerül a sitemapbe.
+- Az eredmény alatt raktáron lévő, illő termékek jelennek meg az adatbázisból; a beállítások a címsorban vannak (a link megosztható).
+- Elérés: fejléc („Kalkulátorok”), főoldal blokk, lábléc, és a BB / rugó / motor / henger / akku termékoldalakon egy link.
+
 ## Hibák
 | Üzenet | Megoldás |
 |---|---|

@@ -3,6 +3,8 @@ import { CURRENCIES, money, t } from "../lib/i18n";
 import { DOCS, FOOTER_LABELS, switchLocale } from "../lib/legal";
 import { ADS, COFFEE_URL } from "../lib/site";
 import AdSlot from "./AdSlot";
+import ToolIcon from "./tools/ToolIcon";
+import { TOOLS_INDEX, toolPath } from "../lib/tools";
 import SearchBox from "./SearchBox";
 
 export function Logo() {
@@ -60,6 +62,9 @@ export function Shell({ locale, currency, path = "", children, query = "", hideS
                        button={tr.search} allText={tr.allResultsFor} />
           )}
           <nav className="toolbar" aria-label={tr.currency}>
+            <Link href={toolPath(locale)} className="tools-link" title={TOOLS_INDEX[locale === "hu" ? "hu" : "en"].title}>
+              <ToolIcon name="calc" size={18} /><span>{TOOLS_INDEX[locale === "hu" ? "hu" : "en"].nav}</span>
+            </Link>
             <div className="seg" role="group" aria-label={tr.currency}>
               {CURRENCIES.map((c) => (
                 <a key={c} href={curHref(c)} rel="nofollow"
@@ -90,6 +95,7 @@ export function Shell({ locale, currency, path = "", children, query = "", hideS
             <p>{tr.footer}</p>
           </div>
           <nav className="footer-links" aria-label={locale === "hu" ? "Jogi információk" : "Legal"}>
+            <Link href={toolPath(locale)}>{TOOLS_INDEX[locale === "hu" ? "hu" : "en"].nav}</Link>
             {Object.keys(DOCS).map((d) => (
               <Link key={d} href={`/${locale}/${DOCS[d][locale]}`}>{FOOTER_LABELS[locale === "hu" ? "hu" : "en"][d]}</Link>
             ))}

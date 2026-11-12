@@ -4,6 +4,7 @@ import { brandStats, countProducts, getAllSlugs } from "./data";
 import { brandSlug, COLLECTION_MIN } from "./seo";
 import { GROUP_IDS, LEAVES } from "./catalog";
 import { DOCS } from "./legal";
+import { TOOLS } from "./tools";
 import { SITE_URL } from "./site";
 
 export const PER_FILE = 10000;
@@ -30,8 +31,9 @@ const urlset = (inner) =>
 export function staticSitemap() {
   const cats = ["", ...[...GROUP_IDS, ...LEAVES].map((c) => `?cat=${c}`)];
   const lists = cats.map((c) => urlEntry(c, { prio: c ? 0.7 : 1 })).join("");
+  const tools = ["/tools", ...TOOLS.map((t) => `/tools/${t.slug}`)].map((p) => urlEntry(p, { freq: "monthly", prio: 0.7 })).join("");
   const legal = Object.values(DOCS).map((d) => urlEntry("", { freq: "yearly", prio: 0.2, pair: [`/hu/${d.hu}`, `/en/${d.en}`] })).join("");
-  return urlset(lists + legal);
+  return urlset(lists + tools + legal);
 }
 
 export async function productSitemap(part) {

@@ -5,6 +5,8 @@ import { CAT_GROUPS, hrefFor } from "../lib/catalog";
 import { t } from "../lib/i18n";
 import { ProductTile } from "./HomeView";
 import SearchBox from "./SearchBox";
+import ToolIcon from "./tools/ToolIcon";
+import { TOOLS, TOOLS_INDEX, toolPath, toolText } from "../lib/tools";
 
 const BASE = { q: "", cats: [], plats: [], brands: [], min: 0, max: 0, stock: false, sort: "discount", view: "grid", page: 1 };
 // a kategória-csempék sorrendje: fegyverek, majd a leggyakrabban keresett alkatrész- és kiegészítő-csoportok
@@ -57,6 +59,27 @@ export default function Welcome({ locale, currency, rates, data }) {
           </ul>
         </section>
       ) : null}
+
+      <section className="wblock">
+        <div className="wblock-head">
+          <div>
+            <h2>{TOOLS_INDEX[locale].h1}</h2>
+            <p className="muted small">{TOOLS_INDEX[locale].description}</p>
+          </div>
+          <Link href={toolPath(locale)} className="see-all">{tr.seeAll} →</Link>
+        </div>
+        <ul className="tool-cards compact">
+          {TOOLS.map((tool) => (
+            <li key={tool.slug}>
+              <Link href={toolPath(locale, tool.slug)} className="tool-card">
+                <span className="tool-ico"><ToolIcon name={tool.icon} /></span>
+                <span className="tool-name">{toolText(tool.slug, locale).name}</span>
+                <span className="tool-desc">{toolText(tool.slug, locale).card}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {data.brands.length ? (
         <section className="wblock">

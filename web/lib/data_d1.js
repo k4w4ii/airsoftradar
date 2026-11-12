@@ -274,3 +274,10 @@ export async function collectionSummaryD1(brand, leaves) {
     .bind(brand, ...(leaves || [])).first();
   return { n: row?.n || 0, inStock: row?.in_stock || 0, low: row?.low ?? null, shops: shops?.n || 0 };
 }
+
+/** Kalkulátorok termékajánlója: raktáron lévők elöl, a legolcsóbbtól. where: SQL feltétel (csak paraméterekkel). */
+export async function toolProductsD1(where, params, limit = 6) {
+  const db = await getDB();
+  return all(db.prepare(`SELECT ${CARD_COLS} FROM product_summary WHERE ${where}
+                         ORDER BY stock = 'in_stock' DESC, price IS NULL, price ASC, id LIMIT ?`).bind(...params, limit));
+}

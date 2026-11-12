@@ -7,6 +7,8 @@ import { Shell } from "../../../../components/ui";
 import { brandStats, getHistory, getOffers, getProduct, getRates } from "../../../../lib/data";
 import { CURRENCIES, DEFAULT_CURRENCY, isLocale, money, t } from "../../../../lib/i18n";
 import { mailEnabled } from "../../../../lib/mail";
+import { TOOLS, toolPath, toolText } from "../../../../lib/tools";
+import ToolIcon from "../../../../components/tools/ToolIcon";
 import { breadcrumbJsonLd, COLLECTION_MIN, collectionPath, ldJson, productJsonLd } from "../../../../lib/seo";
 
 export async function generateMetadata({ params }) {
@@ -40,10 +42,21 @@ export default async function ProductPage({ params, searchParams }) {
   const tr = t(locale);
   const ld = productJsonLd({ product, offers, locale, rates });
   const inCat = stats.find((r) => r.manufacturer === product.manufacturer && r.category === product.category)?.n || 0;
-  const related = product.manufacturer && inCat >= COLLECTION_MIN ? (
+  // a termékhez illő kalkulátor (BB → FPS/Joule, rugó/motor → rugóválasztó, henger/cső → térfogatarány, akku → LiPo)
+  const sub = product.subtypes || "", nm = product.name.toLowerCase();
+  const toolSlug = product.category === "acc_ammo" && sub.includes(",bbw=") ? "fps-joule-calculator"
+    : /cylinder|henger|zylinder/.test(nm) || (product.category === "part_hopup" && sub.includes(",pt=barrel,")) ? "cylinder-volume-ratio"
+    : sub.includes(",pt=spring,") || sub.includes(",pt=motor,") ? "spring-motor-calculator"
+    : product.category === "acc_power" && sub.includes(",pk=battery,") ? "lipo-rof-calculator" : null;
+  const tool = toolSlug ? TOOLS.find((t) => t.slug === toolSlug) : null;
+  const brandLink = product.manufacturer && inCat >= COLLECTION_MIN ? (
     <p className="small"><Link href={collectionPath(locale, product.manufacturer, product.category)}>
       {tr.relatedBrand(product.manufacturer, tr.cats[product.category])} ({inCat}) →</Link></p>
   ) : null;
+  const toolLink = tool ? (
+    <p className="small tool-hint"><Link href={toolPath(locale, tool.slug)}><ToolIcon name={tool.icon} size={16} /> {toolText(tool.slug, locale).name} →</Link></p>
+  ) : null;
+  const related = brandLink || toolLink ? <>{brandLink}{toolLink}</> : null;
   const crumbs = breadcrumbJsonLd([
     { name: "AirsoftHunter", path: `/${locale}` },
     { name: tr.cats[product.category] || product.category, path: `/${locale}?cat=${product.category}` },
