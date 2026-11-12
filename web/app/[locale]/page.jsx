@@ -6,6 +6,7 @@ import Welcome from "../../components/Welcome";
 import { hrefFor, isWelcome, parseCatalog } from "../../lib/catalog";
 import { catalogSearch, getRates, getWelcome } from "../../lib/data";
 import { CURRENCIES, DEFAULT_CURRENCY, isLocale, t } from "../../lib/i18n";
+import { catalogMeta } from "../../lib/seo";
 
 export async function generateMetadata({ params, searchParams }) {
   const { locale } = await params;
@@ -15,14 +16,7 @@ export async function generateMetadata({ params, searchParams }) {
     return { title: tr.title, description: tr.description, alternates: { canonical: `/${locale}`, languages: { hu: "/hu", en: "/en" } } };
   }
   const p = parseCatalog(sp);
-  // egyetlen kategória = saját kanonikus oldal (keresőknek); minden más szűrés a kategória-oldalra mutat
-  const one = !p.q && p.cats.length === 1 ? p.cats[0] : null;
-  return {
-    title: one ? `${tr.cats[one]} | AirsoftHunter` : tr.title,
-    description: tr.description,
-    alternates: { canonical: `/${locale}?cat=${one || "weapons"}`,
-                  languages: { hu: `/hu?cat=${one || "weapons"}`, en: `/en?cat=${one || "weapons"}` } },
-  };
+  return catalogMeta(locale, p, tr);
 }
 
 export default async function Home({ params, searchParams }) {

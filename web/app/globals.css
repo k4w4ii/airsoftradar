@@ -333,6 +333,7 @@ img { display: block; max-width: 100%; }
 .chart svg { width: 100%; height: auto; max-height: 220px; display: block; background: var(--surface); border-radius: var(--radius-m); }
 .chart-line { fill: none; stroke: var(--brass); stroke-width: 2.5; stroke-linejoin: round; }
 .chart-area { fill: var(--brass); opacity: .08; }
+.chart-low { stroke: var(--brass); stroke-width: 1; stroke-dasharray: 4 4; opacity: .5; }
 .chart-dot { fill: var(--brass); }
 .chart figcaption { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); margin-top: 8px; font-variant-numeric: tabular-nums; }
 .chart-range { display: flex; gap: 16px; }
@@ -495,3 +496,33 @@ img { display: block; max-width: 100%; }
 .noimg { background: #fff url(/logo-mark.png) center / 34% no-repeat !important; }
 .noimg::after { content: ""; position: absolute; inset: 0; background: rgba(255, 255, 255, .55); pointer-events: none; }
 .thumb.noimg, .sg-thumb.noimg, .product-img.noimg { position: relative; }
+
+/* Ártörténet: 30 / 90 napos váltó (JavaScript nélkül) + „valódi akció-e” */
+.verdict { margin: 0 0 12px; padding: 10px 14px; border-radius: var(--radius-m); background: var(--surface); border-left: 4px solid var(--line); }
+.verdict.v-low, .verdict.v-below { border-left-color: var(--olive); }
+.verdict.v-above { border-left-color: var(--brick); }
+.range-tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.range-tabs > input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.range-tabs > label { padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font-size: 14px; color: var(--muted); }
+.range-tabs > input:checked + label { background: var(--accent-bg); color: var(--bone); border-color: var(--brass); }
+.range-tabs > input:focus-visible + label { outline: 2px solid var(--brass); }
+.range-tabs > .r30, .range-tabs > .r90 { display: none; flex-basis: 100%; margin-top: 8px; }
+#hr30:checked ~ .r30, #hr90:checked ~ .r90 { display: block; }
+
+/* Ár- és készletfigyelő */
+.alert-box { scroll-margin-top: 80px; }
+.alert-form { display: grid; gap: 10px; max-width: 560px; }
+.alert-kind { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.alert-target { display: inline-flex; align-items: center; gap: 6px; }
+.alert-target input, .alert-row input { height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-s);
+  background: var(--surface); color: var(--bone); font: 15px var(--body); }
+.alert-target input { width: 120px; }
+.alert-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.alert-row input { flex: 1 1 220px; }
+.alert-msg { padding: 10px 14px; border-radius: var(--radius-m); margin: 0 0 12px; background: var(--surface); }
+.alert-msg.good { border-left: 4px solid var(--olive); }
+.alert-msg.bad { border-left: 4px solid var(--brick); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Gyűjtőoldal bevezető */
+.results-head .intro { margin: 4px 0 10px; max-width: 70ch; }

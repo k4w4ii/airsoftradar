@@ -1,6 +1,7 @@
 // Darabolt sitemap: /sitemap.xml = index, /sitemaps/static.xml (főoldal, kategóriák, jogi oldalak),
 // /sitemaps/p-0.xml, p-1.xml … (termékek, fájlonként 10 000 termék = 20 000 URL; a Google-limit 50 000 / fájl).
-import { countProducts, getAllSlugs } from "./data";
+import { brandStats, countProducts, getAllSlugs } from "./data";
+import { brandSlug, COLLECTION_MIN } from "./seo";
 import { GROUP_IDS, LEAVES } from "./catalog";
 import { DOCS } from "./legal";
 import { SITE_URL } from "./site";
@@ -39,10 +40,27 @@ export async function productSitemap(part) {
   return urlset(slice.map((p) => urlEntry(`/p/${p.slug}`, { lastmod: p.updated_at ? String(p.updated_at).slice(0, 10) : null })).join(""));
 }
 
+/** Márka-gyűjtőoldalak: márka (összesen ≥ COLLECTION_MIN termék) és márka × kategória (≥ COLLECTION_MIN). */
+export async function brandSitemap() {
+  const rows = await brandStats();
+  const total = {};
+  for (const r of rows) total[r.manufacturer] = (total[r.manufacturer] || 0) + r.n;
+  const seen = new Set();
+  const out = [];
+  for (const [brand, n] of Object.entries(total)) {
+    const s = brandSlug(brand);
+    if (n < COLLECTION_MIN || !s || seen.has(s)) continue;
+    seen.add(s);
+    out.push(urlEntry(`/b/${s}`, { prio: 0.6 }));
+    for (const r of rows) if (r.manufacturer === brand && r.n >= COLLECTION_MIN) out.push(urlEntry(`/b/${s}/${r.category}`, { prio: 0.6 }));
+  }
+  return urlset(out.join(""));
+}
+
 export async function sitemapIndex() {
   let n = 0;
   try { n = await countProducts(); } catch { n = 0; }
-  const files = ["static", ...Array.from({ length: Math.ceil(n / PER_FILE) }, (_, i) => `p-${i}`)];
+  const files = ["static", "brands", ...Array.from({ length: Math.ceil(n / PER_FILE) }, (_, i) => `p-${i}`)];
   const today = new Date().toISOString().slice(0, 10);
   return `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
     files.map((f) => `<sitemap><loc>${SITE_URL}/sitemaps/${f}.xml</loc><lastmod>${today}</lastmod></sitemap>`).join("") +

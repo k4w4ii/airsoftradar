@@ -82,3 +82,15 @@ CREATE INDEX IF NOT EXISTS product_summary_mfr ON product_summary (manufacturer)
 
 -- kulcs-érték tár (besoroló verzió, minőség-őr állapota)
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
+
+-- Ár- és készletfigyelő (web/lib/alerts.js, scraper/alerts.py; a kód magától is létrehozza)
+CREATE TABLE IF NOT EXISTS alerts (
+  id INTEGER PRIMARY KEY, email TEXT NOT NULL, product_id INTEGER NOT NULL, kind TEXT NOT NULL,
+  target_huf REAL, target_amount REAL, currency TEXT, locale TEXT NOT NULL DEFAULT 'hu',
+  token TEXT NOT NULL UNIQUE, ip_hash TEXT, created_at TEXT NOT NULL, confirmed_at TEXT, sent_at TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS alerts_one ON alerts (email, product_id, kind);
+CREATE INDEX IF NOT EXISTS alerts_ip ON alerts (ip_hash, created_at);
+
+-- AI-ellenőrzés, javaslat-mód (scraper/ai_review.py; a kód magától is létrehozza)
+CREATE TABLE IF NOT EXISTS ai_categories (slug TEXT PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL, model TEXT, reviewed_at TEXT);

@@ -13,7 +13,7 @@ test("robots + darabolt sitemap", async () => {
   expect(robots.rules[1]).toEqual({ userAgent: "*", disallow: "/" });
   const idx = await (await (await import("../app/sitemap.xml/route.js")).GET()).text();
   expect(idx.includes("<sitemapindex")).toBe(true);
-  expect((idx.match(/<loc>/g) || []).length).toBe(4);       // static + 3 termékfájl
+  expect((idx.match(/<loc>/g) || []).length).toBe(5);       // static + brands + 3 termékfájl
   const part = await import("../app/sitemaps/[id]/route.js");
   const p2 = await (await part.GET(null, { params: Promise.resolve({ id: "p-2.xml" }) })).text();
   expect((p2.match(/<url>/g) || []).length).toBe(2 * (N - 20000));

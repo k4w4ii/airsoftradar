@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { COLLECTION_MIN, collectionPath } from "../lib/seo";
 import CatImg from "./CatImg";
 import { CAT_GROUPS, hrefFor } from "../lib/catalog";
 import { t } from "../lib/i18n";
@@ -62,7 +63,7 @@ export default function Welcome({ locale, currency, rates, data }) {
           <h2>{tr.topBrands}</h2>
           <div className="chips brand-chips">
             {data.brands.map((b) => (
-              <Link key={b.name} href={hrefFor(locale, { ...BASE, brands: [b.name] })} className="chip">
+              <Link key={b.name} href={b.n >= COLLECTION_MIN ? collectionPath(locale, b.name) : hrefFor(locale, { ...BASE, brands: [b.name] })} className="chip">
                 {b.name}<span>{b.n}</span>
               </Link>
             ))}

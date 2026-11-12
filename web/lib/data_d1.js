@@ -6,7 +6,6 @@ import { CAT_GROUPS, FACETS, PLATFORMS } from "./catalog";
 let testDB = null;
 /** Teszthez: helyi SQLite a D1 helyett. */
 export function __setTestDB(db) { testDB = db; }
-
 export async function getDB() {
   if (testDB) return testDB;
   const { getCloudflareContext } = await import("@opennextjs/cloudflare");
@@ -156,8 +155,8 @@ export async function getHistoryD1(productId) {
   return all(db.prepare(`
     SELECT h.observed_on, min(h.price_huf) AS min_huf, min(h.price_eur) AS min_eur
     FROM price_history h JOIN offers o ON o.id = h.offer_id
-    WHERE o.product_id = ? AND h.stock = 'in_stock' AND o.is_outlier = 0
-    GROUP BY h.observed_on ORDER BY h.observed_on LIMIT 365`).bind(Number(productId)));
+    WHERE o.product_id = ? AND h.stock = 'in_stock' AND o.is_outlier = 0 AND h.observed_on >= date('now', '-91 day')
+    GROUP BY h.observed_on ORDER BY h.observed_on LIMIT 120`).bind(Number(productId)));
 }
 
 export async function getRatesD1() {
@@ -255,4 +254,23 @@ export async function suggestD1(q, limit = 6) {
   ]);
   const [products, brands] = res.map((r) => r.results || []);
   return { products, brands };
+}
+
+/** Márka-gyűjtőoldalak: márka × kategória darabszámok (sitemap, gyűjtőoldal, kapcsolódó linkek). */
+export async function brandStatsD1() {
+  const db = await getDB();
+  return all(db.prepare(`SELECT manufacturer, category, count(*) AS n, sum(stock = 'in_stock') AS in_stock
+                         FROM product_summary GROUP BY manufacturer, category`));
+}
+
+/** Gyűjtőoldal összesítője: termékszám, raktáron, boltszám, legolcsóbb ár. */
+export async function collectionSummaryD1(brand, leaves) {
+  const db = await getDB();
+  const catSql = leaves?.length ? ` AND category IN (${leaves.map(() => "?").join(",")})` : "";
+  const row = await db.prepare(`SELECT count(*) AS n, sum(stock = 'in_stock') AS in_stock, min(best_price_huf) AS low
+                                FROM product_summary WHERE manufacturer = ?${catSql}`).bind(brand, ...(leaves || [])).first();
+  const shops = await db.prepare(`SELECT count(DISTINCT o.shop_id) AS n FROM offers o JOIN product_summary p ON p.id = o.product_id
+                                  WHERE o.is_active = 1 AND p.manufacturer = ?${catSql.replace(/category/g, "p.category")}`)
+    .bind(brand, ...(leaves || [])).first();
+  return { n: row?.n || 0, inStock: row?.in_stock || 0, low: row?.low ?? null, shops: shops?.n || 0 };
 }

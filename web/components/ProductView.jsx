@@ -2,25 +2,33 @@ import { translateTitle } from "../lib/dictionary";
 import { imgSrc, shopTarget } from "../lib/links";
 import Link from "next/link";
 import { dateFmt, money, shopMoney, shortDate, t } from "../lib/i18n";
+import { historyStats, lastDays } from "../lib/seo";
 import { Ad, Price, StockBadge } from "./ui";
 
-/** Árdiagram SVG-ben (külső könyvtár nélkül). points: [{ observed_on, min_huf }] */
-export function PriceChart({ points, currency, rates, locale }) {
+/** Árdiagram SVG-ben (külső könyvtár nélkül), dátummal arányos időtengellyel: a hiányzó napok (pl. elfogyott) résként
+ *  látszanak, nem csúsznak össze. points: [{ observed_on, min_huf }] */
+export function PriceChart({ points, currency, rates, locale, days }) {
   const tr = t(locale);
   if (!points || points.length < 2) return <p className="muted chart-empty">{tr.historyEmpty}</p>;
   const W = 640, H = 180, PX = 8, PY = 18;
   const vals = points.map((p) => Number(p.min_huf));
   const lo = Math.min(...vals), hi = Math.max(...vals);
   const span = hi - lo || hi * 0.05 || 1;
-  const x = (i) => PX + (i * (W - 2 * PX)) / (points.length - 1);
+  const day = (d) => Date.parse(`${d}T00:00:00Z`) / 864e5;
+  const t1 = day(points[points.length - 1].observed_on);
+  const t0 = Math.min(day(points[0].observed_on), days ? t1 - days : Infinity);
+  const x = (i) => PX + ((day(points[i].observed_on) - t0) / (t1 - t0 || 1)) * (W - 2 * PX);
   const y = (v) => PY + (1 - (v - lo) / span) * (H - 2 * PY);
-  const line = points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(vals[i]).toFixed(1)}`).join(" ");
-  const area = `${line} L${x(points.length - 1).toFixed(1)},${H} L${x(0).toFixed(1)},${H} Z`;
+  // 3 napnál nagyobb kihagyás = szakadás a vonalban (nem húzunk egyenest az ismeretlen időszakon át)
+  const line = points.map((p, i) => {
+    const gap = i && day(p.observed_on) - day(points[i - 1].observed_on) > 3;
+    return `${!i || gap ? "M" : "L"}${x(i).toFixed(1)},${y(vals[i]).toFixed(1)}`;
+  }).join(" ");
   const minI = vals.indexOf(lo);
   return (
     <figure className="chart">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${tr.history}: ${money(lo, currency, rates, locale)} – ${money(hi, currency, rates, locale)}`}>
-        <path d={area} className="chart-area" />
+        <line x1={PX} x2={W - PX} y1={y(lo)} y2={y(lo)} className="chart-low" />
         <path d={line} className="chart-line" />
         <circle cx={x(minI)} cy={y(lo)} r="4" className="chart-dot" />
       </svg>
@@ -33,6 +41,32 @@ export function PriceChart({ points, currency, rates, locale }) {
         <span>{points[points.length - 1].observed_on}</span>
       </figcaption>
     </figure>
+  );
+}
+
+/** Ártörténet blokk: 30 / 90 napos váltó (JavaScript nélkül, rádiógombbal) + „valódi akció-e” ítélet. */
+function History({ points, now, currency, rates, locale }) {
+  const tr = t(locale);
+  const st = historyStats(points, now);
+  return (
+    <section className="block history">
+      <h2>{tr.history}</h2>
+      <p className="muted small">{tr.historyNote}</p>
+      {st ? (
+        <p className={`verdict v-${st.verdict}`}>
+          <b>{st.verdict === "low" ? tr.verdict.low : st.verdict === "near" ? tr.verdict.near : tr.verdict[st.verdict](st.diff)}</b>
+          <span className="muted small"> {tr.low30}: {money(st.low, currency, rates, locale)} · {tr.avg30}: {money(st.avg, currency, rates, locale)}</span>
+        </p>
+      ) : null}
+      <div className="range-tabs">
+        <input type="radio" name="hr" id="hr30" defaultChecked />
+        <label htmlFor="hr30">{tr.range(30)}</label>
+        <input type="radio" name="hr" id="hr90" />
+        <label htmlFor="hr90">{tr.range(90)}</label>
+        <div className="r30"><PriceChart points={lastDays(points, 30)} days={30} currency={currency} rates={rates} locale={locale} /></div>
+        <div className="r90"><PriceChart points={lastDays(points, 90)} days={90} currency={currency} rates={rates} locale={locale} /></div>
+      </div>
+    </section>
   );
 }
 
@@ -69,7 +103,7 @@ function OfferLadder({ offers, currency, rates, locale, odd = false, scaleMax })
   );
 }
 
-export default function ProductView({ locale, currency, rates, product, offers: all, history }) {
+export default function ProductView({ locale, currency, rates, product, offers: all, history, alert = null, related = null }) {
   const tr = t(locale);
   // gyanús ár (alkatrész vagy átépített változat): külön, a legjobb árba nem számít bele
   const offers = all.filter((o) => !o.is_outlier);
@@ -99,6 +133,7 @@ export default function ProductView({ locale, currency, rates, product, offers: 
             </p>
           ) : null}
           {product.updated_at ? <p className="muted small">{tr.updated}: {dateFmt(product.updated_at, locale)}</p> : null}
+          {related}
         </div>
       </div>
 
@@ -115,10 +150,9 @@ export default function ProductView({ locale, currency, rates, product, offers: 
         ) : null}
       </section>
 
-      <section className="block">
-        <h2>{tr.history}</h2>
-        <PriceChart points={history} currency={currency} rates={rates} locale={locale} />
-      </section>
+      {alert}
+
+      <History points={history} now={product.best_price_huf} currency={currency} rates={rates} locale={locale} />
 
       <Ad key={product.slug} place="product" locale={locale} />
     </article>

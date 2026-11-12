@@ -298,11 +298,11 @@ function Chips({ locale, params, currency }) {
   );
 }
 
-export default function HomeView({ locale, currency, rates, data, params }) {
+export default function HomeView({ locale, currency, rates, data, params, title = null, intro = null }) {
   const tr = t(locale);
   const facets = data.facets || {};
   const names = params.cats.map((c) => tr.cats[c]);
-  const heading = params.q ? `„${params.q}”` : !names.length ? tr.cats.all
+  const heading = title ? title : params.q ? `„${params.q}”` : !names.length ? tr.cats.all
     : names.length > 2 ? `${names.slice(0, 2).join(", ")} +${names.length - 2}` : names.join(", ");
 
   return (
@@ -349,6 +349,7 @@ export default function HomeView({ locale, currency, rates, data, params }) {
       <div className="results">
         <div className="results-head">
           <h1>{heading}</h1>
+          {intro ? <p className="intro muted">{intro}</p> : null}
           <div className="results-bar">
             <span className="muted">{tr.results(data.total)}</span>
             <div className="bar-right">

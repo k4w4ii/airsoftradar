@@ -13,7 +13,11 @@ export const OPERATOR = {
   registry: "",         // pl. "Cégjegyzékszám: 01-09-123456" vagy "EV nyilvántartási szám: 12345678" (ha van)
 };
 
-export const LEGAL_UPDATED = "2026-11-08";
+export const LEGAL_UPDATED = "2026-11-12";
+
+// Ár- és készletfigyelő e-mail szolgáltatója (az adatvédelmi tájékoztatóba kerül): "resend" vagy "brevo".
+// A küldéshez a Worker-titok (RESEND_API_KEY vagy BREVO_API_KEY) kell – TELEPITES.md 12. pont.
+export const MAIL_PROVIDER = "resend";
 
 // ─── Bevétel: Google AdSense + „Hívj meg egy kávéra” ──────────────────────────────
 // Amíg ezek üresek, az oldalon SEMMI nem jelenik meg és semmi nem töltődik be.

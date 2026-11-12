@@ -1,6 +1,6 @@
 // A Cloudflare Worker belépési pontja: a Next.js oldal (OpenNext) + időzített indító.
 // Az időzítő (wrangler.jsonc → triggers.crons, 02:17 UTC) pontosan indítja a GitHub „daily-scrape” futást –
-// a GitHub saját ütemezője órákat késhet. Kell hozzá a GH_TOKEN Worker-titok (TELEPITES.md 11. pont).
+// a GitHub saját ütemezője órákat késhet. Kell hozzá a GH_TOKEN Worker-titok (TELEPITES.md 3/b pont).
 // @ts-ignore – a .open-next/worker.js a build során készül
 import { default as handler } from "./.open-next/worker.js";
 

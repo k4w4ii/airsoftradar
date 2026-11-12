@@ -19,6 +19,8 @@ export const getAllSlugs = (max = 45000, offset = 0) => d1.getAllSlugsD1(max, of
 export const countProducts = () => d1.countProductsD1();
 export const getWelcome = () => d1.getWelcomeD1();
 export const suggest = (q) => d1.suggestD1(cleanQuery(q));
+export const brandStats = () => d1.brandStatsD1();
+export const collectionSummary = (brand, leaves) => d1.collectionSummaryD1(brand, leaves);
 
 /**
  * Lista + szűrő-darabszámok egy D1-kötegben.

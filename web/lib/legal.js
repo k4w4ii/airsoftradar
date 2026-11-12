@@ -1,5 +1,5 @@
 // Jogi oldalak tartalma (HU + EN). Az üzemeltetői adatok a lib/site.js OPERATOR objektumából jönnek.
-import { ADS, COFFEE_URL, LEGAL_UPDATED, OPERATOR, SITE_NAME, SITE_URL } from "./site";
+import { ADS, COFFEE_URL, LEGAL_UPDATED, MAIL_PROVIDER, OPERATOR, SITE_NAME, SITE_URL } from "./site";
 
 export const DOCS = {
   terms: { hu: "aszf", en: "terms" },
@@ -30,10 +30,39 @@ const operatorLines = (hu) => [
 ];
 const ADS_ON = Boolean(ADS.client);
 const google = (hu) => `Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, ${hu ? "Írország" : "Ireland"} – policies.google.com (${hu ? "hirdetések: Google AdSense" : "advertising: Google AdSense"})`;
+const MAILER = {
+  resend: (hu) => `Resend, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA – resend.com (${hu ? "értesítő e-mailek küldése" : "sending alert emails"})`,
+  brevo: (hu) => `Brevo SAS, 106 boulevard Haussmann, 75008 Párizs, ${hu ? "Franciaország" : "France"} – brevo.com (${hu ? "értesítő e-mailek küldése" : "sending alert emails"})`,
+}[MAIL_PROVIDER] || null;
 const hosts = (hu) => [
   `Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA – cloudflare.com (${hu ? "weboldal tárhely, adatbázis, domain és DNS" : "website hosting, database, domain and DNS"})`,
   ...(ADS_ON ? [google(hu)] : []),
+  ...(MAILER ? [MAILER(hu)] : []),
 ];
+
+const US = ["Cloudflare", ...(ADS_ON ? ["Google"] : []), ...(MAIL_PROVIDER === "resend" ? ["Resend"] : [])];
+const usNote = (hu) => US.length === 1
+  ? (hu ? `A ${US[0]} amerikai cég;` : `${US[0]} is a US company;`)
+  : (hu ? `A ${US.slice(0, -1).join(", ")} és a ${US[US.length - 1]} amerikai (illetve amerikai anyavállalatú) cégek;`
+        : `${US.slice(0, -1).join(", ")} and ${US[US.length - 1]} are US companies or have US parents;`);
+
+// Ár- és készletfigyelő (e-mail értesítő)
+const alertsSection = (hu) => [{
+  h: hu ? "Ár- és készletértesítő (e-mail)" : "Price and stock alerts (email)",
+  list: hu ? [
+    "Ha a termékoldalon értesítést kérsz, ezeket kezeljük: e-mail cím, a termék, az értesítés típusa (újra raktáron / célár), a célár és pénzneme, a kérés, a megerősítés és a kiküldés időpontja, valamint az IP-címed egyirányú, rövidített lenyomata (hash) a visszaélések (tömeges feliratkoztatás) kiszűrésére.",
+    "Cél: a kért értesítés elküldése. Jogalap: hozzájárulás (GDPR 6. cikk (1) a)), amelyet a megerősítő e-mailben lévő linkre kattintva adsz meg (dupla megerősítés). Megerősítés nélkül semmilyen levelet nem küldünk.",
+    "Hozzájárulásodat bármikor visszavonhatod a levelekben lévő leiratkozó linkkel (egy értesítésről vagy az összesről), vagy a fenti e-mail címen.",
+    "Megőrzés: a meg nem erősített kérést 7 nap után, a teljesült (kiküldött) értesítést 30 nap után, minden más értesítést legkésőbb 1 év után automatikusan töröljük.",
+    "Az adatokat nem adjuk el, hirdetésre és hírlevélre nem használjuk; csak a kért értesítést küldjük el. A leveleket az alább felsorolt e-mail szolgáltató kézbesíti.",
+  ] : [
+    "If you request an alert on a product page, we process: your email address, the product, the alert type (back in stock / target price), the target price and its currency, the time of the request, the confirmation and the sending, and a one-way, shortened hash of your IP address to prevent abuse (mass sign-ups).",
+    "Purpose: sending the alert you requested. Legal basis: consent (GDPR Art. 6(1)(a)), given by clicking the link in the confirmation email (double opt-in). Without confirmation we send no email at all.",
+    "You can withdraw your consent at any time via the unsubscribe link in our emails (for one alert or for all), or at the email address above.",
+    "Retention: unconfirmed requests are deleted after 7 days, fulfilled (sent) alerts after 30 days, and every other alert after 1 year at the latest, automatically.",
+    "We do not sell the data and do not use it for advertising or newsletters; we only send the alert you asked for. Emails are delivered by the email provider listed below.",
+  ],
+}];
 
 // Hirdetés és támogatás: csak akkor kerül a tájékoztatóba, ha be van kapcsolva (lib/site.js)
 const adsSection = (hu) => !ADS_ON ? [] : [{
@@ -97,7 +126,7 @@ const buildContent = () => ({
       { p: [`Hatályos: ${LEGAL_UPDATED}. Ez a tájékoztató az Európai Unió általános adatvédelmi rendelete (GDPR, 2016/679/EU) alapján ismerteti, hogyan kezeljük a(z) ${SITE_NAME} látogatóinak adatait.`] },
       { h: "1. Az adatkezelő", list: operatorLines(true) },
       { h: "2. Röviden", list: [
-        "Az oldalon nincs regisztráció, és nem kérünk be személyes adatot.",
+        "Az oldalon nincs regisztráció. Személyes adatot (e-mail címet) csak akkor kérünk, ha ár- vagy készletértesítőt kérsz.",
         ADS_ON ? "Analitikai sütit nem használunk. Hirdetési sütit csak a Google hirdetései használhatnak, és csak a hozzájárulásoddal (lásd alább)." : "Nem használunk analitikai, követő vagy hirdetési sütit.",
         ADS_ON ? "Saját sütink egyetlen van: a választott pénznem megjegyzésére." : "Egyetlen sütit használunk: a választott pénznem megjegyzésére.",
       ] },
@@ -107,10 +136,11 @@ const buildContent = () => ({
         "Kimenő linkek: a „Megnézem a boltban” gomb a /go/… címen keresztül irányít a boltba. Ennek során személyes adatot nem rögzítünk. A bolt oldalán a bolt saját adatkezelése érvényes.",
         "Kapcsolatfelvétel: ha e-mailt írsz nekünk, a nevedet, e-mail címedet és az üzenetet a megkeresés megválaszolásához használjuk, és az ügy lezárása után legfeljebb 1 évig őrizzük. Jogalap: jogos érdek.",
       ] },
+      ...alertsSection(true),
       ...adsSection(true),
       ...coffeeSection(true),
       { h: "4. Adatfeldolgozók és szolgáltatók", list: hosts(true) },
-      { p: [(ADS_ON ? "A Cloudflare és a Google amerikai (illetve amerikai anyavállalatú) cégek;" : "A Cloudflare amerikai cég;") + " az adattovábbítás az EU–USA adatvédelmi keretrendszer, illetve általános szerződési feltételek alapján történik."] },
+      { p: [usNote(true) + " az adattovábbítás az EU–USA adatvédelmi keretrendszer, illetve általános szerződési feltételek alapján történik."] },
       { h: "5. Jogaid", p: [
         "Kérheted a rólad kezelt adatokhoz való hozzáférést, azok helyesbítését, törlését, kezelésük korlátozását, és tiltakozhatsz a jogos érdeken alapuló adatkezelés ellen. Kérésedet a fenti e-mail címre küldd; 30 napon belül válaszolunk.",
         "Panasszal fordulhatsz a Nemzeti Adatvédelmi és Információszabadság Hatósághoz (NAIH): 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, www.naih.hu, vagy bírósághoz.",
@@ -175,7 +205,7 @@ const buildContent = () => ({
       { p: [`Effective: ${LEGAL_UPDATED}. This notice explains, under the EU General Data Protection Regulation (GDPR, 2016/679), how ${SITE_NAME} handles visitor data.`] },
       { h: "1. Controller", list: operatorLines(false) },
       { h: "2. In short", list: [
-        "There is no registration and we do not ask for personal data.",
+        "There is no registration. We only ask for personal data (an email address) if you request a price or stock alert.",
         ADS_ON ? "We use no analytics cookies. Advertising cookies may only be set by Google's ads, and only with your consent (see below)." : "We use no analytics, tracking or advertising cookies.",
         ADS_ON ? "Our own site sets a single cookie, to remember your chosen currency." : "We use a single cookie to remember your chosen currency.",
       ] },
@@ -185,10 +215,11 @@ const buildContent = () => ({
         "Outbound links: the “View in shop” button redirects via /go/…; we do not record personal data. On the shop's site, the shop's own privacy policy applies.",
         "Contact: if you e-mail us, we use your name, e-mail address and message to reply and keep them for up to 1 year after the matter is closed. Legal basis: legitimate interest.",
       ] },
+      ...alertsSection(false),
       ...adsSection(false),
       ...coffeeSection(false),
       { h: "4. Processors and providers", list: hosts(false) },
-      { p: [(ADS_ON ? "Cloudflare and Google are US companies or have US parents;" : "Cloudflare is a US company;") + " transfers rely on the EU–US Data Privacy Framework or standard contractual clauses."] },
+      { p: [usNote(false) + " transfers rely on the EU–US Data Privacy Framework or standard contractual clauses."] },
       { h: "5. Your rights", p: [
         "You may request access to, rectification or erasure of your data, restriction of processing, and object to processing based on legitimate interest. Send requests to the e-mail above; we reply within 30 days.",
         "You may lodge a complaint with the Hungarian data protection authority (NAIH, 1055 Budapest, Falk Miksa utca 9–11, www.naih.hu) or the authority of your country of residence.",

@@ -20,6 +20,8 @@ function fakeD1(sq) {
 }
 
 let sq;
+const ago = (d) => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
+const D1 = ago(4), D2 = ago(3), OLD = ago(120);
 beforeAll(() => {
   sq = new Database(":memory:");
   sq.exec(readFileSync(new URL("../../d1/schema.sql", import.meta.url).pathname, "utf8"));
@@ -36,7 +38,7 @@ beforeAll(() => {
       (11,2,'2','https://b/2','CM048',85000,'HUF','in_stock',1,'matched',0,'2026-11-09T02:00:00+00:00'),
       (12,2,'3','https://b/2','CM048 régi',90000,'HUF','out_of_stock',1,'matched',0,'2026-11-01T02:00:00+00:00'),
       (13,1,'4','https://a/hpa','CM048 HPA',900,'EUR','in_stock',1,'matched',1,'2026-11-09T02:00:00+00:00');
-    INSERT INTO price_history VALUES (10,'2026-11-08',200,'EUR',76000,200,'in_stock'),(13,'2026-11-08',900,'EUR',342000,900,'in_stock'),(11,'2026-11-09',85000,'HUF',85000,212.5,'in_stock');
+    INSERT INTO price_history VALUES (10,'${D1}',200,'EUR',76000,200,'in_stock'),(13,'${D1}',900,'EUR',342000,900,'in_stock'),(11,'${D2}',85000,'HUF',85000,212.5,'in_stock'),(11,'${OLD}',99000,'HUF',99000,250,'in_stock');
   `);
   d1.__setTestDB(fakeD1(sq));
 });
@@ -89,7 +91,7 @@ test("termék, ajánlatok (ismétlődés nélkül), előzmény, árfolyam, katti
   expect(offers[0].price_eur).toBe(200);
   expect(offers[2].is_outlier).toBe(1);
   const h = await getHistory(1);
-  expect(h).toEqual([{ observed_on: "2026-11-08", min_huf: 76000, min_eur: 200 }, { observed_on: "2026-11-09", min_huf: 85000, min_eur: 212.5 }]);
+  expect(h).toEqual([{ observed_on: D1, min_huf: 76000, min_eur: 200 }, { observed_on: D2, min_huf: 85000, min_eur: 212.5 }]);   // a 91 napnál régebbi kimarad
   expect((await getRates()).EUR).toBe(400);
   const t = await getOfferTarget(11);
   expect(t.shops.affiliate_template).toBe("{url}?ref=ah");
