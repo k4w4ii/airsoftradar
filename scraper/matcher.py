@@ -243,7 +243,9 @@ class MatchResult:
 def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
     # 1. EAN
     ean = norm_ean(o.ean_raw) or find_ean(o.sku_raw)
-    if ean and (pid := cat.ean_index.get(ean)):
+    # (az egyedi/átépített változat – „6Labs Hi-Capa custom” – gyakran a gyári alap EAN-ját kapja: az nem ugyanaz a termék)
+    if ean and (pid := cat.ean_index.get(ean)) and (pid in cat.variant_ids) == is_variant(o.title) \
+            and (pid in cat.part_ids) == is_part(o.title, o.price_huf):
         return MatchResult("auto", "ean", 1.0, pid)
 
     mid = detect_manufacturer(o.brand_raw, o.title, cat.aliases)

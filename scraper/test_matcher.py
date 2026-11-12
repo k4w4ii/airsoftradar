@@ -162,6 +162,21 @@ class TestVariantGate(unittest.TestCase):
         self.assertNotEqual(r.product_id, 21)
 
 
+class TestVariantEan(unittest.TestCase):
+    """A „6Labs Tokyo Marui Hi-Capa 5.1 custom GBB” a gyári Hi-Capa EAN-ját kapta: EAN-ra sem kerülhet a gyári termékhez."""
+    def test_custom_with_base_ean(self):
+        c = catalog()
+        c.add_product(Product(42, 4, "Tokyo Marui Hi-Capa 5.1 Gold Match", None), eans=["4952839142443"])
+        r = match_offer(OfferIn("6Labs Tokyo Marui Hi-Capa 5.1 custom GBB", ean_raw="4952839142443", price_huf=138633), c)
+        self.assertNotEqual(r.product_id, 42)
+        r = match_offer(OfferIn("Tokyo Marui Hi-Capa 5.1 Gold Match GBB", ean_raw="4952839142443", price_huf=54000), c)
+        self.assertEqual((r.product_id, r.method), (42, "ean"))
+        # és fordítva: a gyári ajánlat sem kerülhet EAN-ra az egyedi termékhez
+        c.add_product(Product(43, 4, "Tokyo Marui Hi-Capa custom HPA build", None), eans=["4952839999990"])
+        r = match_offer(OfferIn("Tokyo Marui Hi-Capa 4.3", ean_raw="4952839999990", price_huf=50000), c)
+        self.assertNotEqual(r.product_id, 43)
+
+
 class TestRematchAfterCleanup(unittest.TestCase):
     """A 0012 takarítás után: a puska saját terméket kap a kódjával, az alkatrészek külön termékek lesznek."""
     def test_flow(self):

@@ -25,7 +25,7 @@ from crawl import from_listing, from_sitemap
 from urllib.parse import urlsplit
 from fetcher import Fetcher
 import classify
-from filters import is_clothing, specs
+from filters import is_clothing, is_part, is_variant, specs
 from jsonld import ScrapedOffer, extract
 from matcher import Catalog, OfferIn, Product, gun_kind_of, match_offer
 from names import clean_name
@@ -349,7 +349,9 @@ def run(slug: str, limit: int | None, dry: bool) -> None:
         if prod is None or getattr(prod, "_renamed", False):
             continue
         brand = cat.manufacturers[prod.manufacturer_id][1]
-        from_en = shop["lang"] == "en" and name_lang.get(pid, "en") != "en"
+        # angol cím csak azonos fajtájú ajánlatból: egy „custom” / alkatrész ajánlat neve nem lehet a gyári termék neve
+        from_en = shop["lang"] == "en" and name_lang.get(pid, "en") != "en" \
+            and is_variant(titles[oid]) == is_variant(prod.name) and is_part(titles[oid]) == is_part(prod.name)
         new = clean_name(titles[oid] if from_en else prod.name, brand, alias_set)
         if new != prod.name or from_en:
             db.update("products", {"name": new, **({"name_lang": "en"} if from_en else {})}, id=f"eq.{pid}")

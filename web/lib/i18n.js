@@ -17,10 +17,14 @@ export function isLocale(x) {
   return LOCALES.includes(x);
 }
 
+// Kerekített darabszám a főoldalon („30 000+”): a Google a szöveget hetekig gyorsítótárazza, a pontos szám hamar elavulna,
+// a lefelé kerekített „+” viszont igaz marad, ahogy a katalógus nő.
+export const roundDown = (n) => (n >= 10000 ? Math.floor(n / 1000) * 1000 : n >= 1000 ? Math.floor(n / 100) * 100 : n);
+
 const DICT = {
   hu: {
     title: "AirsoftHunter – airsoft árösszehasonlító",
-    description: "Airsoft replikák és kiegészítők árai európai boltokból, naponta frissítve. Vadászd le a legjobb árat.",
+    description: "Airsoft árösszehasonlító: replikák, alkatrészek és kiegészítők árai és készlete európai airsoft boltokból, minden éjjel frissítve. Vadászd le a legjobb árat!",
     searchPlaceholder: "Keresés: típus, gyártó vagy kód (pl. CM.522, Specna, EVOLT)",
     search: "Keresés",
     manufacturer: "Gyártó",
@@ -32,7 +36,7 @@ const DICT = {
     views: { grid: "Csempe", list: "Lista" },
     allResultsFor: "Összes találat: „{q}”",
     welcomeTitle: "Vadászd le a legjobb airsoft árat",
-    welcomeSub: (n, s) => `${n.toLocaleString("hu-HU")} termék ${s} európai boltból összehasonlítva, minden éjjel frissítve.`,
+    welcomeSub: (n, s) => `${roundDown(n).toLocaleString("hu-HU")}+ termék ${s} európai boltból összehasonlítva, minden éjjel frissítve.`,
     browseCats: "Böngéssz kategóriák szerint",
     bestDeals: "Legnagyobb árkülönbségek",
     bestDealsNote: "Ugyanaz a fegyver, ennyivel olcsóbb a legjobb boltban, mint a legdrágábban.",
@@ -135,7 +139,7 @@ const DICT = {
   },
   en: {
     title: "AirsoftHunter – airsoft price comparison",
-    description: "Airsoft replica and gear prices from European shops, updated daily. Hunt down the best price.",
+    description: "Airsoft price comparison: prices and stock of replicas, parts and gear from European airsoft shops, updated every night. Hunt down the best price!",
     searchPlaceholder: "Search by model, brand or code (e.g. CM.522, Specna, EVOLT)",
     search: "Search",
     manufacturer: "Brand",
@@ -147,7 +151,7 @@ const DICT = {
     views: { grid: "Grid", list: "List" },
     allResultsFor: "All results for “{q}”",
     welcomeTitle: "Hunt down the best airsoft price",
-    welcomeSub: (n, s) => `${n.toLocaleString("en-GB")} products compared across ${s} European shops, updated every night.`,
+    welcomeSub: (n, s) => `${roundDown(n).toLocaleString("en-GB")}+ products compared across ${s} European shops, updated every night.`,
     browseCats: "Browse by category",
     bestDeals: "Biggest price gaps",
     bestDealsNote: "The same gun, this much cheaper at the best shop than at the most expensive one.",
