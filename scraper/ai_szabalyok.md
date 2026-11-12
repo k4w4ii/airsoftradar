@@ -37,6 +37,14 @@ E) Karbantartás, tápellátás és egyéb
 - Akku és töltő (acc_power): LiPo, LiFe, Li-Ion, NiMH akkumulátor, balanszeres töltő, HPA tank / palack.
 - Karbantartás és egyéb (other): szilikonolaj, teflonzsír, tisztítóvessző, chronograph (kronográf), csavarrögzítő, battery tester, célpont, szerszám, kés, rádió.
 
+F) Gránátok és gránátvetők
+- Gránátvető (M203, M320, M79, GL-06, EGLM, AG36, M32 stb.) mindig grenade, akkor is, ha "attachment" vagy "for M4 / M16" szerepel mellette: ez maga a komplett eszköz.
+- Kézigránát (hang, BB, füst, pirotechnikai) és töltött 40 mm-es lövedék / shell: grenade.
+- A gránát és gránátvető alkatrészei (pin, spoon, seal, O-ring, repair kit, cap, safety catch, irányzék, rugó) a megfelelő alkatrész-kategóriába kerülnek, nem grenade.
+- BB-töltőként használt műgránát (dummy grenade BB loader, BB can) -> acc_mag. Csak dísz / kellék műgránát -> other.
+- A "40mm" önmagában nem gránát: lehet hangtompító-, nozzle- vagy távcsőméret (pl. "nozzle 21.40mm", "40mm scope").
+- Távcső / optika lencsevédője, napellenzője -> acc_optics.
+
 # DÖNTÉSI HIERARCHIA (SZIGORÚ SORREND)
 1. Tartalmaz a név bármilyen szót a fenti A–E kategóriákból, és az a szó maga a termék (nem csak a fegyver leírásának része, mint "AEG with mosfet" vagy "Sniper Rifle + Scope")? -> NEM FEGYVER, a megfelelő alkatrész/tartozék kategória.
 2. Gyártó (pl. Cyma, Specna Arms, Tokyo Marui, E&L, ICS, G&G, KJW, WE, Umarex, VFC, Novritsch, Arcturus, Lancer Tactical, Amoeba, Double Bell) ÉS komplett működési elv vagy típus (AEG, GBB, GBBR, HPA, Spring, Shotgun, Sniper Rifle, Pistol, Carbine), vagy egyértelmű komplett modellnév (pl. "CYMA CM.522", "Specna Arms SA-E20 EDGE")? -> FEGYVER, a típusának megfelelő kategória.

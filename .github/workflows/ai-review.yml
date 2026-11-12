@@ -16,6 +16,10 @@ on:
         description: "Legfeljebb ennyi kérés (1 kérés = 100 termék)"
         type: string
         default: "50"
+      reset:
+        description: "Újra mindent (a korábbi AI-döntések törlése, pl. a szabályfájl módosítása után)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -45,6 +49,7 @@ jobs:
         env:
           AI_DRY_RUN: ${{ inputs.mode == 'becsles' && '1' || '0' }}
           AI_MAX_REQUESTS: ${{ inputs.max_requests }}
+          AI_RESET: ${{ inputs.reset && '1' || '0' }}
       - name: Weboldal frissítése
         if: inputs.mode == 'eles'
         run: python scraper/summary.py

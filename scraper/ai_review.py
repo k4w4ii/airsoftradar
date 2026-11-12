@@ -10,6 +10,7 @@ Env:
   AI_MAX_REQUESTS  legfeljebb ennyi kérés egy futásban (alapból 50; egy kérés = AI_BATCH termék)
   AI_BATCH         termék / kérés (alapból 100)
   AI_MODEL         alapból gemini-3.1-flash-lite
+  AI_RESET=1       a korábbi AI-döntések törlése (pl. az ai_szabalyok.md módosítása után mindent újranéz)
 Csak stdlib.
 """
 from __future__ import annotations
@@ -153,6 +154,9 @@ def main() -> int:
     batch_size = int(os.environ.get("AI_BATCH", "100"))
     max_req = int(os.environ.get("AI_MAX_REQUESTS", "50"))
     ensure_table(db)
+    if os.environ.get("AI_RESET") == "1" and not dry:
+        db.execute([("DELETE FROM ai_categories", [])])      # új szabályok: minden termék újra átnézésre kerül
+        print("[ai] korábbi AI-döntések törölve (újra átnézés)", flush=True)
     products = db.select("product_summary", select="id,slug,name,manufacturer,category,price")
     done = {r["slug"]: r["name"] for r in db.select("ai_categories", select="slug,name")}
     todo = candidates(products, done)
