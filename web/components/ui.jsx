@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CURRENCIES, money, t } from "../lib/i18n";
-import { DOCS, FOOTER_LABELS } from "../lib/legal";
+import { DOCS, FOOTER_LABELS, switchLocale } from "../lib/legal";
 import { ADS, COFFEE_URL } from "../lib/site";
 import AdSlot from "./AdSlot";
 import SearchBox from "./SearchBox";
@@ -78,7 +78,7 @@ export function Shell({ locale, currency, path = "", children, query = "", hideS
               </div>
             </details>
             <ThemeToggle locale={locale} back={path || `/${locale}`} />
-            <Link href={`/${other}`} className="lang" hrefLang={other} lang={other}>{tr.otherLang}</Link>
+            <Link href={switchLocale(path, locale)} className="lang" hrefLang={other} lang={other}>{tr.otherLang}</Link>
           </nav>
         </div>
       </header>

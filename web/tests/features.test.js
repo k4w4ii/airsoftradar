@@ -181,3 +181,30 @@ test("értesítő végpont: csapda-mező, kikapcsolt állapot, hibás link", asy
   expect(r.headers.get("location")).toBe("https://www.airsofthunter.com/hu?alert=expired#alert");
   expect((await GET(new Request("https://www.airsofthunter.com/api/alert?a=hack&t=x"))).status).toBe(404);
 });
+
+test("nyelvváltás: ugyanaz az oldal a másik nyelven", async () => {
+  const { switchLocale } = await import("../lib/legal.js");
+  expect(switchLocale("/hu?cat=rifle&brand=CYMA", "hu")).toBe("/en?cat=rifle&brand=CYMA");
+  expect(switchLocale("/en/p/cyma-cm048", "en")).toBe("/hu/p/cyma-cm048");
+  expect(switchLocale("/hu/b/cyma/rifle", "hu")).toBe("/en/b/cyma/rifle");
+  expect(switchLocale("/hu/adatvedelem", "hu")).toBe("/en/privacy");
+  expect(switchLocale("/en/terms", "en")).toBe("/hu/aszf");
+  expect(switchLocale("/hu", "hu")).toBe("/en");
+  expect(switchLocale("", "hu")).toBe("/en");
+  expect(switchLocale("/hungary", "hu")).toBe("/en");
+});
+
+test("adatvédelem: a beállított e-mail szolgáltató szerepel", async () => {
+  const { legalContent } = await import("../lib/legal.js");
+  const text = (l) => JSON.stringify(legalContent(l, "privacy"));
+  delete process.env.RESEND_API_KEY;
+  process.env.BREVO_API_KEY = "x";
+  expect(text("hu")).toContain("Brevo");
+  expect(text("hu")).not.toContain("Resend");
+  delete process.env.BREVO_API_KEY;
+  process.env.RESEND_API_KEY = "x";
+  expect(text("en")).toContain("Resend");
+  expect(text("en")).toContain("Cloudflare and Resend are US companies");
+  delete process.env.RESEND_API_KEY;
+  expect(text("hu")).toContain("Brevo");                       // kulcs nélkül a site.js tartaléka (brevo)
+});

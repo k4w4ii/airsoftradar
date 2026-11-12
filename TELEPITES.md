@@ -163,7 +163,7 @@ A termékoldalon a látogató regisztráció nélkül kérhet értesítést (új
 3. **API Keys → Create API key** (Permission: Sending access) → másold ki.
 4. **Cloudflare → Workers → airsofthunter → Settings → Variables and Secrets → Add:** Type **Secret**, Name `RESEND_API_KEY`, Value: a kulcs. (Opcionális: `MAIL_FROM` = `AirsoftHunter <ertesito@airsofthunter.com>`.)
 5. **GitHub → Settings → Secrets and variables → Actions → New repository secret:** `RESEND_API_KEY` (ugyanaz). A napi frissítés végén a `scraper/alerts.py` küldi ki a riasztásokat.
-- Brevo helyett: `BREVO_API_KEY` mindkét helyen, és a `web/lib/site.js`-ben `MAIL_PROVIDER = "brevo"` (az adatvédelmi tájékoztató ebből íródik).
+- Brevo helyett: `BREVO_API_KEY` mindkét helyen (Worker-titok + GitHub-titok). Az adatvédelmi tájékoztató magától a beállított kulcs szerint nevezi meg a szolgáltatót.
 - Az adatvédelmi tájékoztató új pontja („Ár- és készletértesítő”) automatikusan megjelenik; a régi kérések törlése is automatikus (7 / 30 / 365 nap).
 
 ## 13. SEO (automatikus)

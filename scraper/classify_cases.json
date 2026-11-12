@@ -351,7 +351,7 @@
   "Krytac Trident MK2 PDW Pro",
   null,
   150000,
-  "smg"
+  "rifle"
  ],
  [
   "Retro Arms Šroub pažbičky M4 2ks",
@@ -3916,5 +3916,137 @@
   null,
   156677,
   "part_internal"
+ ],
+ [
+  "CYMA CM707 Black",
+  null,
+  65718,
+  "sniper"
+ ],
+ [
+  "JG NP5 SD6 AEG Black Jing Gong",
+  null,
+  51052,
+  "smg"
+ ],
+ [
+  "CYMA VSS CM.099",
+  null,
+  72948,
+  "sniper"
+ ],
+ [
+  "G&G Armament 2024 CP GBB",
+  null,
+  93018,
+  "pistol"
+ ],
+ [
+  "A&K M1 Garand",
+  null,
+  204319,
+  "rifle"
+ ],
+ [
+  "JG Works JG2338 V2 AEG Black",
+  null,
+  51410,
+  "rifle"
+ ],
+ [
+  "Cybergun COLT M4 PISTOL M-LOK Colt Sportsline M4 AEG",
+  null,
+  72948,
+  "rifle"
+ ],
+ [
+  "EMG Daniel Defense DDM4 V7P Pistol AEG",
+  null,
+  142282,
+  "rifle"
+ ],
+ [
+  "WE M1911 A1 GEN. 3 Gas blowback Full Metal 2x Magazine",
+  null,
+  44760,
+  "pistol"
+ ],
+ [
+  "Lambda Defence x B&T machine gun GBB GHM9 Gen2 Tan",
+  null,
+  80836,
+  "smg"
+ ],
+ [
+  "Arcturus PPK20 AEG FE Machine Gun",
+  null,
+  132284,
+  "smg"
+ ],
+ [
+  "Well AEG Minigun WE23-MINI",
+  null,
+  156879,
+  "lmg"
+ ],
+ [
+  "G&G Armament GMG42",
+  null,
+  680539,
+  "lmg"
+ ],
+ [
+  "Tokyo Marui SGR-12 AEG Black",
+  null,
+  233512,
+  "shotgun"
+ ],
+ [
+  "ARES MSR-338 Spring Black",
+  null,
+  182424,
+  "sniper"
+ ],
+ [
+  "Krytac Trident MK3 PDW-M Black",
+  null,
+  148570,
+  "rifle"
+ ],
+ [
+  "G&G Armament CM16 SRS KeyMod AEG Black",
+  null,
+  99222,
+  "rifle"
+ ],
+ [
+  "EMG SLR Rifleworks Sharp Bros. MB47 SOLO 9\" AEG Black",
+  null,
+  149581,
+  "rifle"
+ ],
+ [
+  "HFC Full Metal WWII Mauser M712 Gas Powered",
+  null,
+  86085,
+  "pistol"
+ ],
+ [
+  "Silverback SRS A1 A2 22 inch fluted Barrel",
+  null,
+  41929,
+  "part_external"
+ ],
+ [
+  "Archwick M170 SPR 300 VSR 10 Spring 9mm",
+  null,
+  6087,
+  "part_internal"
+ ],
+ [
+  "Cybergun Colt 25 Spring Black",
+  null,
+  3649,
+  "pistol"
  ]
 ]

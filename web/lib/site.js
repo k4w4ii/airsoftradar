@@ -15,9 +15,9 @@ export const OPERATOR = {
 
 export const LEGAL_UPDATED = "2026-11-12";
 
-// Ár- és készletfigyelő e-mail szolgáltatója (az adatvédelmi tájékoztatóba kerül): "resend" vagy "brevo".
-// A küldéshez a Worker-titok (RESEND_API_KEY vagy BREVO_API_KEY) kell – TELEPITES.md 12. pont.
-export const MAIL_PROVIDER = "resend";
+// Ár- és készletfigyelő e-mail szolgáltatója (az adatvédelmi tájékoztatóba kerül): "brevo" vagy "resend".
+// Az oldal magától a beállított Worker-titok szerint dönt (BREVO_API_KEY / RESEND_API_KEY); ez csak tartalék.
+export const MAIL_PROVIDER = "brevo";
 
 // ─── Bevétel: Google AdSense + „Hívj meg egy kávéra” ──────────────────────────────
 // Amíg ezek üresek, az oldalon SEMMI nem jelenik meg és semmi nem töltődik be.

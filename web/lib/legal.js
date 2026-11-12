@@ -1,5 +1,6 @@
 // Jogi oldalak tartalma (HU + EN). Az üzemeltetői adatok a lib/site.js OPERATOR objektumából jönnek.
 import { ADS, COFFEE_URL, LEGAL_UPDATED, MAIL_PROVIDER, OPERATOR, SITE_NAME, SITE_URL } from "./site";
+import { mailProvider } from "./mail";
 
 export const DOCS = {
   terms: { hu: "aszf", en: "terms" },
@@ -16,6 +17,22 @@ export const FOOTER_LABELS = {
   en: { terms: "Terms", privacy: "Privacy", imprint: "Imprint", shops: "For shops" },
 };
 
+/** Nyelvváltás: ugyanaz az oldal a másik nyelven (szűrők, termék, jogi oldal megmarad).
+ *  „/hu?cat=rifle&brand=CYMA” -> „/en?cat=rifle&brand=CYMA”, „/hu/adatvedelem” -> „/en/privacy”. */
+export function switchLocale(path, locale) {
+  const other = locale === "hu" ? "en" : "hu";
+  const p = String(path || "");
+  const ok = p === `/${locale}` || ["/", "?", "#"].some((c) => p.startsWith(`/${locale}${c}`));
+  if (!ok) return `/${other}`;
+  let rest = p.slice(locale.length + 1);
+  const m = /^\/([^/?#]+)(.*)$/.exec(rest);
+  if (m) {
+    const doc = Object.keys(DOCS).find((k) => DOCS[k][locale] === m[1]);
+    if (doc) rest = `/${DOCS[doc][other]}${m[2]}`;
+  }
+  return `/${other}${rest}`;
+}
+
 export function docFromSlug(slug) {
   return Object.keys(DOCS).find((k) => DOCS[k].hu === slug || DOCS[k].en === slug) || null;
 }
@@ -30,21 +47,25 @@ const operatorLines = (hu) => [
 ];
 const ADS_ON = Boolean(ADS.client);
 const google = (hu) => `Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, ${hu ? "Írország" : "Ireland"} – policies.google.com (${hu ? "hirdetések: Google AdSense" : "advertising: Google AdSense"})`;
-const MAILER = {
+// a ténylegesen beállított szolgáltató (Worker-titok: BREVO_API_KEY / RESEND_API_KEY), ennek hiányában a site.js értéke
+const provider = () => mailProvider() || MAIL_PROVIDER;
+const MAILERS = {
   resend: (hu) => `Resend, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA – resend.com (${hu ? "értesítő e-mailek küldése" : "sending alert emails"})`,
-  brevo: (hu) => `Brevo SAS, 106 boulevard Haussmann, 75008 Párizs, ${hu ? "Franciaország" : "France"} – brevo.com (${hu ? "értesítő e-mailek küldése" : "sending alert emails"})`,
-}[MAIL_PROVIDER] || null;
+  brevo: (hu) => `Sendinblue SAS (Brevo), 17 rue Salneuve, 75017 ${hu ? "Párizs, Franciaország" : "Paris, France"} – brevo.com (${hu ? "értesítő e-mailek küldése" : "sending alert emails"})`,
+};
 const hosts = (hu) => [
   `Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA – cloudflare.com (${hu ? "weboldal tárhely, adatbázis, domain és DNS" : "website hosting, database, domain and DNS"})`,
   ...(ADS_ON ? [google(hu)] : []),
-  ...(MAILER ? [MAILER(hu)] : []),
+  ...(MAILERS[provider()] ? [MAILERS[provider()](hu)] : []),
 ];
 
-const US = ["Cloudflare", ...(ADS_ON ? ["Google"] : []), ...(MAIL_PROVIDER === "resend" ? ["Resend"] : [])];
-const usNote = (hu) => US.length === 1
+const usNote = (hu) => {
+  const US = ["Cloudflare", ...(ADS_ON ? ["Google"] : []), ...(provider() === "resend" ? ["Resend"] : [])];
+  return US.length === 1
   ? (hu ? `A ${US[0]} amerikai cég;` : `${US[0]} is a US company;`)
   : (hu ? `A ${US.slice(0, -1).join(", ")} és a ${US[US.length - 1]} amerikai (illetve amerikai anyavállalatú) cégek;`
         : `${US.slice(0, -1).join(", ")} and ${US[US.length - 1]} are US companies or have US parents;`);
+};
 
 // Ár- és készletfigyelő (e-mail értesítő)
 const alertsSection = (hu) => [{
