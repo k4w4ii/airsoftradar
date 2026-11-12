@@ -86,6 +86,19 @@ class TestAiReview(unittest.TestCase):
         self.assertGreater(est["usd"], 0)
         self.assertLess(est["usd"], 0.1)
 
+    def test_suggestions_csv(self):
+        prods = [_p(1, "Padded Rifle Carrier", "rifle", 16000), _p(2, "Barrel 6.03", "part_external", 9000),
+                 _p(3, "Cyma M4 HPA custom", "custom_rifle", 90000), _p(4, "Same", "acc_gear")]
+        ai = {"s1": "acc_gear", "s2": "part_hopup", "s3": "rifle", "s4": "acc_gear"}
+        rows = ai_review.suggestions(prods, ai)
+        self.assertEqual([r["termek"] for r in rows], ["Padded Rifle Carrier", "Barrel 6.03"])   # fegyver-ügy elöl, egyedi nem eltérés
+        import os, tempfile
+        path = os.path.join(tempfile.mkdtemp(), "x.csv")
+        ai_review.write_csv(rows, path)
+        text = open(path, encoding="utf-8-sig").read()
+        self.assertIn("termek;gyarto;ar_ft;eddig;ai_javaslat;link", text)
+        self.assertIn("Padded Rifle Carrier;Cyma;16000;rifle;acc_gear;", text)
+
     def test_fix_category_uses_ai(self):
         clean = [{"id": 1, "price_huf": 16000}]
         fixes = {"kategoria": {}, "ai": {"bag": "acc_gear", "cheap": "rifle"}}

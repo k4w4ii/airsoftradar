@@ -1,11 +1,14 @@
 """
-AI-ellenőrzés (Gemini 3.1 Flash-Lite): a termékek kategóriáját a projekt szabályrendszere (ai_szabalyok.md) szerint
-átnézeti, az eredményt a D1 ai_categories táblájába írja. A summary.py ezt a kézi javítás után, a szabály-alapú
-besorolás helyett használja. Minden terméket csak egyszer kérdez meg (újra csak akkor, ha a neve megváltozott).
+AI-ellenőrzés JAVASLAT-MÓDBAN (Gemini 3.1 Flash-Lite): a termékek kategóriáját a projekt szabályrendszere
+(ai_szabalyok.md) szerint átnézeti, az eredményt a D1 ai_categories táblájába írja. Az oldal kategóriáit NEM írja át:
+az eltérésekből ai_javaslatok.csv készül (a futás oldalán: Artifacts), és ebből születnek az új besorolási szabályok
+és regressziós tesztek a classify.py-ban. Így az oldalt mindig a saját, ellenőrizhető szabályaink rendezik.
+Minden terméket csak egyszer kérdez meg (újra csak akkor, ha a neve megváltozott).
 
 Futtatás: GitHub → Actions → ai-review → Run workflow   (helyben: python scraper/ai_review.py)
 Env:
   GEMINI_API_KEY   a Google AI Studio kulcsa (GitHub Secret). Nélküle a script kihagyja magát.
+  AI_LIST_ONLY=1   csak a javaslat-lista (CSV) elkészítése a már meglévő AI-döntésekből (nem hív API-t)
   AI_DRY_RUN=1     csak becslés: hány termék, hány token, mennyibe kerülne (nem hív API-t, kulcs sem kell)
   AI_MAX_REQUESTS  legfeljebb ennyi kérés egy futásban (alapból 50; egy kérés = AI_BATCH termék)
   AI_BATCH         termék / kérés (alapból 100)
@@ -144,6 +147,40 @@ def estimate(todo: list[dict], batch_size: int) -> dict:
             "usd": round(usd, 3), "huf": round(usd * USD_HUF)}
 
 
+CSV = "ai_javaslatok.csv"
+SITE = "https://www.airsofthunter.com/hu/p/"
+
+
+def suggestions(products: list[dict], ai: dict[str, str]) -> list[dict]:
+    """Ahol az AI mást mond, mint a saját szabályaink (az „egyedi” változat nem eltérés). Fegyver-ügyek elöl."""
+    out = []
+    for p in products:
+        c = ai.get(p["slug"])
+        base = p["category"]
+        if not c or c == base or (base in classify.CUSTOM and classify.custom_of(c) == base):
+            continue
+        out.append({"termek": p["name"], "gyarto": p.get("manufacturer") or "", "ar_ft": round(p.get("price") or 0),
+                    "eddig": base, "ai_javaslat": c, "link": SITE + p["slug"]})
+    gun = lambda r: classify.is_gun(r["eddig"]) != classify.is_gun(r["ai_javaslat"])
+    return sorted(out, key=lambda r: (not gun(r), r["eddig"], r["ai_javaslat"], r["ar_ft"]))
+
+
+def write_csv(rows: list[dict], path: str = CSV) -> None:
+    import csv
+    with open(path, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=["termek", "gyarto", "ar_ft", "eddig", "ai_javaslat", "link"], delimiter=";")
+        w.writeheader()
+        w.writerows(rows)
+
+
+def report(db, products: list[dict]) -> list[str]:
+    rows = suggestions(products, load(db))
+    write_csv(rows)
+    guns = sum(classify.is_gun(r["eddig"]) != classify.is_gun(r["ai_javaslat"]) for r in rows)
+    return [f"**Javaslat-lista:** {len(rows)} eltérés (ebből {guns} fegyver ↔ nem fegyver). "
+            f"Letöltés: a futás oldalán lent, **Artifacts → ai-javaslatok** (CSV). Az oldal kategóriái nem változtak."]
+
+
 def _summary(lines: list[str]) -> None:
     print("\n".join(lines), flush=True)
     if os.environ.get("GITHUB_STEP_SUMMARY"):
@@ -156,6 +193,11 @@ def main() -> int:
     db = get_db()
     dry = os.environ.get("AI_DRY_RUN") == "1"
     key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if os.environ.get("AI_LIST_ONLY") == "1":
+        ensure_table(db)
+        products = db.select("product_summary", select="id,slug,name,manufacturer,category,price")
+        _summary(["## AI-javaslatok", *report(db, products)])
+        return 0
     if not dry and not key:
         _summary(["## AI-ellenőrzés", "Nincs GEMINI_API_KEY titok – kihagyva (lásd TELEPITES.md, 11. pont)."])
         return 0
@@ -206,10 +248,10 @@ def main() -> int:
             saved += len(rows)
         print(f"[ai] {n + 1}. kérés: {len(res)}/{len(batch)} termék", flush=True)
     usd = used["in"] / 1e6 * PRICE_IN + used["out"] / 1e6 * PRICE_OUT
-    lines = ["## AI-ellenőrzés", "", f"Átnézve: **{saved}** termék, ebből **{len(changes)}** kategóriája változik. "
+    lines = ["## AI-ellenőrzés (javaslat-mód)", "", f"Átnézve: **{saved}** termék, ebből **{len(changes)}** esetben javasol mást. "
              f"Hátravan: {max(0, len(todo) - saved)}.",
              f"Tokenek: {used['in']:,} be / {used['out']:,} ki → kb. ${usd:.3f} (~{round(usd * USD_HUF)} Ft; ingyenes keretben 0).",
-             *( [f"Megállt: {stop}"] if stop else [] ), ""]
+             *( [f"Megállt: {stop}"] if stop else [] ), *report(db, products), ""]
     if changes:
         lines += ["| Termék | Eddig | AI szerint | Ár (Ft) |", "|---|---|---|---|"]
         lines += [f"| {nm[:70]} | {a} | {b} | {round(pr or 0)} |" for nm, a, b, pr in changes[:200]]

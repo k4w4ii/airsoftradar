@@ -1,16 +1,18 @@
 name: ai-review
 
-# AI-ellenőrzés (Gemini 3.1 Flash-Lite): a termékkategóriák átnézése a szabályrendszer (scraper/ai_szabalyok.md) szerint.
-# Kézi indítás: Actions -> ai-review -> Run workflow. Előbb „becsles” (ingyenes, nem küld semmit), utána „eles”.
+# AI-ellenőrzés JAVASLAT-MÓDBAN (Gemini 3.1 Flash-Lite): a termékkategóriák átnézése a szabályrendszer
+# (scraper/ai_szabalyok.md) szerint. Az oldalt NEM írja át: az eltérések listája (ai_javaslatok.csv) a futás oldalán,
+# Artifacts alatt tölthető le, és ebből lesznek az új besorolási szabályok.
+# Kézi indítás: Actions -> ai-review -> Run workflow. becsles = árbecslés, eles = átnézés + lista, lista = csak a lista.
 # Minden terméket csak egyszer néz át; ha elfogy a napi keret, a következő futás onnan folytatja.
 # Az éjszakai frissítés (daily-scrape) is lefuttatja, kis kerettel, az új termékekre.
 on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "becsles = csak árbecslés, eles = átnézés és az oldal frissítése"
+        description: "becsles = árbecslés, eles = átnézés + javaslat-lista, lista = csak a lista (API nélkül)"
         type: choice
-        options: [becsles, eles]
+        options: [becsles, eles, lista]
         default: becsles
       max_requests:
         description: "Legfeljebb ennyi kérés (1 kérés = 100 termék)"
@@ -48,8 +50,15 @@ jobs:
         run: python scraper/ai_review.py
         env:
           AI_DRY_RUN: ${{ inputs.mode == 'becsles' && '1' || '0' }}
+          AI_LIST_ONLY: ${{ inputs.mode == 'lista' && '1' || '0' }}
           AI_MAX_REQUESTS: ${{ inputs.max_requests }}
           AI_RESET: ${{ inputs.reset && '1' || '0' }}
-      - name: Weboldal frissítése
-        if: always() && inputs.mode == 'eles'      # hiba esetén is: ami addig elkészült, kikerül az oldalra
-        run: python scraper/summary.py
+      - uses: actions/upload-artifact@v4       # javaslat-lista: ezt küldd el a szabályok frissítéséhez
+        continue-on-error: true
+        timeout-minutes: 3
+        if: always()
+        with:
+          name: ai-javaslatok
+          path: ai_javaslatok.csv
+          if-no-files-found: ignore
+          retention-days: 30

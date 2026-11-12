@@ -101,7 +101,7 @@ jobs:
         with: { python-version: "3.12" }
       - name: Tesztek (hibás besoroló kód soha nem ír az adatbázisba)
         run: python -m unittest discover -s scraper -q
-      - name: AI-ellenőrzés (Gemini, csak az új termékek; kulcs nélkül kihagyja, hiba esetén is továbbmegy)
+      - name: AI-ellenőrzés, javaslat-mód (Gemini, csak az új termékek; az oldalt nem írja át; kulcs nélkül kihagyja)
         continue-on-error: true
         timeout-minutes: 15
         run: python scraper/ai_review.py
@@ -115,7 +115,9 @@ jobs:
         if: always()
         with:
           name: minoseg
-          path: minoseg.csv
+          path: |
+            minoseg.csv
+            ai_javaslatok.csv
           if-no-files-found: ignore
           retention-days: 14
       # Next.js ISR újraépítés (opcionális): curl -X POST "$REVALIDATE_URL?secret=$REVALIDATE_SECRET"

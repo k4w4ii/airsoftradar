@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import statistics
 from collections import Counter, defaultdict
@@ -179,8 +180,9 @@ def rebuild(db) -> dict:
     offers = db.select("offers", select="id,product_id,shop_id,url,title_raw,price,currency,stock,last_seen_at,is_outlier,image_url",
                        is_active="eq.1", product_id="not.is.null")
     fixes, diag = quality.load_fixes(), {}
-    import ai_review
-    fixes["ai"] = ai_review.load(db)    # Gemini-ellenőrzés eredménye (ha még nincs tábla: üres)
+    if os.environ.get("AI_APPLY") == "1":   # alapból KI: az AI csak javasol (ai_javaslatok.csv), az oldalt a szabályok rendezik
+        import ai_review
+        fixes["ai"] = ai_review.load(db)
     if fixes["elrejt"]:                 # kézzel elrejtett ajánlat: soha ne párosuljon újra (manual = az automatika nem nyúl hozzá)
         hide = [o["id"] for o in offers if o["url"] in fixes["elrejt"]]
         for i in range(0, len(hide), 80):
