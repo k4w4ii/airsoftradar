@@ -32,6 +32,9 @@ from names import clean_name
 
 CONFIG = json.loads((Path(__file__).parent / "shops.json").read_text())
 STALE_DAYS = 3
+THROTTLED = {"429", "503"}       # „túl sok kérés” / „szolgáltatás nem elérhető”: a bolt lassítást kér
+THROTTLE_STREAK = 20
+COOLDOWN_S = 600
 
 
 def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict], int | None]:
@@ -44,7 +47,7 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
     for attempt in (1, 2):
         # 2. próba: ha az első csak időtúllépést / hálózati / 5xx hibát kapott (a bolt szervere épp lassú), 2 perc múlva
         # még egyszer, dupla időkorláttal – így egy átmeneti akadás miatt nem lesz piros az egész napi futás
-        f = Fetcher(extra_headers=cfg.get("headers"), timeout=cfg.get("timeout", 30) * attempt)
+        f = Fetcher(extra_headers=cfg.get("headers"), timeout=cfg.get("timeout", 30) * attempt, delay=float(cfg.get("delay", 2.0)))
         errors, out, urls, diag = [], [], [], {}
         try:
             if cfg["source"] == "sitemap":
@@ -84,6 +87,7 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
     out = out[:cap]
     urls = urls[:cap]
     print(f"[{slug}] {len(out)} ajánlat kategóriaoldalról, {len(urls)} termék URL, http: {dict(f.stats)}", file=sys.stderr)
+    streak, cooled = 0, False
     for i, u in enumerate(urls):
         if time.monotonic() > deadline:
             errors.append({"error": f"időkorlát: {i}/{len(urls)} URL után leállt"})
@@ -91,6 +95,17 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
             break
         try:
             page = f.get(u)
+            # a bolt korlátoz (429 / 503 egymás után): egyszer 10 perc szünet, ha utána is, leállunk (holnap folytatja)
+            streak = streak + 1 if page is None and f.last in THROTTLED else 0
+            if streak >= THROTTLE_STREAK:
+                if cooled:
+                    errors.append({"error": f"a bolt korlátozza a letöltést ({f.last}): {i + 1}/{len(urls)} URL után leállt",
+                                   "http": dict(f.stats)})
+                    stale_days = None
+                    break
+                print(f"[{slug}] {streak} korlátozott válasz egymás után ({f.last}) – 10 perc szünet", file=sys.stderr)
+                time.sleep(COOLDOWN_S)
+                cooled, streak = True, 0
             found = extract(page, u) if page else []
             if not found:
                 errors.append({"url": u, "error": "no product data" if page else f"letöltés sikertelen ({dict(f.stats)})"})

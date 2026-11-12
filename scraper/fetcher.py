@@ -22,6 +22,8 @@ class Fetcher:
         self._last: dict[str, float] = {}
         self._robots: dict[str, urllib.robotparser.RobotFileParser | None] = {}
         self.stats: Counter = Counter()      # kimenetek: '200', '403', 'timeout', 'robots' ... (diagnosztika)
+        self.last = ""                       # az utolsó letöltés kimenete (a futás ebből látja, ha a bolt korlátoz)
+        self.max_delay = 20.0
 
     def allowed(self, url: str) -> bool:
         p = urlsplit(url)
@@ -55,16 +57,29 @@ class Fetcher:
             try:
                 status, text = self._raw(url)
                 self.stats[str(status)] += 1
+                self.last = str(status)
                 return text if status == 200 else None
             except urllib.error.HTTPError as e:
                 self.stats[str(e.code)] += 1
+                self.last = str(e.code)
                 if e.code not in (429, 500, 502, 503, 504):
                     return None          # 403/404/...: nem próbáljuk újra, a statisztikában látszik
+                if e.code in (429, 503):
+                    # a bolt korlátoz („túl sok kérés”): tartósan lassítunk, és kivárjuk a Retry-After-t (vagy 20–60 mp-et)
+                    self.delay = min(self.max_delay, self.delay * 1.5 + 1)
+                    try:
+                        ra = float((e.headers or {}).get("Retry-After") or 0)
+                    except (TypeError, ValueError):
+                        ra = 0
+                    if attempt < self.retries - 1:
+                        time.sleep(min(120.0, max(ra, 20.0 * (attempt + 1))))
+                    continue
             except ValueError:
                 self.stats["badurl"] += 1
                 return None
             except (urllib.error.URLError, TimeoutError, OSError) as e:
-                self.stats["timeout" if "timed out" in str(e) else "neterr"] += 1
+                self.last = "timeout" if "timed out" in str(e) else "neterr"
+                self.stats[self.last] += 1
             if attempt < self.retries - 1:
                 time.sleep((2 ** attempt) * 5 + random.random() * 2)
         return None

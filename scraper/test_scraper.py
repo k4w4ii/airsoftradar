@@ -547,3 +547,35 @@ class TestShopConfig(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestThrottle(unittest.TestCase):
+    def test_503_slows_down_and_waits(self):
+        import urllib.error
+        from fetcher import Fetcher
+        f = Fetcher(retries=2, delay=2)
+        def boom(url):
+            raise urllib.error.HTTPError(url, 503, "busy", {"Retry-After": "45"}, None)
+        sleeps = []
+        with mock.patch.object(f, "_raw", side_effect=boom), mock.patch.object(f, "allowed", return_value=True), \
+                mock.patch("fetcher.time.sleep", side_effect=sleeps.append):
+            self.assertIsNone(f.get("https://s.eu/p/1"))
+        self.assertEqual(f.last, "503")
+        self.assertIn(45.0, sleeps)                    # Retry-After tiszteletben tartva
+        self.assertGreater(f.delay, 2)                 # tartósan lassabb
+
+    def test_throttled_shop_stops_after_cooldown(self):
+        class Busy:
+            stats, last = {"503": 1}, "503"
+            def get(self, u):
+                return None
+        cfg = {"source": "sitemap", "sitemap": "https://s.eu/sm.xml", "product_pattern": r"/p/", "base_url": "https://s.eu"}
+        urls = [f"https://s.eu/p/{i}" for i in range(100)]
+        sleeps = []
+        with mock.patch.object(run_shop, "Fetcher", return_value=Busy()), mock.patch.object(run_shop, "from_sitemap", return_value=urls), \
+                mock.patch.dict(run_shop.CONFIG, {"busy": cfg}), mock.patch("run_shop.time.sleep", side_effect=sleeps.append):
+            out, errors, stale = run_shop.scrape("busy", None)
+        self.assertEqual(sleeps, [run_shop.COOLDOWN_S])             # egyszer 10 perc szünet
+        self.assertIn("korlátozza", errors[-1]["error"])
+        self.assertIn("40/100", errors[-1]["error"])
+        self.assertIsNone(stale)                                      # csonka futás: semmit nem inaktivál

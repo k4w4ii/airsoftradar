@@ -1,5 +1,5 @@
 {
-  "_doc": "source: 'sitemap' | 'listing'. sitemap: URL, URL-lista vagy 'auto' (robots.txt). product_pattern: termék URL regex. max_products: napi felső korlát (alap 2000). headers: extra HTTP fejlécek. enabled=false -> kihagyva.",
+  "_doc": "source: 'sitemap' | 'listing'. sitemap: URL, URL-lista vagy 'auto' (robots.txt). product_pattern: termék URL regex. exclude_pattern: kihagyandó URL-ek. max_products: napi felső korlát (alap 6000; több termék esetén naponta forgó ablak). delay: másodperc két kérés között (alap 2; 429/503 esetén magától lassít). headers: extra HTTP fejlécek. enabled=false -> kihagyva.",
   "gunfire": {
     "source": "listing",
     "start_urls": [
@@ -35,8 +35,9 @@
     "sitemap": "https://www.taiwangun.com/downloads/sitemap/products_1_eng.xml",
     "product_pattern": "^https://www\\.taiwangun\\.com/(?!(?:pl|de|fr|es|it|cs|cz|hu|ro|sk|ru|ua|en)/)[a-z0-9-]+/[a-z0-9-]+$",
     "exclude_pattern": "/(?:patches|naszywki|knives|noze|camping|outdoor|survival|watches|zegarki)[a-z0-9-]*/",
-    "max_products": 6000,
-    "status": "2026-11-11: a sitemap-index már csak a lengyel listát adja -> közvetlenül az angol termék-sitemap (products_1_eng.xml); ruházat kiszűrve; forgó napi ablak"
+    "max_products": 2500,
+    "status": "2026-11-11: a sitemap-index már csak a lengyel listát adja -> közvetlenül az angol termék-sitemap (products_1_eng.xml); ruházat kiszűrve; forgó napi ablak",
+    "delay": 4
   },
   "evike-europe": {
     "source": "sitemap",
@@ -113,7 +114,8 @@
     "base_url": "https://airsoftsports.de",
     "product_pattern": "^https://airsoftsports\\.de/(?!kein-|keine-)[a-z0-9-]+/$",
     "max_products": 4000,
-    "status": "2026-11-11: WooCommerce (Yoast) termék-sitemapek, termék = egyszintű cím perjellel; a „kein-…” opció-termékek kihagyva"
+    "status": "2026-11-11: WooCommerce (Yoast) termék-sitemapek, termék = egyszintű cím perjellel; a „kein-…” opció-termékek kihagyva",
+    "exclude_pattern": "^https://airsoftsports\\.de/(shop|cart|checkout|warenkorb|kasse|mein-konto|my-account|kontakt|impressum|datenschutz|agb|versand|blog)/$"
   },
   "airsoft-guns-eu": {
     "source": "sitemap",
