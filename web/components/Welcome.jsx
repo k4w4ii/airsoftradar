@@ -2,7 +2,7 @@ import Link from "next/link";
 import { COLLECTION_MIN, collectionPath } from "../lib/seo";
 import CatImg from "./CatImg";
 import { CAT_GROUPS, hrefFor } from "../lib/catalog";
-import { t } from "../lib/i18n";
+import { shy, t } from "../lib/i18n";
 import { ProductTile } from "./HomeView";
 import SearchBox from "./SearchBox";
 import ToolIcon from "./tools/ToolIcon";
@@ -37,7 +37,7 @@ export default function Welcome({ locale, currency, rates, data }) {
             <li key={c}>
               <Link href={hrefFor(locale, { ...BASE, cats: [c] })} className="cat-tile">
                 <span className="cat-img"><CatImg srcs={image(c)} alt={tr.cats[c]} /></span>
-                <span className="cat-name">{tr.cats[c]}</span>
+                <span className="cat-name">{shy(tr.cats[c], locale)}</span>
                 <span className="cat-n">{tr.items(count(c))}</span>
               </Link>
             </li>

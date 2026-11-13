@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CAT_GROUPS, defaultCats, FACETS, facetLabel, facetValue, hrefFor, PLATFORMS, showPlatforms, visibleDims, withoutCat } from "../lib/catalog";
-import { money, plainMoney, shortDate, t } from "../lib/i18n";
+import { money, plainMoney, shortDate, shy, t } from "../lib/i18n";
 import { imgSrc } from "../lib/links";
 import AutoSubmit from "./AutoSubmit";
 import PriceSlider from "./PriceSlider";
@@ -119,13 +119,13 @@ function CategoryTree({ locale, params, counts }) {
         return (
           <li key={g.id} className={open ? "group open" : "group"}>
             <div className="group-row">
-              {box("cat", g.id, tr.cats[g.id], n, gOn, { "data-group": g.id })}
+              {box("cat", g.id, shy(tr.cats[g.id], locale), n, gOn, { "data-group": g.id })}
               <button type="button" className="twisty" data-twisty aria-expanded={open ? "true" : "false"}
                       aria-label={tr.cats[g.id]} />
             </div>
             <ul className="sub">
               {g.leaves.map((l) => (
-                <li key={l}>{box("cat", l, tr.cats[l], counts[l] || 0, gOn || sel.has(l), { "data-parent": g.id })}</li>
+                <li key={l}>{box("cat", l, shy(tr.cats[l], locale), counts[l] || 0, gOn || sel.has(l), { "data-parent": g.id })}</li>
               ))}
             </ul>
           </li>

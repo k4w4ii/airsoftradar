@@ -454,13 +454,19 @@ img { display: block; max-width: 100%; }
 .see-all { font-weight: 600; white-space: nowrap; }
 .cat-tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 .cat-tile {
-  display: grid; justify-items: center; gap: 4px; padding: 10px 10px 12px; text-decoration: none; text-align: center; height: 100%;
+  display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; justify-items: center; gap: 4px; padding: 10px 10px 12px; text-decoration: none; text-align: center; height: 100%;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-m); transition: border-color .15s, transform .15s;
 }
 .cat-tile:hover { border-color: var(--brass-dim); transform: translateY(-2px); }
 .cat-img { width: 100%; aspect-ratio: 16 / 10; background: #fff; border-radius: var(--radius-s); display: grid; place-items: center; overflow: hidden; margin-bottom: 4px; }
 .cat-img img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
-.cat-name { font: 600 17px/1.15 var(--display); }
+.cat-name { font: 600 17px/1.15 var(--display); max-width: 100%; }
+/* hosszú összetett szavak (németül „Scharfschützengewehre”): a kategórianevekben feltételes elválasztójel (lib/i18n.js shy()),
+   máshol szótagolás csak hosszú szavaknál; végső esetben tördelés, hogy semmi ne lógjon ki a dobozból */
+.cat-name, .cat-tree label { overflow-wrap: break-word; hyphens: manual; }
+.tool-name, .tool-desc, .facet, .fgroup h2, .chip, .wblock h2, .hero h1 {
+  overflow-wrap: break-word; hyphens: auto; -webkit-hyphenate-limit-before: 5; hyphenate-limit-chars: 12 5 5;
+}
 .cat-n { font-size: 13px; color: var(--muted); }
 .brand-chips .chip span { font-size: 12px; }
 @media (min-width: 1000px) { .cat-tiles { grid-template-columns: repeat(7, minmax(0, 1fr)); } .cat-name { font-size: 16px; } }

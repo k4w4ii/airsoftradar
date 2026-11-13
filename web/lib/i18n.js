@@ -22,6 +22,21 @@ import PL from "./locales/pl";
 import CS from "./locales/cs";
 export const WEAPON_CATS = ["rifle", "pistol", "smg", "sniper", "lmg", "shotgun", "grenade"];
 
+// Feltételes elválasztás (soft hyphen) a hosszú német összetett szavakba, csak megjelenítéshez (csempék, oldalsáv):
+// így „Maschinen-pistolen” a tördelés, nem „Maschinenpisto-len”. Címbe, metaadatba NEM kerül.
+const SHY = {
+  de: ["Maschinen|pistolen", "Maschinen|gewehre", "Scharf|schützen|gewehre", "Sturm|gewehre", "Schrot|flinten", "Granat|werfer",
+       "Ersatz|teile", "Innen|teile", "Innen|läufe", "Lade|geräte", "Schutz|ausrüstung", "Aus|rüstung", "Scharf|schützen"],
+};
+const SHY_RE = Object.fromEntries(Object.entries(SHY).map(([l, words]) => [l, words.map((w) => [new RegExp(w.replace(/\|/g, ""), "g"), w.replace(/\|/g, "\u00AD")])]));
+export function shy(text, locale) {
+  const rules = SHY_RE[locale];
+  if (!rules || !text) return text;
+  let out = text;
+  for (const [re, rep] of rules) out = out.replace(re, rep);
+  return out;
+}
+
 export function isLocale(x) {
   return LOCALES.includes(x);
 }
