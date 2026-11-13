@@ -33,8 +33,8 @@ from names import clean_name
 CONFIG = json.loads((Path(__file__).parent / "shops.json").read_text())
 STALE_DAYS = 3
 THROTTLED = {"429", "503"}       # „túl sok kérés” / „szolgáltatás nem elérhető”: a bolt lassítást kér
-THROTTLE_STREAK = 20
-COOLDOWN_S = 600
+THROTTLE_STREAK = 3              # ennyi korlátozott URL egymás után (mindegyik már 3x próbálva) -> szünet
+COOLDOWNS_S = (300, 900, 1800, 3600)   # egyre hosszabb szünetek; ha kettő egymás után sem segít, holnap folytatja
 
 
 LANGS = {"en", "hu", "de", "fr", "it", "es", "pl", "cs", "cz", "sk", "hr", "sl", "ro", "nl", "pt", "sv", "fi", "da", "no", "bg",
@@ -108,7 +108,9 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
     out = out[:cap]
     urls = urls[:cap]
     print(f"[{slug}] {len(out)} ajánlat kategóriaoldalról, {len(urls)} termék URL, http: {dict(f.stats)}", file=sys.stderr)
-    streak, cooled = 0, False
+    if md := cfg.get("max_delay"):
+        f.max_delay = max(getattr(f, "max_delay", 20.0), float(md))
+    streak, level, burst, burst_t0, dead, pauses, done = 0, 0, 0, time.monotonic(), 0, [], 0
     for i, u in enumerate(urls):
         if time.monotonic() > deadline:
             errors.append({"error": f"időkorlát: {i}/{len(urls)} URL után leállt"})
@@ -116,23 +118,39 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
             break
         try:
             page = f.get(u)
-            # a bolt korlátoz (429 / 503 egymás után): egyszer 10 perc szünet, ha utána is, leállunk (holnap folytatja)
+            done = i + 1
+            if page is not None:
+                burst, dead = burst + 1, 0
+            # a bolt korlátoz (429/503 egymás után): egyre hosszabb szünet, utána a megfigyelt ütemhez lassítunk
             streak = streak + 1 if page is None and f.last in THROTTLED else 0
             if streak >= THROTTLE_STREAK:
-                if cooled:
+                dead += 1 if burst == 0 else 0
+                pause = COOLDOWNS_S[min(level, len(COOLDOWNS_S) - 1)]
+                if dead >= 2 or time.monotonic() + pause > deadline:
                     errors.append({"error": f"a bolt korlátozza a letöltést ({f.last}): {i + 1}/{len(urls)} URL után leállt",
-                                   "http": dict(f.stats)})
+                                   "http": dict(f.stats), "szunetek_s": pauses, "elso_korlatozas": getattr(f, "throttle_info", None)})
                     stale_days = None
                     break
-                print(f"[{slug}] {streak} korlátozott válasz egymás után ({f.last}) – 10 perc szünet", file=sys.stderr)
-                time.sleep(COOLDOWN_S)
-                cooled, streak = True, 0
+                if burst:   # megfigyelt fenntartható ütem: 'burst' oldal (burst idő + szünet) alatt -> ehhez lassítunk
+                    pace = (time.monotonic() - burst_t0 + pause) / burst
+                    f.max_delay = max(getattr(f, "max_delay", 20.0), min(90.0, pace))
+                    f.delay = max(getattr(f, "delay", 2.0), min(90.0, pace))
+                print(f"[{slug}] {streak} korlátozott válasz ({f.last}) {burst} sikeres után – {pause // 60} perc szünet, "
+                      f"utána {getattr(f, 'delay', 0):.0f} mp/oldal", file=sys.stderr)
+                time.sleep(pause)
+                pauses.append(pause)
+                level, streak, burst, burst_t0 = level + 1, 0, 0, time.monotonic()
+                continue
             found = extract(page, u) if page else []
             if not found:
                 errors.append({"url": u, "error": "no product data" if page else f"letöltés sikertelen ({dict(f.stats)})"})
             out += [o for o in found if not is_clothing(o.title)]
         except Exception as e:  # egy hibás oldal ne állítsa le a futást
             errors.append({"url": u, "error": repr(e)[:200]})
+    if pauses or getattr(f, "throttle_info", None):   # összesítő az allapot.sql-hez: hány URL ment le, milyen szünetekkel
+        errors.insert(0, {"info": f"{done}/{len(urls)} URL feldolgozva, {len(out)} ajánlat", "http": dict(f.stats),
+                          "szunetek_s": pauses, "vegso_mp_per_oldal": round(getattr(f, "delay", 0), 1),
+                          "elso_korlatozas": getattr(f, "throttle_info", None)})
     return out, errors, stale_days
 
 

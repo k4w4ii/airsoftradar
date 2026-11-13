@@ -575,10 +575,32 @@ class TestThrottle(unittest.TestCase):
         with mock.patch.object(run_shop, "Fetcher", return_value=Busy()), mock.patch.object(run_shop, "from_sitemap", return_value=urls), \
                 mock.patch.dict(run_shop.CONFIG, {"busy": cfg}), mock.patch("run_shop.time.sleep", side_effect=sleeps.append):
             out, errors, stale = run_shop.scrape("busy", None)
-        self.assertEqual(sleeps, [run_shop.COOLDOWN_S])             # egyszer 10 perc szünet
+        self.assertEqual(sleeps, [run_shop.COOLDOWNS_S[0]])         # egy szünet; utána sem jön semmi -> leáll
         self.assertIn("korlátozza", errors[-1]["error"])
-        self.assertIn("40/100", errors[-1]["error"])
+        self.assertIn("6/100", errors[-1]["error"])
+        self.assertIn("6/100", errors[0]["info"])                     # összesítő az allapot.sql-hez
         self.assertIsNone(stale)                                      # csonka futás: semmit nem inaktivál
+
+    def test_rate_limit_learns_pace_and_continues(self):
+        class Limited:                        # 20 oldal megy, aztán 3 korlátozott, utána újra megy
+            stats, last, delay, max_delay, throttle_info = {}, "200", 4.0, 20.0, {"status": 503, "cloudflare": False}
+            n = 0
+            def get(self, u):
+                self.n += 1
+                ok = not (20 < self.n <= 23)
+                self.last = "200" if ok else "503"
+                return "<html></html>" if ok else None
+        cfg = {"source": "sitemap", "sitemap": "https://s.eu/sm.xml", "product_pattern": r"/p/", "base_url": "https://s.eu"}
+        urls = [f"https://s.eu/p/{i}" for i in range(60)]
+        lim, sleeps = Limited(), []
+        with mock.patch.object(run_shop, "Fetcher", return_value=lim), mock.patch.object(run_shop, "from_sitemap", return_value=urls), \
+                mock.patch.dict(run_shop.CONFIG, {"lim": cfg}), mock.patch("run_shop.time.sleep", side_effect=sleeps.append), \
+                mock.patch.object(run_shop, "extract", return_value=[]):
+            out, errors, stale = run_shop.scrape("lim", None)
+        self.assertEqual(sleeps, [run_shop.COOLDOWNS_S[0]])
+        self.assertEqual(lim.n, 60)                                    # a szünet után végigment
+        self.assertGreaterEqual(lim.delay, run_shop.COOLDOWNS_S[0] / 20)   # 20 oldal / (idő + 5 perc) ütemre lassított
+        self.assertNotIn("korlátozza", str(errors))
 
 
 class TestOneLanguage(unittest.TestCase):

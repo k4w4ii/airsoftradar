@@ -35,9 +35,10 @@
     "sitemap": "https://www.taiwangun.com/downloads/sitemap/products_1_eng.xml",
     "product_pattern": "^https://www\\.taiwangun\\.com/(?!(?:pl|de|fr|es|it|cs|cz|hu|ro|sk|ru|ua|en)/)[a-z0-9-]+/[a-z0-9-]+$",
     "exclude_pattern": "/(?:patches|naszywki|knives|noze|camping|outdoor|survival|watches|zegarki)[a-z0-9-]*/",
-    "max_products": 2500,
-    "status": "2026-11-11: a sitemap-index már csak a lengyel listát adja -> közvetlenül az angol termék-sitemap (products_1_eng.xml); ruházat kiszűrve; forgó napi ablak",
-    "delay": 4
+    "max_products": 1200,
+    "status": "2026-11-13: ~20 oldal után 503 (sebességkorlát) -> lassabb ütem (10 mp), egyre hosszabb szünetek + öntanuló tempó; ablak 1200/nap",
+    "delay": 10,
+    "max_delay": 60
   },
   "evike-europe": {
     "source": "sitemap",

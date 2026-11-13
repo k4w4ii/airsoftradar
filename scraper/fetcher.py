@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import gzip
+import re
 import random
 import time
 import urllib.error
@@ -24,6 +25,7 @@ class Fetcher:
         self.stats: Counter = Counter()      # kimenetek: '200', '403', 'timeout', 'robots' ... (diagnosztika)
         self.last = ""                       # az utolsó letöltés kimenete (a futás ebből látja, ha a bolt korlátoz)
         self.max_delay = 20.0
+        self.throttle_info: dict | None = None   # az első 429/503 válasz jellemzői (Cloudflare? Retry-After?) – diagnosztika
 
     def allowed(self, url: str) -> bool:
         p = urlsplit(url)
@@ -65,6 +67,8 @@ class Fetcher:
                 if e.code not in (429, 500, 502, 503, 504):
                     return None          # 403/404/...: nem próbáljuk újra, a statisztikában látszik
                 if e.code in (429, 503):
+                    if self.throttle_info is None:
+                        self.throttle_info = self._describe(e)
                     # a bolt korlátoz („túl sok kérés”): tartósan lassítunk, és kivárjuk a Retry-After-t (vagy 20–60 mp-et)
                     self.delay = min(self.max_delay, self.delay * 1.5 + 1)
                     try:
@@ -83,6 +87,19 @@ class Fetcher:
             if attempt < self.retries - 1:
                 time.sleep((2 ** attempt) * 5 + random.random() * 2)
         return None
+
+    @staticmethod
+    def _describe(e) -> dict:
+        h = e.headers or {}
+        try:
+            body = (e.read() or b"")[:3000].decode("utf-8", "replace")
+        except Exception:
+            body = ""
+        low = body.lower()
+        title = re.search(r"<title[^>]*>(.*?)</title>", body, re.I | re.S)
+        return {"status": e.code, "server": h.get("Server"), "retry_after": h.get("Retry-After"),
+                "cloudflare": bool(h.get("CF-RAY")) or "cloudflare" in low or "just a moment" in low,
+                "title": (title.group(1).strip()[:80] if title else body.strip()[:80])}
 
     def _throttle(self, url: str) -> None:
         host = urlsplit(url).netloc
