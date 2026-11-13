@@ -5,7 +5,7 @@ import { Shell } from "../../components/ui";
 import Welcome from "../../components/Welcome";
 import { hrefFor, isWelcome, parseCatalog } from "../../lib/catalog";
 import { catalogSearch, getRates, getWelcome } from "../../lib/data";
-import { CURRENCIES, DEFAULT_CURRENCY, isLocale, t } from "../../lib/i18n";
+import { altLanguages, CURRENCIES, DEFAULT_CURRENCY, isLocale, t } from "../../lib/i18n";
 import { catalogMeta } from "../../lib/seo";
 
 export async function generateMetadata({ params, searchParams }) {
@@ -13,7 +13,7 @@ export async function generateMetadata({ params, searchParams }) {
   const sp = await searchParams;
   const tr = t(locale);
   if (isWelcome(sp)) {
-    return { title: tr.title, description: tr.description, alternates: { canonical: `/${locale}`, languages: { hu: "/hu", en: "/en" } } };
+    return { title: tr.title, description: tr.description, alternates: { canonical: `/${locale}`, languages: altLanguages((l) => `/${l}`) } };
   }
   const p = parseCatalog(sp);
   return catalogMeta(locale, p, tr);

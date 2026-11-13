@@ -1,8 +1,9 @@
 // Programmatic SEO: schema.org JSON-LD a termékoldalakra, márka-gyűjtőoldalak (slug, minimális méret), árelőzmény-elemzés.
 // Tiszta függvények (szerveren és tesztben is).
 import { SITE_NAME, SITE_URL } from "./site";
+import { altLanguages } from "./i18n";
 
-export const PAGE_CURRENCY = { hu: "HUF", en: "EUR" };
+export const PAGE_CURRENCY = { hu: "HUF", en: "EUR", de: "EUR", pl: "PLN", cs: "CZK" };
 export const COLLECTION_MIN = 3;            // ennél kevesebb termékből nem készül gyűjtőoldal (vékony tartalom)
 
 const round = (v, cur) => (cur === "HUF" || cur === "CZK" ? Math.round(v) : Math.round(v * 100) / 100);
@@ -90,7 +91,7 @@ export function catalogMeta(locale, p, tr) {
     const c = p.cats[0] || null;
     const path = (l) => collectionPath(l, p.brands[0], c);
     return { title: `${tr.collectionTitle(p.brands[0], c ? tr.cats[c] : null)} | AirsoftHunter`, description: tr.description,
-             alternates: { canonical: path(locale), languages: { hu: path("hu"), en: path("en") } } };
+             alternates: { canonical: path(locale), languages: altLanguages(path) } };
   }
   const one = p.cats.length === 1 ? p.cats[0] : null;
   const clean = one && !p.brands.length && !extra && !p.stock;
@@ -99,7 +100,7 @@ export function catalogMeta(locale, p, tr) {
     title: one ? `${tr.cats[one]}${page ? ` – ${p.page}.` : ""} | AirsoftHunter` : tr.title,
     description: tr.description,
     alternates: { canonical: `/${locale}?cat=${one || "weapons"}${page}`,
-                  languages: { hu: `/hu?cat=${one || "weapons"}${page}`, en: `/en?cat=${one || "weapons"}${page}` } },
+                  languages: altLanguages((l) => `/${l}?cat=${one || "weapons"}${page}`) },
   };
 }
 

@@ -1,11 +1,9 @@
+import { TL_X } from "./locales/toollabels";
 // A kalkulátorok felületi szövegei (a böngészőbe is kerül, ezért rövid; a hosszabb SEO-szöveg a lib/tools.js-ben van).
 export const TL = {
   hu: {
     unit: "Mértékegység", speed: "Mért sebesség", bb: "BB súlya", unitFps: "fps", unitMs: "m/s",
-    energy: "Torkolati energia", bbFor: (a, b) => `Ehhez az energiához illő BB-k (${a}–${b} g)`, eq20: "0,20 g-os BB-vel egyenértékű", bbAdvice: "Ajánlott BB-súly",
-    masz: "MASZ kategória",
-    maszName: { hand: "Kézifegyver (≤ 1,5 J)", dmr: "Félautomata mesterlövész (≤ 2,2 J, 20 m min. lőtáv)",
-                bolt: "Ismétlő mesterlövész (≤ 3,3 J, 20 m min. lőtáv)", over: "3,3 J felett: nem airsoft légfegyver" },
+    energy: "Torkolati energia", bbFor: (a, b) => `Ehhez az energiához illő BB-k (${a}–${b} g)`,
     target: "Célenergia", unitJ: "Joule", unitFps20: "fps (0,20 g)", barrel: "Belső cső hossza", ratio: "Fogaskerék-áttétel",
     spring: "Ajánlott rugó", estimate: "Várható érték", motor: "Ajánlott motor",
     motorName: { balanced: "Balanced / High Speed (16–18 TPA)", torque: "Torque (18–20 TPA)", hightorque: "High Torque (22+ TPA)" },
@@ -30,10 +28,7 @@ export const TL = {
   },
   en: {
     unit: "Unit", speed: "Measured speed", bb: "BB weight", unitFps: "fps", unitMs: "m/s",
-    energy: "Muzzle energy", bbFor: (a, b) => `BBs that suit this energy (${a}–${b} g)`, eq20: "Equivalent with 0.20 g BBs", bbAdvice: "Recommended BB weight",
-    masz: "Hungarian rules (MASZ) class",
-    maszName: { hand: "Standard gun (≤ 1.5 J)", dmr: "Semi-auto sniper / DMR (≤ 2.2 J, 20 m min. distance)",
-                bolt: "Bolt-action sniper (≤ 3.3 J, 20 m min. distance)", over: "Above 3.3 J: not an airsoft gun" },
+    energy: "Muzzle energy", bbFor: (a, b) => `BBs that suit this energy (${a}–${b} g)`,
     target: "Target energy", unitJ: "Joule", unitFps20: "fps (0.20 g)", barrel: "Inner barrel length", ratio: "Gear ratio",
     spring: "Recommended spring", estimate: "Expected result", motor: "Recommended motor",
     motorName: { balanced: "Balanced / High Speed (16–18 TPA)", torque: "Torque (18–20 TPA)", hightorque: "High Torque (22+ TPA)" },
@@ -57,4 +52,5 @@ export const TL = {
     shops: (n) => (n === 1 ? "1 shop" : `${n} shops`),
   },
 };
+Object.assign(TL, TL_X);
 export const tl = (locale) => TL[locale] || TL.en;

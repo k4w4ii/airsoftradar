@@ -2,12 +2,14 @@
 // Airsoft kalkulátorok (kliensoldal): azonnali számítás gépelés közben, az eredmény alatt raktáron lévő termékajánló.
 // A beállítások a címsorba kerülnek (?bb=0.28&speed=380…), így a link megosztható.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { money } from "../../lib/i18n";
+import { intl, money } from "../../lib/i18n";
 import { imgSrc } from "../../lib/links";
 import { tl } from "../../lib/toollabels";
 import { BB_WEIGHTS, BORES, cylinderCalc, fpsCalc, GEAR_RATIOS, lipoCalc, springCalc, VOLTAGES } from "../../lib/toolcalc";
 
-const fmt = (v, locale, d = 0) => (v == null ? "–" : Number(v).toLocaleString(locale === "hu" ? "hu-HU" : "en-GB", { maximumFractionDigits: d }));
+// rögzített tizedesjegyű szám a nyelv tizedesjelével (0,25 g; 6,03 mm; 7,4 V)
+const dn = (v, locale, d) => Number(v).toLocaleString(intl(locale), { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmt = (v, locale, d = 0) => (v == null ? "–" : Number(v).toLocaleString(intl(locale), { maximumFractionDigits: d }));
 
 function useQuerySync(state) {
   const first = useRef(true);
@@ -138,7 +140,7 @@ export function FpsCalculator({ locale, currency, rates, initial = {} }) {
             <span className="tf-label">{L.bb}</span>
             <span className="tf-input">
               <select id="bb" value={bb} onChange={(e) => setBb(e.target.value)}>
-                {BB_WEIGHTS.map((w) => <option key={w} value={w}>{w} g</option>)}
+                {BB_WEIGHTS.map((w) => <option key={w} value={w}>{dn(w, locale, 2)} g</option>)}
               </select>
             </span>
           </label>
@@ -180,7 +182,7 @@ export function SpringCalculator({ locale, currency, rates, initial = {} }) {
         <div className="tres">
           {r ? (
             <>
-              <Out big label={L.spring} value={`M${r.m}`} sub={`${L.estimate}: ≈ ${fmt(r.estFps, locale)} fps · ${fmt(r.estJoule, locale, 2)} J (${locale === "hu" ? "0,20" : "0.20"} g) · ${L.efficiency} ${Math.round(r.eff * 100)}%`} />
+              <Out big label={L.spring} value={`M${r.m}`} sub={`${L.estimate}: ≈ ${fmt(r.estFps, locale)} fps · ${fmt(r.estJoule, locale, 2)} J (${dn(0.2, locale, 2)} g) · ${L.efficiency} ${Math.round(r.eff * 100)}%`} />
               <Out label={L.motor} value={L.motorName[r.motor]} sub={L.motorNote[r.motor]} tone={r.motor === "hightorque" ? "warn" : undefined} />
               {r.highVolt ? <Note>{L.highVolt}</Note> : null}
               {r.outOfRange ? <Note tone="bad">{r.outOfRange === "low" ? L.rangeLow : L.rangeHigh}</Note> : null}
@@ -209,12 +211,12 @@ export function CylinderCalculator({ locale, currency, rates, initial = {} }) {
       <div className="tcard">
         <div className="tin">
           <Field id="barrel" label={L.barrel} value={barrel} onChange={setBarrel} unit="mm" min={80} max={800} step={1} />
-          <Seg label={L.bore} name="bore" value={bore} onChange={setBore} options={BORES.map((b) => [b, `${b} mm`])} />
+          <Seg label={L.bore} name="bore" value={bore} onChange={setBore} options={BORES.map((b) => [b, `${dn(b, locale, 2)} mm`])} />
           <label className="tf" htmlFor="bb">
             <span className="tf-label">{L.bb}</span>
             <span className="tf-input">
               <select id="bb" value={bb} onChange={(e) => setBb(e.target.value)}>
-                {BB_WEIGHTS.map((w) => <option key={w} value={w}>{w} g</option>)}
+                {BB_WEIGHTS.map((w) => <option key={w} value={w}>{dn(w, locale, 2)} g</option>)}
               </select>
             </span>
           </label>
@@ -249,7 +251,7 @@ export function LipoCalculator({ locale, currency, rates, initial = {} }) {
     <>
       <div className="tcard">
         <div className="tin">
-          <Seg label={L.volt} name="volt" value={volt} onChange={setVolt} options={VOLTAGES.map((v) => [v, `${v} V`])} />
+          <Seg label={L.volt} name="volt" value={volt} onChange={setVolt} options={VOLTAGES.map((v) => [v, `${dn(v, locale, 1)} V`])} />
           <Field id="mah" label={L.mah} value={mah} onChange={setMah} unit="mAh" min={300} max={10000} step={50} />
           <Field id="c" label={L.c} value={c} onChange={setC} unit="C" min={5} max={100} step={1} />
           <Field id="rpm" label={L.rpm} value={rpm} onChange={setRpm} unit="RPM" min={10000} max={80000} step={500} />

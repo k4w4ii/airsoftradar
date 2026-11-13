@@ -1,6 +1,12 @@
-export const LOCALES = ["hu", "en"];
+export const LOCALES = ["hu", "en", "de", "pl", "cs"];
+export const LOCALE_NAMES = { hu: "Magyar", en: "English", de: "Deutsch", pl: "Polski", cs: "Čeština" };
+const INTL = { hu: "hu-HU", en: "en-GB", de: "de-DE", pl: "pl-PL", cs: "cs-CZ" };
+/** Intl/BCP-47 nyelvkód a szám- és dátumformázáshoz */
+export const intl = (locale) => INTL[locale] || "en-GB";
 export const CURRENCIES = ["HUF", "EUR", "PLN", "CZK", "GBP"];
-export const DEFAULT_CURRENCY = { hu: "HUF", en: "EUR" };
+export const DEFAULT_CURRENCY = { hu: "HUF", en: "EUR", de: "EUR", pl: "PLN", cs: "CZK" };
+/** hreflang-lista a metadata alternates.languages-hez: minden nyelv + x-default (angol). fn: locale -> útvonal */
+export const altLanguages = (fn) => ({ ...Object.fromEntries(LOCALES.map((l) => [l, fn(l)])), "x-default": fn("en") });
 
 // Árszűrő sávhatárai a választott pénznemben (kerek értékek); a lekérdezés HUF-ra váltja
 export const PRICE_EDGES = {
@@ -11,6 +17,9 @@ export const PRICE_EDGES = {
   GBP: [65, 130, 220, 440],
 };
 export { CAT_GROUPS, LEAVES, PLATFORMS } from "./catalog";
+import DE from "./locales/de";
+import PL from "./locales/pl";
+import CS from "./locales/cs";
 export const WEAPON_CATS = ["rifle", "pistol", "smg", "sniper", "lmg", "shotgun", "grenade"];
 
 export function isLocale(x) {
@@ -19,7 +28,8 @@ export function isLocale(x) {
 
 // Kerekített darabszám a főoldalon („30 000+”): a Google a szöveget hetekig gyorsítótárazza, a pontos szám hamar elavulna,
 // a lefelé kerekített „+” viszont igaz marad, ahogy a katalógus nő.
-export const roundDown = (n) => (n >= 10000 ? Math.floor(n / 1000) * 1000 : n >= 1000 ? Math.floor(n / 100) * 100 : n);
+export { roundDown } from "./locales/round";
+import { roundDown } from "./locales/round";
 
 const DICT = {
   hu: {
@@ -100,7 +110,15 @@ const DICT = {
     checked: "Ellenőrizve",
     back: "Vissza a listához",
     footer: "Az árak tájékoztató jellegűek, szállítási költség nélkül, a bolt pénznemében mért ár napi MNB-árfolyamon átszámítva. Vásárlás előtt mindig ellenőrizd a bolt oldalán.",
-    otherLang: "English",
+    language: "Nyelv",
+    allCount: (n) => `Összes (${n})`,
+    darkMode: "Sötét mód",
+    lightMode: "Világos mód",
+    home: "AirsoftHunter – főoldal",
+    legalNav: "Jogi információk",
+    coffee: "Hasznos az oldal? Hívj meg egy kávéra",
+    ad: "Hirdetés",
+    operatorTodo: "Az üzemeltetői adatok kitöltése folyamatban.",
     currency: "Pénznem",
     notFound: "Ilyen termék nincs (vagy már egyik boltban sem kapható).",
     filters: "Szűrés",
@@ -215,7 +233,15 @@ const DICT = {
     checked: "Checked",
     back: "Back to the list",
     footer: "Prices are indicative, excluding shipping, converted from the shop's currency at the daily Hungarian central bank (MNB) rate. Always check the shop's page before buying.",
-    otherLang: "Magyar",
+    language: "Language",
+    allCount: (n) => `All (${n})`,
+    darkMode: "Dark mode",
+    lightMode: "Light mode",
+    home: "AirsoftHunter – home",
+    legalNav: "Legal",
+    coffee: "Find it useful? Buy me a coffee",
+    ad: "Advertisement",
+    operatorTodo: "Operator details are being completed.",
     currency: "Currency",
     notFound: "No such product (or no shop sells it any more).",
     filters: "Filters",
@@ -253,6 +279,8 @@ const DICT = {
   },
 };
 
+Object.assign(DICT, { de: DE, pl: PL, cs: CS });
+
 export function t(locale) {
   return DICT[isLocale(locale) ? locale : "en"];
 }
@@ -263,7 +291,7 @@ export function money(amountHuf, currency, rates, locale) {
   const rate = currency === "HUF" ? 1 : rates?.[currency];
   if (!rate) return money(amountHuf, "HUF", rates, locale);
   const value = Number(amountHuf) / rate;
-  return new Intl.NumberFormat(locale === "hu" ? "hu-HU" : "en-GB", {
+  return new Intl.NumberFormat(intl(locale), {
     style: "currency",
     currency,
     maximumFractionDigits: currency === "HUF" || currency === "CZK" ? 0 : 2,
@@ -273,7 +301,7 @@ export function money(amountHuf, currency, rates, locale) {
 
 /** Bolti ár a bolt saját pénznemében */
 export function shopMoney(amount, currency, locale) {
-  return new Intl.NumberFormat(locale === "hu" ? "hu-HU" : "en-GB", {
+  return new Intl.NumberFormat(intl(locale), {
     style: "currency",
     currency,
     maximumFractionDigits: currency === "HUF" ? 0 : 2,
@@ -282,7 +310,7 @@ export function shopMoney(amount, currency, locale) {
 
 export function dateFmt(iso, locale) {
   if (!iso) return "";
-  return new Intl.DateTimeFormat(locale === "hu" ? "hu-HU" : "en-GB", {
+  return new Intl.DateTimeFormat(intl(locale), {
     year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Budapest",
   }).format(new Date(iso));
 }
@@ -290,14 +318,14 @@ export function dateFmt(iso, locale) {
 /** Rövid dátum a kártyákra / ajánlatsorokra: „nov. 11. 03:40” */
 export function shortDate(iso, locale) {
   if (!iso) return "";
-  return new Intl.DateTimeFormat(locale === "hu" ? "hu-HU" : "en-GB", {
+  return new Intl.DateTimeFormat(intl(locale), {
     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Budapest",
   }).format(new Date(iso));
 }
 
 /** Már a választott pénznemben lévő érték kiírása (pl. ársáv-határ) */
 export function plainMoney(value, currency, locale) {
-  return new Intl.NumberFormat(locale === "hu" ? "hu-HU" : "en-GB", {
+  return new Intl.NumberFormat(intl(locale), {
     style: "currency", currency, maximumFractionDigits: 0,
   }).format(value);
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CAT_GROUPS, defaultCats, FACETS, hrefFor, PLATFORMS, showPlatforms, visibleDims, withoutCat } from "../lib/catalog";
+import { CAT_GROUPS, defaultCats, FACETS, facetLabel, facetValue, hrefFor, PLATFORMS, showPlatforms, visibleDims, withoutCat } from "../lib/catalog";
 import { money, plainMoney, shortDate, t } from "../lib/i18n";
 import { imgSrc } from "../lib/links";
 import AutoSubmit from "./AutoSubmit";
@@ -137,7 +137,7 @@ function CategoryTree({ locale, params, counts }) {
 
 // Kategóriánkénti extra szűrők (Működés, Gránát típusa, BB súlya…): mindig csak a kiválasztott kategóriához illők
 function AttrFilters({ locale, params, counts }) {
-  const hu = locale === "hu";
+  const tr = t(locale);
   return visibleDims(params.cats).map((k) => {
     const sel = new Set(params.attrs?.[k] || []);
     const c = counts[k] || {};
@@ -147,21 +147,21 @@ function AttrFilters({ locale, params, counts }) {
     const MAX = 8;                                        // hosszú lista: a többi lenyitható (a kiválasztottak mindig látszanak)
     const top = items.filter(([v], i) => i < MAX || sel.has(v));
     const rest = items.filter(([v], i) => i >= MAX && !sel.has(v));
-    const row = ([v, lhu, len]) => (
+    const row = ([v]) => (
       <li key={v}>
         <label className={c[v] || sel.has(v) ? "facet check" : "facet check zero"}>
           <input type="checkbox" name={k} value={v} defaultChecked={sel.has(v)} />
-          <span className="box" aria-hidden="true" /><span>{hu ? lhu : len}</span><span className="n">{c[v] || 0}</span>
+          <span className="box" aria-hidden="true" /><span>{facetValue(k, v, locale)}</span><span className="n">{c[v] || 0}</span>
         </label>
       </li>
     );
     return (
       <section className="fgroup" key={k}>
-        <h2>{FACETS[k].label[hu ? 0 : 1]}</h2>
+        <h2>{facetLabel(k, locale)}</h2>
         <ul className="facet-list">{top.map(row)}</ul>
         {rest.length ? (
           <details className="more">
-            <summary>{hu ? `Összes (${items.length})` : `All (${items.length})`}</summary>
+            <summary>{tr.allCount(items.length)}</summary>
             <ul className="facet-list">{rest.map(row)}</ul>
           </details>
         ) : null}
@@ -276,7 +276,7 @@ function Chips({ locale, params, currency }) {
   if (!isDefault) for (const c of params.cats) chips.push({ label: tr.cats[c], href: hrefFor(locale, params, { cats: withoutCat(params.cats, c) }) });
   for (const k of visibleDims(params.cats)) {
     for (const v of params.attrs?.[k] || []) {
-      const lbl = FACETS[k].values.find((x) => x[0] === v)?.[locale === "hu" ? 1 : 2] || v;
+      const lbl = facetValue(k, v, locale);
       chips.push({ label: lbl, href: hrefFor(locale, params, { attrs: { ...params.attrs, [k]: params.attrs[k].filter((x) => x !== v) } }) });
     }
   }

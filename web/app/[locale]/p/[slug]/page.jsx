@@ -5,7 +5,7 @@ import AlertBox from "../../../../components/AlertBox";
 import ProductView from "../../../../components/ProductView";
 import { Shell } from "../../../../components/ui";
 import { brandStats, getHistory, getOffers, getProduct, getRates } from "../../../../lib/data";
-import { CURRENCIES, DEFAULT_CURRENCY, isLocale, money, t } from "../../../../lib/i18n";
+import { altLanguages, CURRENCIES, DEFAULT_CURRENCY, isLocale, money, t } from "../../../../lib/i18n";
 import { mailEnabled } from "../../../../lib/mail";
 import { TOOLS, toolPath, toolText } from "../../../../lib/tools";
 import ToolIcon from "../../../../components/tools/ToolIcon";
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }) {
   return {
     title: `${product.name} – ${price} | AirsoftHunter`,
     description: `${product.manufacturer} ${product.name}: ${t(locale).offersIntro(product.offer_count)}`,
-    alternates: { canonical: `/${locale}/p/${slug}`, languages: { hu: `/hu/p/${slug}`, en: `/en/p/${slug}` } },
+    alternates: { canonical: `/${locale}/p/${slug}`, languages: altLanguages((l) => `/${l}/p/${slug}`) },
     openGraph: product.image_url ? { images: [product.image_url] } : undefined,
   };
 }

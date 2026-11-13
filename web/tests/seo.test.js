@@ -16,10 +16,14 @@ test("robots + darabolt sitemap", async () => {
   expect((idx.match(/<loc>/g) || []).length).toBe(5);       // static + brands + 3 termékfájl
   const part = await import("../app/sitemaps/[id]/route.js");
   const p2 = await (await part.GET(null, { params: Promise.resolve({ id: "p-2.xml" }) })).text();
-  expect((p2.match(/<url>/g) || []).length).toBe(2 * (N - 20000));
-  expect(p2.includes('hreflang="en" href="https://www.airsofthunter.com/en/p/p20000"')).toBe(true);
+  expect((p2.match(/<url>/g) || []).length).toBe(5 * (N - 16000));          // 8000 termék / fájl, 5 nyelv
+  expect(p2.includes('hreflang="en" href="https://www.airsofthunter.com/en/p/p16000"')).toBe(true);
+  expect(p2.includes('hreflang="pl" href="https://www.airsofthunter.com/pl/p/p16000"')).toBe(true);
+  expect(p2.includes('hreflang="x-default" href="https://www.airsofthunter.com/en/p/p16000"')).toBe(true);
   const st = await (await part.GET(null, { params: Promise.resolve({ id: "static.xml" }) })).text();
   expect(st.includes("<loc>https://www.airsofthunter.com/hu</loc>")).toBe(true);
+  expect(st.includes("<loc>https://www.airsofthunter.com/de/datenschutz</loc>")).toBe(true);
+  expect(st.includes("<loc>https://www.airsofthunter.com/cs/ochrana-osobnich-udaju</loc>")).toBe(true);
   expect((await part.GET(null, { params: Promise.resolve({ id: "p-9.xml" }) })).status).toBe(404);
   expect((await part.GET(null, { params: Promise.resolve({ id: "../x" }) })).status).toBe(404);
   const bot = await (await import("../app/bot/route.js")).GET();

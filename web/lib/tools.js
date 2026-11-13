@@ -1,3 +1,4 @@
+import { TOOL_TEXT_X, TOOLS_INDEX_X } from "./locales/tools";
 // Kalkulátorok: útvonalak és SEO-tartalom (cím, leírás, bevezető, „hogyan számol”, GYIK). A számítás: lib/toolcalc.js.
 export const TOOLS = [
   { slug: "fps-joule-calculator", icon: "bolt" },
@@ -190,4 +191,7 @@ export const TOOL_TEXT = {
   },
 };
 
-export const toolText = (slug, locale) => TOOL_TEXT[slug]?.[locale === "hu" ? "hu" : "en"] || null;
+Object.assign(TOOLS_INDEX, TOOLS_INDEX_X);
+for (const [slug, x] of Object.entries(TOOL_TEXT_X)) Object.assign(TOOL_TEXT[slug], x);
+
+export const toolText = (slug, locale) => TOOL_TEXT[slug]?.[locale] || TOOL_TEXT[slug]?.en || null;

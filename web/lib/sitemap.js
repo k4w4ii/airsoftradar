@@ -1,13 +1,14 @@
 // Darabolt sitemap: /sitemap.xml = index, /sitemaps/static.xml (főoldal, kategóriák, jogi oldalak),
-// /sitemaps/p-0.xml, p-1.xml … (termékek, fájlonként 10 000 termék = 20 000 URL; a Google-limit 50 000 / fájl).
+// /sitemaps/p-0.xml, p-1.xml … (termékek, fájlonként 8000 termék × 5 nyelv = 40 000 URL; a Google-limit 50 000 / fájl).
 import { brandStats, countProducts, getAllSlugs } from "./data";
 import { brandSlug, COLLECTION_MIN } from "./seo";
 import { GROUP_IDS, LEAVES } from "./catalog";
 import { DOCS } from "./legal";
 import { TOOLS } from "./tools";
 import { SITE_URL } from "./site";
+import { LOCALES } from "./i18n";
 
-export const PER_FILE = 10000;
+export const PER_FILE = 8000;      // termék / fájl: 5 nyelv × 8000 = 40 000 URL (Google-limit: 50 000 / fájl)
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 export function xmlResponse(body) {
@@ -16,12 +17,12 @@ export function xmlResponse(body) {
   });
 }
 
-function urlEntry(path, { lastmod, freq = "daily", prio = 0.6, pair } = {}) {
-  const [hu, en] = pair || [`/hu${path}`, `/en${path}`];
-  const alt = `<xhtml:link rel="alternate" hreflang="hu" href="${esc(SITE_URL + hu)}"/>` +
-              `<xhtml:link rel="alternate" hreflang="en" href="${esc(SITE_URL + en)}"/>` +
-              `<xhtml:link rel="alternate" hreflang="x-default" href="${esc(SITE_URL + en)}"/>`;
-  return [hu, en].map((p) => `<url><loc>${esc(SITE_URL + p)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}` +
+function urlEntry(path, { lastmod, freq = "daily", prio = 0.6, paths } = {}) {
+  // paths: nyelvenként eltérő cím (jogi oldalak), különben /<nyelv><path>
+  const ps = LOCALES.map((l) => [l, paths ? paths[l] : `/${l}${path}`]);
+  const alt = ps.map(([l, p]) => `<xhtml:link rel="alternate" hreflang="${l}" href="${esc(SITE_URL + p)}"/>`).join("") +
+              `<xhtml:link rel="alternate" hreflang="x-default" href="${esc(SITE_URL + ps.find(([l]) => l === "en")[1])}"/>`;
+  return ps.map(([, p]) => `<url><loc>${esc(SITE_URL + p)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}` +
     `<changefreq>${freq}</changefreq><priority>${prio}</priority>${alt}</url>`).join("");
 }
 
@@ -32,7 +33,7 @@ export function staticSitemap() {
   const cats = ["", ...[...GROUP_IDS, ...LEAVES].map((c) => `?cat=${c}`)];
   const lists = cats.map((c) => urlEntry(c, { prio: c ? 0.7 : 1 })).join("");
   const tools = ["/tools", ...TOOLS.map((t) => `/tools/${t.slug}`)].map((p) => urlEntry(p, { freq: "monthly", prio: 0.7 })).join("");
-  const legal = Object.values(DOCS).map((d) => urlEntry("", { freq: "yearly", prio: 0.2, pair: [`/hu/${d.hu}`, `/en/${d.en}`] })).join("");
+  const legal = Object.values(DOCS).map((d) => urlEntry("", { freq: "yearly", prio: 0.2, paths: Object.fromEntries(LOCALES.map((l) => [l, `/${l}/${d[l]}`])) })).join("");
   return urlset(lists + tools + legal);
 }
 

@@ -5,7 +5,7 @@ import Calculator from "../../../../components/tools/Calculators";
 import ToolIcon from "../../../../components/tools/ToolIcon";
 import { Shell } from "../../../../components/ui";
 import { getRates } from "../../../../lib/data";
-import { CURRENCIES, DEFAULT_CURRENCY, isLocale } from "../../../../lib/i18n";
+import { altLanguages, CURRENCIES, DEFAULT_CURRENCY, isLocale } from "../../../../lib/i18n";
 import { breadcrumbJsonLd, ldJson } from "../../../../lib/seo";
 import { TOOLS, TOOLS_INDEX, toolBySlug, toolPath, toolText } from "../../../../lib/tools";
 
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }) {
   return {
     title: `${x.title} | AirsoftHunter`,
     description: x.description,
-    alternates: { canonical: toolPath(locale, slug), languages: { hu: toolPath("hu", slug), en: toolPath("en", slug) } },
+    alternates: { canonical: toolPath(locale, slug), languages: altLanguages((l) => toolPath(l, slug)) },
   };
 }
 

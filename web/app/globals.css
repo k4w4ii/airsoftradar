@@ -404,6 +404,13 @@ img { display: block; max-width: 100%; }
 .cur-pop { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; display: grid; background: var(--pop); border: 1px solid var(--line); border-radius: var(--radius-s); min-width: 80px; }
 .cur-pop a { padding: 8px 12px; text-decoration: none; font-size: 14px; font-weight: 600; color: var(--muted); }
 .cur-pop a.on { color: var(--bone); background: var(--surface-2); }
+/* nyelvválasztó (minden képernyőméreten lenyíló menü) */
+.lang-menu { position: relative; }
+.lang-menu summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 6px 9px;
+  border: 1px solid var(--line); border-radius: var(--radius-s); font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.lang-menu summary::-webkit-details-marker { display: none; }
+.lang-menu summary:hover, .lang-menu[open] summary { color: var(--bone); }
+.lang-pop { min-width: 130px; }
 
 /* ---------- nézetválasztó + csempék ---------- */
 .bar-right { display: flex; align-items: center; gap: 12px; }

@@ -1,74 +1,113 @@
-// Jogi oldalak tartalma (HU + EN). Az üzemeltetői adatok a lib/site.js OPERATOR objektumából jönnek.
+// Jogi oldalak tartalma (HU + EN itt, DE/PL/CS a lib/locales/legal.js-ben). Az üzemeltetői adatok a lib/site.js OPERATOR objektumából jönnek.
 import { ADS, COFFEE_URL, LEGAL_UPDATED, MAIL_PROVIDER, OPERATOR, SITE_NAME, SITE_URL } from "./site";
 import { mailProvider } from "./mail";
+import { legalX } from "./locales/legal";
 
 export const DOCS = {
-  terms: { hu: "aszf", en: "terms" },
-  privacy: { hu: "adatvedelem", en: "privacy" },
-  imprint: { hu: "impresszum", en: "imprint" },
-  shops: { hu: "boltoknak", en: "for-shops" },
+  terms: { hu: "aszf", en: "terms", de: "nutzungsbedingungen", pl: "regulamin", cs: "podminky-uziti" },
+  privacy: { hu: "adatvedelem", en: "privacy", de: "datenschutz", pl: "polityka-prywatnosci", cs: "ochrana-osobnich-udaju" },
+  imprint: { hu: "impresszum", en: "imprint", de: "impressum", pl: "nota-prawna", cs: "provozovatel" },
+  shops: { hu: "boltoknak", en: "for-shops", de: "fuer-haendler", pl: "dla-sklepow", cs: "pro-obchody" },
 };
 export const DOC_TITLES = {
   hu: { terms: "Általános Szerződési Feltételek (ÁSZF)", privacy: "Adatvédelmi tájékoztató", imprint: "Impresszum", shops: "Boltoknak" },
   en: { terms: "Terms of Use", privacy: "Privacy Policy", imprint: "Imprint", shops: "For shops" },
+  de: { terms: "Nutzungsbedingungen", privacy: "Datenschutzerklärung", imprint: "Impressum", shops: "Für Händler" },
+  pl: { terms: "Regulamin serwisu", privacy: "Polityka prywatności", imprint: "Nota prawna", shops: "Dla sklepów" },
+  cs: { terms: "Podmínky užití", privacy: "Zásady ochrany osobních údajů", imprint: "Provozovatel", shops: "Pro obchody" },
 };
 export const FOOTER_LABELS = {
   hu: { terms: "ÁSZF", privacy: "Adatvédelem", imprint: "Impresszum", shops: "Boltoknak" },
   en: { terms: "Terms", privacy: "Privacy", imprint: "Imprint", shops: "For shops" },
+  de: { terms: "Nutzungsbedingungen", privacy: "Datenschutz", imprint: "Impressum", shops: "Für Händler" },
+  pl: { terms: "Regulamin", privacy: "Prywatność", imprint: "Nota prawna", shops: "Dla sklepów" },
+  cs: { terms: "Podmínky užití", privacy: "Ochrana údajů", imprint: "Provozovatel", shops: "Pro obchody" },
 };
+const LANGS = Object.keys(DOC_TITLES);
 
 /** Nyelvváltás: ugyanaz az oldal a másik nyelven (szűrők, termék, jogi oldal megmarad).
- *  „/hu?cat=rifle&brand=CYMA” -> „/en?cat=rifle&brand=CYMA”, „/hu/adatvedelem” -> „/en/privacy”. */
-export function switchLocale(path, locale) {
-  const other = locale === "hu" ? "en" : "hu";
+ *  „/hu?cat=rifle&brand=CYMA” -> „/en?cat=rifle&brand=CYMA”, „/hu/adatvedelem” -> „/de/datenschutz”.
+ *  to: célnyelv (alapból hu <-> en). */
+export function switchLocale(path, locale, to = locale === "hu" ? "en" : "hu") {
   const p = String(path || "");
   const ok = p === `/${locale}` || ["/", "?", "#"].some((c) => p.startsWith(`/${locale}${c}`));
-  if (!ok) return `/${other}`;
+  if (!ok) return `/${to}`;
   let rest = p.slice(locale.length + 1);
   const m = /^\/([^/?#]+)(.*)$/.exec(rest);
   if (m) {
     const doc = Object.keys(DOCS).find((k) => DOCS[k][locale] === m[1]);
-    if (doc) rest = `/${DOCS[doc][other]}${m[2]}`;
+    if (doc) rest = `/${DOCS[doc][to]}${m[2]}`;
   }
-  return `/${other}${rest}`;
+  return `/${to}${rest}`;
 }
 
+/** Jogi oldal azonosítója a címből (bármelyik nyelv címét felismeri). */
 export function docFromSlug(slug) {
-  return Object.keys(DOCS).find((k) => DOCS[k].hu === slug || DOCS[k].en === slug) || null;
+  return Object.keys(DOCS).find((k) => LANGS.some((l) => DOCS[k][l] === slug)) || null;
 }
 
 const O = OPERATOR;
-const operatorLines = (hu) => [
-  `${hu ? "Név" : "Name"}: ${O.name}`,
-  ...(O.address ? [`${hu ? "Cím" : "Address"}: ${O.address}`] : []),
-  `E-mail: ${O.email}`,
-  ...(O.taxNumber ? [`${hu ? "Adószám" : "Tax number"}: ${O.taxNumber}`] : []),
-  ...(O.registry ? [O.registry] : []),
-];
+const OP_LABELS = {
+  hu: ["Név", "Cím", "Adószám"], en: ["Name", "Address", "Tax number"], de: ["Name", "Anschrift", "Steuernummer"],
+  pl: ["Imię i nazwisko / nazwa", "Adres", "Numer podatkowy"], cs: ["Jméno / název", "Adresa", "Daňové číslo"],
+};
+const operatorLines = (L) => {
+  const [name, addr, tax] = OP_LABELS[L];
+  return [
+    `${name}: ${O.name}`,
+    ...(O.address ? [`${addr}: ${O.address}`] : []),
+    `E-mail: ${O.email}`,
+    ...(O.taxNumber ? [`${tax}: ${O.taxNumber}`] : []),
+    ...(O.registry ? [O.registry] : []),
+  ];
+};
 const ADS_ON = Boolean(ADS.client);
-const google = (hu) => `Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, ${hu ? "Írország" : "Ireland"} – policies.google.com (${hu ? "hirdetések: Google AdSense" : "advertising: Google AdSense"})`;
+const W = {   // szolgáltatók leírásának nyelvi elemei
+  ireland: { hu: "Írország", en: "Ireland", de: "Irland", pl: "Irlandia", cs: "Irsko" },
+  adsense: { hu: "hirdetések: Google AdSense", en: "advertising: Google AdSense", de: "Werbung: Google AdSense",
+             pl: "reklamy: Google AdSense", cs: "reklama: Google AdSense" },
+  mails: { hu: "értesítő e-mailek küldése", en: "sending alert emails", de: "Versand der Benachrichtigungs-E-Mails",
+           pl: "wysyłka e-maili z powiadomieniami", cs: "odesílání e-mailů s upozorněními" },
+  paris: { hu: "Párizs, Franciaország", en: "Paris, France", de: "Paris, Frankreich", pl: "Paryż, Francja", cs: "Paříž, Francie" },
+  hosting: { hu: "weboldal tárhely, adatbázis, domain és DNS", en: "website hosting, database, domain and DNS",
+             de: "Webhosting, Datenbank, Domain und DNS", pl: "hosting strony, baza danych, domena i DNS",
+             cs: "hosting webu, databáze, doména a DNS" },
+};
+const google = (L) => `Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, ${W.ireland[L]} – policies.google.com (${W.adsense[L]})`;
 // a ténylegesen beállított szolgáltató (Worker-titok: BREVO_API_KEY / RESEND_API_KEY), ennek hiányában a site.js értéke
 const provider = () => mailProvider() || MAIL_PROVIDER;
 const MAILERS = {
-  resend: (hu) => `Resend, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA – resend.com (${hu ? "értesítő e-mailek küldése" : "sending alert emails"})`,
-  brevo: (hu) => `Sendinblue SAS (Brevo), 17 rue Salneuve, 75017 ${hu ? "Párizs, Franciaország" : "Paris, France"} – brevo.com (${hu ? "értesítő e-mailek küldése" : "sending alert emails"})`,
+  resend: (L) => `Resend, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA – resend.com (${W.mails[L]})`,
+  brevo: (L) => `Sendinblue SAS (Brevo), 17 rue Salneuve, 75017 ${W.paris[L]} – brevo.com (${W.mails[L]})`,
 };
-const hosts = (hu) => [
-  `Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA – cloudflare.com (${hu ? "weboldal tárhely, adatbázis, domain és DNS" : "website hosting, database, domain and DNS"})`,
-  ...(ADS_ON ? [google(hu)] : []),
-  ...(MAILERS[provider()] ? [MAILERS[provider()](hu)] : []),
+const hosts = (L) => [
+  `Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, USA – cloudflare.com (${W.hosting[L]})`,
+  ...(ADS_ON ? [google(L)] : []),
+  ...(MAILERS[provider()] ? [MAILERS[provider()](L)] : []),
 ];
 
-const usNote = (hu) => {
+const usNote = (L) => {
   const US = ["Cloudflare", ...(ADS_ON ? ["Google"] : []), ...(provider() === "resend" ? ["Resend"] : [])];
-  return US.length === 1
-  ? (hu ? `A ${US[0]} amerikai cég;` : `${US[0]} is a US company;`)
-  : (hu ? `A ${US.slice(0, -1).join(", ")} és a ${US[US.length - 1]} amerikai (illetve amerikai anyavállalatú) cégek;`
-        : `${US.slice(0, -1).join(", ")} and ${US[US.length - 1]} are US companies or have US parents;`);
+  const one = US.length === 1;
+  const list = US.slice(0, -1).join(", "), last = US[US.length - 1];
+  return {
+    hu: one ? `A ${US[0]} amerikai cég;` : `A ${list} és a ${last} amerikai (illetve amerikai anyavállalatú) cégek;`,
+    en: one ? `${US[0]} is a US company;` : `${list} and ${last} are US companies or have US parents;`,
+    de: one ? `${US[0]} ist ein US-Unternehmen;` : `${list} und ${last} sind US-Unternehmen bzw. haben eine US-Muttergesellschaft;`,
+    pl: one ? `${US[0]} jest firmą amerykańską;` : `${list} i ${last} są firmami amerykańskimi (lub mają amerykańską spółkę dominującą);`,
+    cs: one ? `${US[0]} je americká společnost;` : `${list} a ${last} jsou americké společnosti (nebo mají americkou mateřskou společnost);`,
+  }[L];
+};
+const US_BASIS = {
+  hu: " az adattovábbítás az EU–USA adatvédelmi keretrendszer, illetve általános szerződési feltételek alapján történik.",
+  en: " transfers rely on the EU–US Data Privacy Framework or standard contractual clauses.",
+  de: " die Übermittlung erfolgt auf Grundlage des EU-US Data Privacy Framework bzw. von Standardvertragsklauseln.",
+  pl: " przekazywanie danych odbywa się na podstawie ram ochrony danych UE–USA (EU–US Data Privacy Framework) lub standardowych klauzul umownych.",
+  cs: " předávání údajů probíhá na základě rámce pro ochranu osobních údajů mezi EU a USA (EU–US Data Privacy Framework) nebo standardních smluvních doložek.",
 };
 
 // Ár- és készletfigyelő (e-mail értesítő)
-const alertsSection = (hu) => [{
+const alertsSectionHuEn = (hu) => [{
   h: hu ? "Ár- és készletértesítő (e-mail)" : "Price and stock alerts (email)",
   list: hu ? [
     "Ha a termékoldalon értesítést kérsz, ezeket kezeljük: e-mail cím, a termék, az értesítés típusa (újra raktáron / célár), a célár és pénzneme, a kérés, a megerősítés és a kiküldés időpontja, valamint az IP-címed egyirányú, rövidített lenyomata (hash) a visszaélések (tömeges feliratkoztatás) kiszűrésére.",
@@ -86,7 +125,7 @@ const alertsSection = (hu) => [{
 }];
 
 // Hirdetés és támogatás: csak akkor kerül a tájékoztatóba, ha be van kapcsolva (lib/site.js)
-const adsSection = (hu) => !ADS_ON ? [] : [{
+const adsSectionHuEn = (hu) => !ADS_ON ? [] : [{
   h: hu ? "Hirdetések (Google AdSense)" : "Advertising (Google AdSense)",
   list: hu ? [
     "Az oldal fenntartását hirdetések segítik, amelyeket a Google AdSense jelenít meg. Felugró ablakot és automatikus hirdetést nem használunk; a hirdetések „Hirdetés” felirattal, a lista és a termékoldal alján jelennek meg.",
@@ -98,19 +137,26 @@ const adsSection = (hu) => !ADS_ON ? [] : [{
     "Google may use cookies and device identifiers to serve ads and may transfer data to the US under the EU–US Data Privacy Framework. Details: policies.google.com/technologies/ads; opt out of personalised ads: adssettings.google.com.",
   ],
 }];
-const coffeeSection = (hu) => !COFFEE_URL ? [] : [{
+const coffeeSectionHuEn = (hu) => !COFFEE_URL ? [] : [{
   h: hu ? "Támogatás („Hívj meg egy kávéra”)" : "Support (“Buy me a coffee”)",
   p: [hu
     ? `Az oldal alján lévő link egy külső támogatói oldalra (${new URL(COFFEE_URL).hostname}) visz. A támogatás önkéntes; a fizetést és az ehhez szükséges adatokat az a szolgáltató kezeli a saját adatvédelmi szabályai szerint. Tőle a támogató megadott nevét és üzenetét kaphatjuk meg.`
     : `The link at the bottom of the page leads to an external support page (${new URL(COFFEE_URL).hostname}). Support is voluntary; payment and the related data are handled by that provider under its own privacy policy. We may receive the supporter's chosen name and message.`],
 }];
 
+const alertsSection = (L) => alertsSectionHuEn(L === "hu");
+const adsSection = (L) => adsSectionHuEn(L === "hu");
+const coffeeSection = (L) => coffeeSectionHuEn(L === "hu");
+// a német, lengyel és cseh változat ugyanezekből az építőkockákból (lib/locales/legal.js)
+const H = () => ({ operatorLines, hosts, usNote, US_BASIS, ADS_ON, COFFEE_URL, SITE_NAME, SITE_URL, LEGAL_UPDATED, O });
+
 // Egy dokumentum: [{ h: "Cím", p: ["bekezdés", ...], list: ["pont", ...] }]
 const buildContent = () => ({
+  ...legalX(H()),
   hu: {
     terms: [
       { p: [`Hatályos: ${LEGAL_UPDATED}. Ez a dokumentum a(z) ${SITE_NAME} (${SITE_URL}) weboldal használatának feltételeit tartalmazza. Az oldal használatával a felhasználó elfogadja ezeket a feltételeket.`] },
-      { h: "1. Az üzemeltető", list: operatorLines(true) },
+      { h: "1. Az üzemeltető", list: operatorLines("hu") },
       { h: "2. A szolgáltatás", p: [
         `A(z) ${SITE_NAME} ingyenes, tájékoztató jellegű ár- és készlet-összehasonlító oldal airsoft termékekhez. Az oldal nem webáruház: terméket nem értékesít, megrendelést nem fogad, fizetést nem kezel.`,
         "A vásárlás a felhasználó és a kiválasztott bolt között jön létre, a bolt saját feltételei szerint. Az oldal ebben a jogviszonyban nem vesz részt, a boltok teljesítéséért (szállítás, garancia, elállás, panaszkezelés) nem felel.",
@@ -145,7 +191,7 @@ const buildContent = () => ({
     ],
     privacy: [
       { p: [`Hatályos: ${LEGAL_UPDATED}. Ez a tájékoztató az Európai Unió általános adatvédelmi rendelete (GDPR, 2016/679/EU) alapján ismerteti, hogyan kezeljük a(z) ${SITE_NAME} látogatóinak adatait.`] },
-      { h: "1. Az adatkezelő", list: operatorLines(true) },
+      { h: "1. Az adatkezelő", list: operatorLines("hu") },
       { h: "2. Röviden", list: [
         "Az oldalon nincs regisztráció. Személyes adatot (e-mail címet) csak akkor kérünk, ha ár- vagy készletértesítőt kérsz.",
         ADS_ON ? "Analitikai sütit nem használunk. Hirdetési sütit csak a Google hirdetései használhatnak, és csak a hozzájárulásoddal (lásd alább)." : "Nem használunk analitikai, követő vagy hirdetési sütit.",
@@ -157,11 +203,11 @@ const buildContent = () => ({
         "Kimenő linkek: a „Megnézem a boltban” gomb a /go/… címen keresztül irányít a boltba. Ennek során személyes adatot nem rögzítünk. A bolt oldalán a bolt saját adatkezelése érvényes.",
         "Kapcsolatfelvétel: ha e-mailt írsz nekünk, a nevedet, e-mail címedet és az üzenetet a megkeresés megválaszolásához használjuk, és az ügy lezárása után legfeljebb 1 évig őrizzük. Jogalap: jogos érdek.",
       ] },
-      ...alertsSection(true),
-      ...adsSection(true),
-      ...coffeeSection(true),
-      { h: "4. Adatfeldolgozók és szolgáltatók", list: hosts(true) },
-      { p: [usNote(true) + " az adattovábbítás az EU–USA adatvédelmi keretrendszer, illetve általános szerződési feltételek alapján történik."] },
+      ...alertsSection("hu"),
+      ...adsSection("hu"),
+      ...coffeeSection("hu"),
+      { h: "4. Adatfeldolgozók és szolgáltatók", list: hosts("hu") },
+      { p: [usNote("hu") + US_BASIS.hu] },
       { h: "5. Jogaid", p: [
         "Kérheted a rólad kezelt adatokhoz való hozzáférést, azok helyesbítését, törlését, kezelésük korlátozását, és tiltakozhatsz a jogos érdeken alapuló adatkezelés ellen. Kérésedet a fenti e-mail címre küldd; 30 napon belül válaszolunk.",
         "Panasszal fordulhatsz a Nemzeti Adatvédelmi és Információszabadság Hatósághoz (NAIH): 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, www.naih.hu, vagy bírósághoz.",
@@ -169,8 +215,8 @@ const buildContent = () => ({
       { h: "6. Változások", p: ["A tájékoztatót módosíthatjuk; az aktuális változat mindig ezen az oldalon érhető el."] },
     ],
     imprint: [
-      { h: "Üzemeltető", list: operatorLines(true) },
-      { h: "Tárhelyszolgáltatók", list: hosts(true) },
+      { h: "Üzemeltető", list: operatorLines("hu") },
+      { h: "Tárhelyszolgáltatók", list: hosts("hu") },
       { h: "Az oldalról", p: [
         `A(z) ${SITE_NAME} független airsoft ár-összehasonlító. Nem áll kapcsolatban az oldalon szereplő boltokkal és gyártókkal, kivéve, ha egy linknél partnerprogram működik (lásd ÁSZF 4. pont).`,
       ] },
@@ -193,7 +239,7 @@ const buildContent = () => ({
   en: {
     terms: [
       { p: [`Effective: ${LEGAL_UPDATED}. These terms govern the use of ${SITE_NAME} (${SITE_URL}). By using the site you accept these terms.`] },
-      { h: "1. Operator", list: operatorLines(false) },
+      { h: "1. Operator", list: operatorLines("en") },
       { h: "2. The service", p: [
         `${SITE_NAME} is a free, informational price and stock comparison site for airsoft products. It is not a shop: it does not sell products, take orders or handle payments.`,
         "Any purchase is a contract between you and the selected shop under the shop's own terms. We are not a party to it and are not responsible for the shop's performance (delivery, warranty, returns, complaints).",
@@ -224,7 +270,7 @@ const buildContent = () => ({
     ],
     privacy: [
       { p: [`Effective: ${LEGAL_UPDATED}. This notice explains, under the EU General Data Protection Regulation (GDPR, 2016/679), how ${SITE_NAME} handles visitor data.`] },
-      { h: "1. Controller", list: operatorLines(false) },
+      { h: "1. Controller", list: operatorLines("en") },
       { h: "2. In short", list: [
         "There is no registration. We only ask for personal data (an email address) if you request a price or stock alert.",
         ADS_ON ? "We use no analytics cookies. Advertising cookies may only be set by Google's ads, and only with your consent (see below)." : "We use no analytics, tracking or advertising cookies.",
@@ -236,11 +282,11 @@ const buildContent = () => ({
         "Outbound links: the “View in shop” button redirects via /go/…; we do not record personal data. On the shop's site, the shop's own privacy policy applies.",
         "Contact: if you e-mail us, we use your name, e-mail address and message to reply and keep them for up to 1 year after the matter is closed. Legal basis: legitimate interest.",
       ] },
-      ...alertsSection(false),
-      ...adsSection(false),
-      ...coffeeSection(false),
-      { h: "4. Processors and providers", list: hosts(false) },
-      { p: [usNote(false) + " transfers rely on the EU–US Data Privacy Framework or standard contractual clauses."] },
+      ...alertsSection("en"),
+      ...adsSection("en"),
+      ...coffeeSection("en"),
+      { h: "4. Processors and providers", list: hosts("en") },
+      { p: [usNote("en") + US_BASIS.en] },
       { h: "5. Your rights", p: [
         "You may request access to, rectification or erasure of your data, restriction of processing, and object to processing based on legitimate interest. Send requests to the e-mail above; we reply within 30 days.",
         "You may lodge a complaint with the Hungarian data protection authority (NAIH, 1055 Budapest, Falk Miksa utca 9–11, www.naih.hu) or the authority of your country of residence.",
@@ -248,8 +294,8 @@ const buildContent = () => ({
       { h: "6. Changes", p: ["We may update this notice; the current version is always available on this page."] },
     ],
     imprint: [
-      { h: "Operator", list: operatorLines(false) },
-      { h: "Hosting providers", list: hosts(false) },
+      { h: "Operator", list: operatorLines("en") },
+      { h: "Hosting providers", list: hosts("en") },
       { h: "About", p: [`${SITE_NAME} is an independent airsoft price comparison site, not affiliated with the listed shops or manufacturers except where a link is part of an affiliate programme (see Terms, section 4).`] },
     ],
     shops: [
@@ -270,5 +316,5 @@ const buildContent = () => ({
 });
 
 export function legalContent(locale, doc) {
-  return buildContent()[locale === "hu" ? "hu" : "en"][doc];
+  return (buildContent()[locale] || buildContent().en)[doc];
 }

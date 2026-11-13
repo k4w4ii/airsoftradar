@@ -6,7 +6,7 @@ import HomeView from "./HomeView";
 import { Shell } from "./ui";
 import { CAT_GROUPS, GROUP_IDS, LEAVES } from "../lib/catalog";
 import { brandStats, catalogSearch, collectionSummary, getRates } from "../lib/data";
-import { CURRENCIES, DEFAULT_CURRENCY, isLocale, money, t } from "../lib/i18n";
+import { altLanguages, CURRENCIES, DEFAULT_CURRENCY, isLocale, money, t } from "../lib/i18n";
 import { brandSlug, COLLECTION_MIN, collectionPath } from "../lib/seo";
 
 const leavesOf = (cat) => (!cat ? [] : CAT_GROUPS.find((g) => g.id === cat)?.leaves || [cat]);
@@ -30,7 +30,7 @@ export async function collectionMetadata({ locale, brand: slug, cat }) {
   return {
     title: `${title} | AirsoftHunter`,
     description: tr.collectionIntro(r.sum.n, r.sum.inStock, r.sum.shops, low).trim(),
-    alternates: { canonical: path(locale), languages: { hu: path("hu"), en: path("en") } },
+    alternates: { canonical: path(locale), languages: altLanguages(path) },
     ...(r.sum.n < COLLECTION_MIN ? { robots: { index: false, follow: true } } : {}),
   };
 }

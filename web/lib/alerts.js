@@ -61,6 +61,33 @@ const TXT = {
     ignore: "If you did not request this, ignore this email: we send nothing without confirmation, and we delete your address after 7 days.",
     footer: (stop, privacy) => `You received this email because someone requested an alert with this address on AirsoftHunter. <a href="${stop}">Unsubscribe</a> · <a href="${privacy}">Privacy</a>`,
   },
+  de: {
+    subject: (name) => `Bestätige deine Benachrichtigung: ${name}`,
+    title: "Bestätige deine Benachrichtigung",
+    stock: (name) => `Wir melden uns, sobald „${name}“ in einem der von uns beobachteten EU-Shops wieder auf Lager ist.`,
+    price: (name, target) => `Wir melden uns, sobald der beste Preis für „${name}“ unter ${target} fällt.`,
+    confirm: "Bestätigen",
+    ignore: "Falls du das nicht angefordert hast, ignoriere diese E-Mail einfach: Ohne Bestätigung senden wir nichts, und deine Adresse wird nach 7 Tagen gelöscht.",
+    footer: (stop, privacy) => `Du erhältst diese E-Mail, weil jemand mit dieser Adresse auf AirsoftHunter eine Benachrichtigung angefordert hat. <a href="${stop}">Abbestellen</a> · <a href="${privacy}">Datenschutz</a>`,
+  },
+  pl: {
+    subject: (name) => `Potwierdź powiadomienie: ${name}`,
+    title: "Potwierdź powiadomienie",
+    stock: (name) => `Damy znać, gdy „${name}” znów będzie dostępny w którymkolwiek z obserwowanych przez nas sklepów w UE.`,
+    price: (name, target) => `Damy znać, gdy najlepsza cena produktu „${name}” spadnie poniżej ${target}.`,
+    confirm: "Potwierdzam",
+    ignore: "Jeśli to nie ty, po prostu zignoruj tę wiadomość: bez potwierdzenia niczego nie wyślemy, a twój adres usuniemy po 7 dniach.",
+    footer: (stop, privacy) => `Otrzymujesz tę wiadomość, ponieważ ktoś zamówił powiadomienie na ten adres w serwisie AirsoftHunter. <a href="${stop}">Wypisz się</a> · <a href="${privacy}">Prywatność</a>`,
+  },
+  cs: {
+    subject: (name) => `Potvrď upozornění: ${name}`,
+    title: "Potvrď upozornění",
+    stock: (name) => `Dáme ti vědět, až bude „${name}“ znovu skladem v kterémkoli z obchodů v EU, které sledujeme.`,
+    price: (name, target) => `Dáme ti vědět, až nejlepší cena produktu „${name}“ klesne pod ${target}.`,
+    confirm: "Potvrdit",
+    ignore: "Pokud jsi o to nežádal(a), tento e-mail ignoruj: bez potvrzení nic neposíláme a tvou adresu po 7 dnech smažeme.",
+    footer: (stop, privacy) => `Tento e-mail ti přišel, protože si někdo na AirsoftHunteru objednal upozornění na tuto adresu. <a href="${stop}">Odhlásit</a> · <a href="${privacy}">Ochrana osobních údajů</a>`,
+  },
 };
 
 export function confirmMail({ locale, name, kind, targetText, token }) {

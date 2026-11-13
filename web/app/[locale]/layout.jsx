@@ -2,6 +2,7 @@ import { Chakra_Petch, Manrope, Montserrat } from "next/font/google";
 import { cookies } from "next/headers";
 import "../globals.css";
 import { ADS, SITE_URL } from "../../lib/site";
+import { isLocale } from "../../lib/i18n";
 
 const body = Manrope({ subsets: ["latin", "latin-ext"], weight: ["400", "500", "600", "700"], variable: "--font-body", display: "swap" });
 const brand = Montserrat({ subsets: ["latin"], weight: ["700", "800"], variable: "--font-brand", display: "swap" });
@@ -29,7 +30,7 @@ export async function generateViewport() {
 export default async function RootLayout({ children, params }) {
   const { locale } = await params;
   return (
-    <html lang={locale === "hu" ? "hu" : "en"} data-theme={await theme()} className={`${body.variable} ${display.variable} ${brand.variable}`}>
+    <html lang={isLocale(locale) ? locale : "en"} data-theme={await theme()} className={`${body.variable} ${display.variable} ${brand.variable}`}>
       <head>
         {/* betöltetlen (törölt / hotlink-tiltott) boltkép: nem a nyers alt-szöveg látszik, hanem egy halvány logó */}
         <script dangerouslySetInnerHTML={{ __html: "document.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='IMG'&&!t.closest('.cat-tile')){t.style.visibility='hidden';t.parentNode&&t.parentNode.classList.add('noimg')}},true)" }} />

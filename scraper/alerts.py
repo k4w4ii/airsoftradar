@@ -52,7 +52,55 @@ TXT = {
         "note": "This was a one-time alert. To keep watching, request a new one on the product page. Prices are indicative: check the shop's page before buying.",
         "footer": 'You received this email because you requested an alert on AirsoftHunter. <a href="{stopall}">Unsubscribe from all alerts</a>',
     },
+    "de": {
+        "stock_subject": "Wieder auf Lager: {name}",
+        "stock_title": "Wieder auf Lager!",
+        "stock_text": "„{name}“ ist wieder erhältlich: bester Preis jetzt {price}, {shops}.",
+        "price_subject": "Preissenkung: {name} jetzt {price}",
+        "price_title": "Dein Zielpreis ist erreicht!",
+        "price_text": "Der beste Preis für „{name}“ liegt jetzt bei {price} (dein Zielpreis: {target}).",
+        "button": "Angebote ansehen",
+        "note": "Dies war eine einmalige Benachrichtigung. Wenn du den Artikel weiter beobachten möchtest, kannst du auf der Produktseite eine neue anfordern. Die Preise sind unverbindlich: Prüfe vor dem Kauf die Angaben im Shop.",
+        "footer": 'Du erhältst diese E-Mail, weil du auf AirsoftHunter eine Benachrichtigung angefordert hast. <a href="{stopall}">Alle Benachrichtigungen abbestellen</a>',
+    },
+    "pl": {
+        "stock_subject": "Znowu dostępny: {name}",
+        "stock_title": "Znowu dostępny!",
+        "stock_text": "„{name}” jest znowu w sprzedaży: najlepsza cena teraz {price}, {shops}.",
+        "price_subject": "Spadek ceny: {name} teraz {price}",
+        "price_title": "Cena docelowa osiągnięta!",
+        "price_text": "Najlepsza cena produktu „{name}” wynosi teraz {price} (twoja cena docelowa: {target}).",
+        "button": "Zobacz oferty",
+        "note": "To było jednorazowe powiadomienie. Jeśli chcesz dalej obserwować produkt, zamów nowe na stronie produktu. Ceny mają charakter informacyjny: przed zakupem sprawdź dane na stronie sklepu.",
+        "footer": 'Otrzymujesz tę wiadomość, ponieważ na ten adres zamówiono powiadomienie w serwisie AirsoftHunter. <a href="{stopall}">Wypisz się ze wszystkich powiadomień</a>',
+    },
+    "cs": {
+        "stock_subject": "Znovu skladem: {name}",
+        "stock_title": "Znovu skladem!",
+        "stock_text": "„{name}“ je opět k dostání: nejlepší cena teď {price}, {shops}.",
+        "price_subject": "Snížení ceny: {name} teď za {price}",
+        "price_title": "Cílová cena je tu!",
+        "price_text": "Nejlepší cena produktu „{name}“ je teď {price} (tvoje cílová cena: {target}).",
+        "button": "Zobrazit nabídky",
+        "note": "Toto bylo jednorázové upozornění. Pokud chceš produkt sledovat dál, objednej si na stránce produktu nové. Ceny jsou orientační: před nákupem si údaje ověř na stránce obchodu.",
+        "footer": 'Tento e-mail ti přišel, protože sis na AirsoftHunteru objednal(a) upozornění. <a href="{stopall}">Odhlásit všechna upozornění</a>',
+    },
 }
+
+
+def shops_in_stock(n: int, loc: str) -> str:
+    """„skladem v 3 obchodech” – a nyelvtanilag helyes alak (de/pl/cs; a hu/en szöveg {n}-t használ)."""
+    if loc == "de":
+        return "auf Lager in 1 Shop" if n == 1 else f"auf Lager in {n} Shops"
+    if loc == "pl":
+        return "dostępny w 1 sklepie" if n == 1 else f"dostępny w {n} sklepach"
+    if loc == "cs":
+        return "skladem v 1 obchodě" if n == 1 else f"skladem v {n} obchodech"
+    return str(n)
+
+
+DEFAULT_CURRENCY = {"hu": "HUF", "en": "EUR", "de": "EUR", "pl": "PLN", "cs": "CZK"}
+COMMA_LOCALES = {"hu", "de", "pl", "cs"}       # tizedesvessző
 
 
 def money(huf: float, currency: str, rates: dict, locale: str) -> str:
@@ -64,7 +112,7 @@ def money(huf: float, currency: str, rates: dict, locale: str) -> str:
         num = f"{round(v):,}".replace(",", " ")
     else:
         num = f"{v:,.2f}".replace(",", " ")
-        if locale == "hu":
+        if locale in COMMA_LOCALES:
             num = num.replace(".", ",")
     sym = {"HUF": "Ft", "EUR": "€", "PLN": "zł", "CZK": "Kč", "GBP": "£"}.get(currency, currency)
     return f"£{num}" if currency == "GBP" else f"{num} {sym}"
@@ -82,7 +130,7 @@ def due(alert: dict) -> bool:
 
 def build_mail(alert: dict, rates: dict) -> dict:
     loc = alert.get("locale") if alert.get("locale") in TXT else "en"
-    T, cur = TXT[loc], alert.get("currency") or ("HUF" if loc == "hu" else "EUR")
+    T, cur = TXT[loc], alert.get("currency") or DEFAULT_CURRENCY[loc]
     name = alert["name"]
     price = money(alert["best_price_huf"], cur, rates, loc) if alert.get("best_price_huf") is not None else "–"
     url = f"{SITE}/{loc}/p/{alert['slug']}"
@@ -90,7 +138,8 @@ def build_mail(alert: dict, rates: dict) -> dict:
     stopall = f"{SITE}/api/alert?a=stopall&t={alert['token']}"
     if alert["kind"] == "stock":
         subject, title = T["stock_subject"].format(name=name), T["stock_title"]
-        text = T["stock_text"].format(name=name, price=price, n=alert.get("in_stock_count") or 1)
+        n = alert.get("in_stock_count") or 1
+        text = T["stock_text"].format(name=name, price=price, n=n, shops=shops_in_stock(n, loc))
     else:
         target = money(alert["target_huf"], cur, rates, loc)
         subject, title = T["price_subject"].format(name=name, price=price), T["price_title"]

@@ -1,4 +1,5 @@
 import FACETS_JSON from "./facets.json";
+import { FACET_I18N } from "./locales/facets";
 // Katalógus-szűrők: kategóriafa, platformok, URL <-> szűrőállapot. Tiszta függvények (szerveren és tesztben is).
 
 export const CAT_GROUPS = [
@@ -18,6 +19,25 @@ export const PLATFORMS = ["m4", "ak", "g36", "mp5", "aug", "scar", "m14", "p90",
 // Kategóriánkénti extra szűrők (Működés, Gránát típusa, BB súlya, Akku típusa, Optika típusa…): a scraper/facets.py-ból
 // generált facets.json írja le, melyik szűrő melyik kategóriához tartozik. SQL: powers („,aeg,”) és subtypes („,bbw=0.25,”).
 export const FACETS = FACETS_JSON;
+
+const COMMA = new Set(["hu", "de", "pl", "cs"]);       // tizedesvesszős nyelvek
+/** Extra szűrő felirata a nyelven (hu/en a facets.json-ból, de/pl/cs a locales/facets.js-ből, különben angol). */
+export function facetLabel(k, locale) {
+  const f = FACETS[k];
+  if (!f) return k;
+  if (locale === "hu") return f.label[0];
+  return FACET_I18N[locale]?.labels[k] || f.label[1];
+}
+/** Extra szűrő egy értékének felirata. */
+export function facetValue(k, v, locale) {
+  const row = FACETS[k]?.values.find((x) => x[0] === v);
+  if (!row) return v;
+  if (locale === "hu") return row[1];
+  const own = FACET_I18N[locale]?.values[k]?.[v];
+  if (own) return own;
+  // számértékek (0.25 g, 7.4 V): tizedesvessző a vesszős nyelveken
+  return COMMA.has(locale) && (k === "bbw" || k === "volt") ? row[2].replace(".", ",") : row[2];
+}
 export const DIM_KEYS = Object.keys(FACETS);
 const GROUP_LEAVES_C = Object.fromEntries(CAT_GROUPS.map((g) => [g.id, g.leaves]));
 

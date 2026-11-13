@@ -15,10 +15,13 @@ const nextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
-  // A főoldal a böngésző nyelve szerint /hu vagy /en (middleware nélkül)
+  // A főoldal a böngésző (első) nyelve szerint /hu, /de, /pl, /cs (szlovákoknak is), egyébként /en (middleware nélkül)
   async redirects() {
     return [
       { source: "/", has: [{ type: "header", key: "accept-language", value: "hu.*" }], destination: "/hu", permanent: false },
+      { source: "/", has: [{ type: "header", key: "accept-language", value: "de.*" }], destination: "/de", permanent: false },
+      { source: "/", has: [{ type: "header", key: "accept-language", value: "pl.*" }], destination: "/pl", permanent: false },
+      { source: "/", has: [{ type: "header", key: "accept-language", value: "(?:cs|sk).*" }], destination: "/cs", permanent: false },
       { source: "/", destination: "/en", permanent: false },
     ];
   },

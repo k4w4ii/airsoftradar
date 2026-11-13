@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ToolIcon from "../../../components/tools/ToolIcon";
 import { Shell } from "../../../components/ui";
-import { CURRENCIES, DEFAULT_CURRENCY, isLocale } from "../../../lib/i18n";
+import { altLanguages, CURRENCIES, DEFAULT_CURRENCY, isLocale } from "../../../lib/i18n";
 import { breadcrumbJsonLd, ldJson } from "../../../lib/seo";
 import { TOOLS, TOOLS_INDEX, toolPath, toolText } from "../../../lib/tools";
 
@@ -12,7 +12,7 @@ export async function generateMetadata({ params }) {
   if (!isLocale(locale)) return {};
   const T = TOOLS_INDEX[locale];
   return { title: `${T.title} | AirsoftHunter`, description: T.description,
-           alternates: { canonical: toolPath(locale), languages: { hu: toolPath("hu"), en: toolPath("en") } } };
+           alternates: { canonical: toolPath(locale), languages: altLanguages((l) => toolPath(l)) } };
 }
 
 export default async function ToolsIndex({ params }) {
