@@ -147,7 +147,8 @@ export async function getOffersD1(productId) {
            round(d.price_huf / (SELECT e FROM eur), 2) AS price_eur, d.stock, d.last_seen_at, d.is_outlier,
            s.name AS shop_name, s.slug AS shop_slug, s.country AS shop_country, s.affiliate_template
     FROM d JOIN shops s ON s.id = d.shop_id
-    WHERE d.rn = 1 ORDER BY d.price_huf`).bind(Number(productId)));
+    WHERE d.rn = 1
+    ORDER BY CASE d.stock WHEN 'in_stock' THEN 0 WHEN 'out_of_stock' THEN 2 ELSE 1 END, d.price_huf`).bind(Number(productId)));
 }
 
 export async function getHistoryD1(productId) {
