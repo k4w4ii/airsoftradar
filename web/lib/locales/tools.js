@@ -143,11 +143,11 @@ export const TOOL_TEXT_X = {
       how: [
         "Výchozí bod: v dobře utěsněné AEG s hlavní 363 mm dává pružina M100 s kuličkou 0,20 g přibližně 330 fps a každých M10 přidá zhruba 30 fps.",
         "Délka hlavně mění účinnost: v hlavni kratší než 250 mm se část vzduchu „ztratí“ dřív, než kulička hlaveň opustí (≈ 6–10 % ztráta), hlaveň 450–510 mm dává malý zisk. Kalkulačka s tím počítá.",
-        "Zátěž motoru vyplývá z poměru síly pružiny a převodového poměru: u krátkých převodů (13:1, 16:1) je stejná pružina mnohem těžší natáhnout, proto se tam doporučuje motor s vysokým kroutícím momentem (22+ TPA) a 11,1 V.",
+        "Zátěž motoru vyplývá z poměru síly pružiny a převodového poměru: u krátkých převodů (13:1, 16:1) je stejná pružina mnohem těžší natáhnout, proto se tam doporučuje motor s vysokým krouticím momentem (22+ TPA) a 11,1 V.",
       ],
       faq: [
         ["Jakou pružinu potřebuji pro 1,5 J?", "S hlavní 363 mm a dobrou kompresí obvykle kolem M120–M125; s kratší hlavní o stupeň silnější, s delší o stupeň slabší. Ověř si to na chronu!"],
-        ["Co znamená TPA?", "Turns Per Armature: počet závitů vinutí motoru. Více závitů = vyšší kroutící moment a nižší otáčky (high torque); méně = rychlejší, ale slabší (high speed)."],
+        ["Co znamená TPA?", "Turns Per Armature: počet závitů vinutí motoru. Více závitů = vyšší krouticí moment a nižší otáčky (high torque); méně = rychlejší, ale slabší (high speed)."],
         ["Jaký převodový poměr zvolit?", "18:1 – vyvážený, univerzální; 16:1 – rychlejší, vyžaduje silnější motor; 13:1 – vysoká kadence, je potřeba silný motor + 11,1 V + MOSFET; 32:1 – pro silné pružiny (DMR)."],
       ],
     },

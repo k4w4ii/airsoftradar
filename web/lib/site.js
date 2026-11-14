@@ -13,7 +13,7 @@ export const OPERATOR = {
   registry: "",         // pl. "Cégjegyzékszám: 01-09-123456" vagy "EV nyilvántartási szám: 12345678" (ha van)
 };
 
-export const LEGAL_UPDATED = "2026-11-12";
+export const LEGAL_UPDATED = "2026-11-14";
 
 // Ár- és készletfigyelő e-mail szolgáltatója (az adatvédelmi tájékoztatóba kerül): "brevo" vagy "resend".
 // Az oldal magától a beállított Worker-titok szerint dönt (BREVO_API_KEY / RESEND_API_KEY); ez csak tartalék.

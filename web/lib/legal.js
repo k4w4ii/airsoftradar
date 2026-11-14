@@ -186,7 +186,7 @@ const buildContent = () => ({
         `Ha egy bolt nem szeretne szerepelni az oldalon, vagy hibás adatot észlel, a(z) ${O.email} címen kérheti a javítást vagy az eltávolítást. Részletek a „Boltoknak” oldalon.`,
       ] },
       { h: "9. Záró rendelkezések", p: [
-        "Az üzemeltető jogosult a feltételeket egyoldalúan módosítani; a módosítás az oldalon történő közzététellel lép hatályba. A jelen feltételekre a magyar jog az irányadó. Kérdés esetén írj a fenti e-mail címre.",
+        "Az üzemeltető jogosult a feltételeket egyoldalúan módosítani; a módosítás az oldalon történő közzététellel lép hatályba. A jelen feltételekre a magyar jog az irányadó; ez nem érinti azokat a kötelező fogyasztóvédelmi szabályokat, amelyek a fogyasztót a lakóhelye szerinti ország joga alapján megilletik. Kérdés esetén írj a fenti e-mail címre.",
       ] },
     ],
     privacy: [
@@ -209,7 +209,7 @@ const buildContent = () => ({
       { h: "4. Adatfeldolgozók és szolgáltatók", list: hosts("hu") },
       { p: [usNote("hu") + US_BASIS.hu] },
       { h: "5. Jogaid", p: [
-        "Kérheted a rólad kezelt adatokhoz való hozzáférést, azok helyesbítését, törlését, kezelésük korlátozását, és tiltakozhatsz a jogos érdeken alapuló adatkezelés ellen. Kérésedet a fenti e-mail címre küldd; 30 napon belül válaszolunk.",
+        "Kérheted a rólad kezelt adatokhoz való hozzáférést, azok helyesbítését, törlését, kezelésük korlátozását, és tiltakozhatsz a jogos érdeken alapuló adatkezelés ellen. A hozzájárulásod alapján kezelt adatokat (értesítések) kérésre géppel olvasható formában is megkapod (adathordozhatóság), a hozzájárulást pedig bármikor visszavonhatod. Kérésedet a fenti e-mail címre küldd; 30 napon belül válaszolunk.",
         "Panasszal fordulhatsz a Nemzeti Adatvédelmi és Információszabadság Hatósághoz (NAIH): 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, www.naih.hu, vagy bírósághoz.",
       ] },
       { h: "6. Változások", p: ["A tájékoztatót módosíthatjuk; az aktuális változat mindig ezen az oldalon érhető el."] },
@@ -266,7 +266,7 @@ const buildContent = () => ({
         "We aim to keep the site available and accurate but do not guarantee it. To the extent permitted by law, the operator is not liable for damages arising from the use of the site's data, its unavailability, or contracts with shops.",
       ] },
       { h: "8. Shops and rights holders", p: [`Shops that do not wish to be listed, or that spot incorrect data, can request a correction or removal at ${O.email}. See the “For shops” page.`] },
-      { h: "9. Final provisions", p: ["The operator may amend these terms; changes take effect when published on this page. These terms are governed by Hungarian law. Questions: write to the e-mail address above."] },
+      { h: "9. Final provisions", p: ["The operator may amend these terms; changes take effect when published on this page. These terms are governed by Hungarian law; this does not affect the mandatory consumer protection rules of the country where the consumer lives. Questions: write to the e-mail address above."] },
     ],
     privacy: [
       { p: [`Effective: ${LEGAL_UPDATED}. This notice explains, under the EU General Data Protection Regulation (GDPR, 2016/679), how ${SITE_NAME} handles visitor data.`] },
@@ -288,7 +288,7 @@ const buildContent = () => ({
       { h: "4. Processors and providers", list: hosts("en") },
       { p: [usNote("en") + US_BASIS.en] },
       { h: "5. Your rights", p: [
-        "You may request access to, rectification or erasure of your data, restriction of processing, and object to processing based on legitimate interest. Send requests to the e-mail above; we reply within 30 days.",
+        "You may request access to, rectification or erasure of your data, restriction of processing, and object to processing based on legitimate interest. For data processed on the basis of your consent (alerts) you can also receive a machine-readable copy (data portability) and withdraw your consent at any time. Send requests to the e-mail above; we reply within 30 days.",
         "You may lodge a complaint with the Hungarian data protection authority (NAIH, 1055 Budapest, Falk Miksa utca 9–11, www.naih.hu) or the authority of your country of residence.",
       ] },
       { h: "6. Changes", p: ["We may update this notice; the current version is always available on this page."] },

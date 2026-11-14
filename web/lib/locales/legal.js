@@ -41,7 +41,7 @@ export function legalX(H) {
         `Möchte ein Shop nicht auf der Website erscheinen oder stellt er fehlerhafte Daten fest, kann er unter ${O.email} eine Korrektur oder Entfernung verlangen. Einzelheiten auf der Seite „Für Händler“.`,
       ] },
       { h: "9. Schlussbestimmungen", p: [
-        "Der Betreiber ist berechtigt, diese Bedingungen einseitig zu ändern; Änderungen treten mit ihrer Veröffentlichung auf dieser Seite in Kraft. Es gilt ungarisches Recht. Bei Fragen schreibe an die oben genannte E-Mail-Adresse.",
+        "Der Betreiber ist berechtigt, diese Bedingungen einseitig zu ändern; Änderungen treten mit ihrer Veröffentlichung auf dieser Seite in Kraft. Es gilt ungarisches Recht; zwingende Verbraucherschutzvorschriften des Staates, in dem der Verbraucher seinen gewöhnlichen Aufenthalt hat, bleiben unberührt. Bei Fragen schreibe an die oben genannte E-Mail-Adresse.",
       ] },
     ],
     privacy: [
@@ -76,7 +76,7 @@ export function legalX(H) {
       { h: "4. Auftragsverarbeiter und Dienstleister", list: hosts("de") },
       { p: [usNote("de") + US_BASIS.de] },
       { h: "5. Deine Rechte", p: [
-        "Du kannst Auskunft über die zu deiner Person verarbeiteten Daten sowie deren Berichtigung, Löschung oder die Einschränkung der Verarbeitung verlangen und der auf berechtigtem Interesse beruhenden Verarbeitung widersprechen. Sende deine Anfrage an die oben genannte E-Mail-Adresse; wir antworten innerhalb von 30 Tagen.",
+        "Du kannst Auskunft über die zu deiner Person verarbeiteten Daten sowie deren Berichtigung, Löschung oder die Einschränkung der Verarbeitung verlangen und der auf berechtigtem Interesse beruhenden Verarbeitung widersprechen. Daten, die wir aufgrund deiner Einwilligung verarbeiten (Benachrichtigungen), erhältst du auf Wunsch auch in einem maschinenlesbaren Format (Datenübertragbarkeit); deine Einwilligung kannst du jederzeit widerrufen. Sende deine Anfrage an die oben genannte E-Mail-Adresse; wir antworten innerhalb von 30 Tagen.",
         `Du kannst dich bei der Datenschutz-Aufsichtsbehörde deines Wohnsitzlandes (in Deutschland bei der zuständigen Landesdatenschutzbehörde, in Österreich bei der Datenschutzbehörde) oder bei der ungarischen Datenschutzbehörde (${NAIH}) beschweren oder ein Gericht anrufen.`,
       ] },
       { h: "6. Änderungen", p: ["Wir können diese Erklärung ändern; die jeweils aktuelle Fassung ist immer auf dieser Seite abrufbar."] },
@@ -138,7 +138,7 @@ export function legalX(H) {
         `Jeśli sklep nie chce być prezentowany w serwisie lub zauważy błędne dane, może zażądać poprawienia lub usunięcia danych pod adresem ${O.email}. Szczegóły na stronie „Dla sklepów”.`,
       ] },
       { h: "9. Postanowienia końcowe", p: [
-        "Operator może jednostronnie zmienić regulamin; zmiana wchodzi w życie z chwilą opublikowania jej na tej stronie. Regulamin podlega prawu węgierskiemu. W razie pytań napisz na podany wyżej adres e-mail.",
+        "Operator może jednostronnie zmienić regulamin; zmiana wchodzi w życie z chwilą opublikowania jej na tej stronie. Regulamin podlega prawu węgierskiemu; nie narusza to bezwzględnie obowiązujących przepisów o ochronie konsumentów obowiązujących w kraju zamieszkania konsumenta. W razie pytań napisz na podany wyżej adres e-mail.",
       ] },
     ],
     privacy: [
@@ -173,8 +173,8 @@ export function legalX(H) {
       { h: "4. Podmioty przetwarzające i dostawcy usług", list: hosts("pl") },
       { p: [usNote("pl") + US_BASIS.pl] },
       { h: "5. Twoje prawa", p: [
-        "Możesz żądać dostępu do dotyczących cię danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania, a także wnieść sprzeciw wobec przetwarzania opartego na prawnie uzasadnionym interesie. Żądanie wyślij na podany wyżej adres e-mail; odpowiemy w ciągu 30 dni.",
-        `Możesz wnieść skargę do Prezesa Urzędu Ochrony Danych Osobowych (UODO, ul. Stawki 2, 00-193 Warszawa, uodo.gov.pl), do węgierskiego organu ochrony danych (${NAIH}) lub zwrócić się do sądu.`,
+        "Możesz żądać dostępu do dotyczących cię danych, ich sprostowania, usunięcia lub ograniczenia przetwarzania, a także wnieść sprzeciw wobec przetwarzania opartego na prawnie uzasadnionym interesie. Dane przetwarzane na podstawie twojej zgody (powiadomienia) możesz też otrzymać w formacie nadającym się do odczytu maszynowego (prawo do przenoszenia danych), a zgodę możesz w każdej chwili wycofać. Żądanie wyślij na podany wyżej adres e-mail; odpowiemy w ciągu 30 dni.",
+        `Możesz wnieść skargę do Prezesa Urzędu Ochrony Danych Osobowych (UODO, ul. Moniuszki 1A, 00-014 Warszawa, uodo.gov.pl), do węgierskiego organu ochrony danych (${NAIH}) lub zwrócić się do sądu.`,
       ] },
       { h: "6. Zmiany", p: ["Możemy zmieniać niniejszą politykę; aktualna wersja jest zawsze dostępna na tej stronie."] },
     ],
@@ -235,7 +235,7 @@ export function legalX(H) {
         `Pokud obchod nechce být na webu uveden nebo zjistí chybné údaje, může požádat o opravu nebo odstranění na adrese ${O.email}. Podrobnosti na stránce „Pro obchody“.`,
       ] },
       { h: "9. Závěrečná ustanovení", p: [
-        "Provozovatel je oprávněn tyto podmínky jednostranně změnit; změna nabývá účinnosti zveřejněním na této stránce. Tyto podmínky se řídí maďarským právem. S dotazy se obracej na výše uvedenou e-mailovou adresu.",
+        "Provozovatel je oprávněn tyto podmínky jednostranně změnit; změna nabývá účinnosti zveřejněním na této stránce. Tyto podmínky se řídí maďarským právem; tím nejsou dotčena kogentní ustanovení na ochranu spotřebitele platná v zemi, kde má spotřebitel bydliště. S dotazy se obracej na výše uvedenou e-mailovou adresu.",
       ] },
     ],
     privacy: [
@@ -270,7 +270,7 @@ export function legalX(H) {
       { h: "4. Zpracovatelé a poskytovatelé služeb", list: hosts("cs") },
       { p: [usNote("cs") + US_BASIS.cs] },
       { h: "5. Tvoje práva", p: [
-        "Můžeš požadovat přístup k osobním údajům, které o tobě zpracováváme, jejich opravu, výmaz nebo omezení zpracování a můžeš vznést námitku proti zpracování založenému na oprávněném zájmu. Žádost pošli na výše uvedenou e-mailovou adresu; odpovíme do 30 dnů.",
+        "Můžeš požadovat přístup k osobním údajům, které o tobě zpracováváme, jejich opravu, výmaz nebo omezení zpracování a můžeš vznést námitku proti zpracování založenému na oprávněném zájmu. Údaje zpracovávané na základě tvého souhlasu (upozornění) můžeš na požádání získat i ve strojově čitelném formátu (právo na přenositelnost údajů) a souhlas můžeš kdykoli odvolat. Žádost pošli na výše uvedenou e-mailovou adresu; odpovíme do 30 dnů.",
         `Stížnost můžeš podat u Úřadu pro ochranu osobních údajů (ÚOOÚ, Pplk. Sochora 27, 170 00 Praha 7), u maďarského dozorového úřadu (${NAIH}) nebo se obrátit na soud.`,
       ] },
       { h: "6. Změny", p: ["Tyto zásady můžeme měnit; aktuální znění je vždy k dispozici na této stránce."] },

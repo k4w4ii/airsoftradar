@@ -17,7 +17,7 @@ export default {
   views: { grid: "Kacheln", list: "Liste" },
   allResultsFor: "Alle Ergebnisse für „{q}“",
   welcomeTitle: "Finde den besten Airsoft-Preis",
-  welcomeSub: (c, s) => `Über ${n(roundDown(c))} Produkte aus ${s} europäischen Shops im Vergleich, jede Nacht aktualisiert.`,
+  welcomeSub: (c, s) => `Über ${n(roundDown(c))} Produkte aus ${s === 1 ? "1 europäischen Shop" : `${s} europäischen Shops`} im Vergleich, jede Nacht aktualisiert.`,
   browseCats: "Nach Kategorie stöbern",
   bestDeals: "Größte Preisunterschiede",
   bestDealsNote: "So viel günstiger ist derselbe Artikel im günstigsten Shop als im teuersten.",
@@ -28,7 +28,7 @@ export default {
   shops: (c) => (c === 1 ? "1 Shop" : `${n(c)} Shops`),
   bestPrice: "Bester Preis",
   from: "ab",
-  save: (p) => `${p} % günstiger als der teuerste Shop`,
+  save: (p) => `${p} % günstiger als im teuersten Shop`,
   saveUpTo: (amount, p) => `Bis zu ${amount} sparen (${p} %)`,
   saveUpToNote: "günstigstes Angebot auf Lager im Vergleich zum teuersten Angebot auf Lager",
   noResults: "Keine Ergebnisse. Versuche eine kürzere Suche oder setze die Filter zurück.",
@@ -77,7 +77,7 @@ export default {
   // Kategorienamen sind Substantive: im Deutschen nicht kleinschreiben
   collectionTitle: (brand, cat) => `${brand} ${cat || "Produkte"} – Preise und Verfügbarkeit`,
   collectionIntro: (c, inStock, shops, low) =>
-    `${n(c)} ${c === 1 ? "Produkt" : "Produkte"}, davon ${n(inStock)} auf Lager, aus ${shops} europäischen Shops im Vergleich. ${low ? `Aktuell am günstigsten ab ${low}.` : ""} Die Preise werden jede Nacht aktualisiert.`,
+    `${n(c)} ${c === 1 ? "Produkt" : "Produkte"}, davon ${n(inStock)} auf Lager, aus ${shops === 1 ? "1 europäischen Shop" : `${shops} europäischen Shops`} im Vergleich. ${low ? `Aktuell am günstigsten ab ${low}.` : ""} Die Preise werden jede Nacht aktualisiert.`,
   relatedBrand: (brand, cat) => `Alle ${cat || "Produkte"} von ${brand}`,
   updated: "Aktualisiert",
   checked: "Geprüft",
