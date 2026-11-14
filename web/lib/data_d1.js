@@ -151,12 +151,13 @@ export async function getOffersD1(productId) {
     ORDER BY CASE d.stock WHEN 'in_stock' THEN 0 WHEN 'out_of_stock' THEN 2 ELSE 1 END, d.price_huf`).bind(Number(productId)));
 }
 
+// o.is_active = 1: így az offers_product indexet használja (enélkül a teljes, naponta növő price_history táblát olvasná végig)
 export async function getHistoryD1(productId) {
   const db = await getDB();
   return all(db.prepare(`
     SELECT h.observed_on, min(h.price_huf) AS min_huf, min(h.price_eur) AS min_eur
-    FROM price_history h JOIN offers o ON o.id = h.offer_id
-    WHERE o.product_id = ? AND h.stock = 'in_stock' AND o.is_outlier = 0 AND h.observed_on >= date('now', '-91 day')
+    FROM offers o JOIN price_history h ON h.offer_id = o.id
+    WHERE o.product_id = ? AND o.is_active = 1 AND h.stock = 'in_stock' AND o.is_outlier = 0 AND h.observed_on >= date('now', '-91 day')
     GROUP BY h.observed_on ORDER BY h.observed_on LIMIT 120`).bind(Number(productId)));
 }
 

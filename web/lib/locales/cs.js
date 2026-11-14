@@ -48,6 +48,7 @@ export default {
   page: (a, b) => `Strana ${a} z ${b}`,
   stock: { in_stock: "Skladem", out_of_stock: "Vyprodáno", preorder: "Na objednávku", unknown: "Dostupnost neznámá" },
   offers: "Nabídky",
+  productMeta: (name, price, c) => `${name} – nejlepší cena: ${price}. Srovnání nabídek z ${fromShops(c)}: dostupnost, vývoj ceny a upozornění na cenu e-mailem.`,
   offersIntro: (c) => `Nabídky z ${fromShops(c)}, od nejlevnější; vyprodané na konci seznamu. Délka pruhu odpovídá ceně.`,
   goToShop: "Zobrazit v obchodě",
   oddOffers: (c) => `Neobvyklá cena (${c})`,

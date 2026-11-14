@@ -125,7 +125,8 @@ def scrape(slug: str, limit: int | None) -> tuple[list[ScrapedOffer], list[dict]
             streak = streak + 1 if page is None and f.last in THROTTLED else 0
             if streak >= THROTTLE_STREAK:
                 dead += 1 if burst == 0 else 0
-                pause = COOLDOWNS_S[min(level, len(COOLDOWNS_S) - 1)]
+                cds = cfg.get("cooldowns") or COOLDOWNS_S        # boltonként felülírható (pl. órás keretű boltnál)
+                pause = cds[min(level, len(cds) - 1)]
                 if dead >= 2 or time.monotonic() + pause > deadline:
                     errors.append({"error": f"a bolt korlátozza a letöltést ({f.last}): {i + 1}/{len(urls)} URL után leállt",
                                    "http": dict(f.stats), "szunetek_s": pauses, "elso_korlatozas": getattr(f, "throttle_info", None)})

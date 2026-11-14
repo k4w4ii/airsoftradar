@@ -35,10 +35,16 @@
     "sitemap": "https://www.taiwangun.com/downloads/sitemap/products_1_eng.xml",
     "product_pattern": "^https://www\\.taiwangun\\.com/(?!(?:pl|de|fr|es|it|cs|cz|hu|ro|sk|ru|ua|en)/)[a-z0-9-]+/[a-z0-9-]+$",
     "exclude_pattern": "/(?:patches|naszywki|knives|noze|camping|outdoor|survival|watches|zegarki)[a-z0-9-]*/",
-    "max_products": 1200,
-    "status": "2026-11-13: ~20 oldal után 503 (sebességkorlát) -> lassabb ütem (10 mp), egyre hosszabb szünetek + öntanuló tempó; ablak 1200/nap",
+    "max_products": 120,
+    "status": "2026-11-14: a bolt szervere IP-nként pontosan 20 letöltést enged, utána 503 (20+ percig). Órás szünetekkel próbáljuk (ha a keret óránkénti: ~100 termék/nap). Végleges megoldás: termék-feed a bolttól vagy kategóriaoldalas letöltés.",
     "delay": 10,
-    "max_delay": 60
+    "max_delay": 60,
+    "cooldowns": [
+      3660,
+      3660,
+      3660,
+      3660
+    ]
   },
   "evike-europe": {
     "source": "sitemap",

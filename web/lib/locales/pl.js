@@ -49,6 +49,7 @@ export default {
   page: (a, b) => `Strona ${a} z ${b}`,
   stock: { in_stock: "Dostępny", out_of_stock: "Niedostępny", preorder: "Przedsprzedaż", unknown: "Dostępność nieznana" },
   offers: "Oferty",
+  productMeta: (name, price, c) => `${name} – najlepsza cena: ${price}. Porównanie ofert z ${fromShops(c)}: dostępność, historia cen i powiadomienia e-mail o cenie.`,
   offersIntro: (c) => `Oferty z ${fromShops(c)}, od najtańszej; niedostępne na końcu listy. Długość paska odpowiada cenie.`,
   goToShop: "Zobacz w sklepie",
   oddOffers: (c) => `Nietypowa cena (${c})`,

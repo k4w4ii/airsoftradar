@@ -18,7 +18,10 @@ export async function generateMetadata({ params }) {
   const price = money(product.best_price_huf ?? product.min_price_any_huf, DEFAULT_CURRENCY[locale] || "EUR", await getRates(), locale);
   return {
     title: `${product.name} – ${price} | AirsoftHunter`,
-    description: `${product.manufacturer} ${product.name}: ${t(locale).offersIntro(product.offer_count)}`,
+    // a márka csak akkor kerül a név elé, ha a névben még nincs benne (ne legyen „CYMA CYMA CM032”)
+    description: t(locale).productMeta(
+      product.manufacturer && !product.name.toLowerCase().includes(product.manufacturer.toLowerCase()) ? `${product.manufacturer} ${product.name}` : product.name,
+      price, product.offer_count),
     alternates: { canonical: `/${locale}/p/${slug}`, languages: altLanguages((l) => `/${l}/p/${slug}`) },
     openGraph: product.image_url ? { images: [product.image_url] } : undefined,
   };
