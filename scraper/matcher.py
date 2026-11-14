@@ -240,6 +240,11 @@ class MatchResult:
     manufacturer_id: int | None = None
 
 
+def _nums(key: str) -> list[str]:
+    """A címkulcs számai rendezve („6.03”, „430”, „m120” -> 120): két cím csak akkor ugyanaz a termék, ha ezek egyeznek."""
+    return sorted(re.findall(r"\d+(?:[.,]\d+)?", key))
+
+
 def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
     # 1. EAN
     ean = norm_ean(o.ean_raw) or find_ean(o.sku_raw)
@@ -300,6 +305,17 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
         runner_up = scored[1][1] if len(scored) > 1 else 0.0
         if best >= AUTO_FUZZY and best - runner_up >= 0.05:
             return MatchResult("auto", "fuzzy", round(best, 3), best_pid, candidates=scored, manufacturer_id=mid)
+        # Szoros verseny (a második is majdnem ugyanilyen jó). Két esetben mégis párosítunk – de csak ha a címben lévő
+        # SZÁMOK pontosan egyeznek (0.25 ≠ 0.28, 70° ≠ 75°, 430 mm ≠ 100 mm, MS100 ≠ MS120):
+        #  a) gyakorlatilag azonos cím (>= 0,97);
+        #  b) a két jelölt egymás duplikátuma (a katalógusban kétszer szerepel ugyanaz a termék) -> a régebbi kapja.
+        if best >= AUTO_FUZZY and _nums(key) == _nums(cat._key_of[best_pid]):
+            second = scored[1][0]
+            twins = SequenceMatcher(None, cat._key_of[best_pid], cat._key_of[second]).ratio() >= 0.95 \
+                and _nums(cat._key_of[second]) == _nums(key)
+            if best >= 0.97 or twins:
+                pid = min(best_pid, second) if twins and runner_up >= AUTO_FUZZY else best_pid
+                return MatchResult("auto", "fuzzy", round(best, 3), pid, candidates=scored, manufacturer_id=mid)
         # (régen: 0,75–0,92 között „review” állapot. Kézi átnézés nincs, így ezek az ajánlatok soha nem jelentek meg az
         #  oldalon – 2026-11-14-én az aktív ajánlatok 31%-a. Most a 6. lépés külön terméket hoz létre nekik: inkább két
         #  hasonló termék, mint egy láthatatlan ajánlat. Ugyanaz a cím más boltból már 0,92 felett ide párosul.)

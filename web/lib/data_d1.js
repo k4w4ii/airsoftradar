@@ -233,7 +233,8 @@ export async function getWelcomeD1() {
                   AND max_price_huf > best_price_huf AND (max_price_huf - best_price_huf) * 1.0 / max_price_huf <= 0.7
                 ORDER BY d DESC, offer_count DESC LIMIT 8`),
     db.prepare("SELECT manufacturer AS name, count(*) AS n FROM product_summary GROUP BY manufacturer ORDER BY n DESC LIMIT 14"),
-    db.prepare("SELECT count(*) AS n FROM shops WHERE is_active = 1 AND last_scraped_at IS NOT NULL"),
+    db.prepare(// csak a ténylegesen működő boltok: az elmúlt 7 napban volt sikeres letöltésük (a letiltott / blokkoló boltok nem számítanak)
+    "SELECT count(*) AS n FROM shops WHERE is_active = 1 AND substr(last_scraped_at, 1, 10) >= date('now', '-7 day')"),
   ]);
   const [counts, images, deals, brands, shops] = res.map((r) => r.results || []);
   return {

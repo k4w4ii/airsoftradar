@@ -49,6 +49,8 @@ export default {
   page: (a, b) => `Strona ${a} z ${b}`,
   stock: { in_stock: "Dostępny", out_of_stock: "Niedostępny", preorder: "Przedsprzedaż", unknown: "Dostępność nieznana" },
   offers: "Oferty",
+  catMeta: (cat) => `${cat}: ceny i dostępność w europejskich sklepach airsoftowych, aktualizowane każdej nocy. Porównaj oferty i znajdź najlepszą cenę!`,
+  pageN: (c) => `strona ${c}`,
   productMeta: (name, price, c) => `${name} – najlepsza cena: ${price}. Porównanie ofert z ${fromShops(c)}: dostępność, historia cen i powiadomienia e-mail o cenie.`,
   offersIntro: (c) => `Oferty z ${fromShops(c)}, od najtańszej; niedostępne na końcu listy. Długość paska odpowiada cenie.`,
   goToShop: "Zobacz w sklepie",

@@ -139,7 +139,7 @@ export default function ProductView({ locale, currency, rates, product, offers: 
 
       <section className="block">
         <h2>{tr.offers}</h2>
-        <p className="muted">{tr.offersIntro(offers.length)}</p>
+        <p className="muted">{tr.offersIntro(new Set(offers.map((o) => o.shop_slug)).size)}</p>
         <OfferLadder offers={offers} currency={currency} rates={rates} locale={locale} />
         {odd.length ? (
           <details className="odd-offers">

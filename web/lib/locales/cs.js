@@ -48,6 +48,8 @@ export default {
   page: (a, b) => `Strana ${a} z ${b}`,
   stock: { in_stock: "Skladem", out_of_stock: "Vyprodáno", preorder: "Předobjednávka", unknown: "Dostupnost neznámá" },
   offers: "Nabídky",
+  catMeta: (cat) => `${cat}: ceny a dostupnost z evropských airsoftových obchodů, aktualizované každou noc. Porovnej nabídky a najdi nejlepší cenu!`,
+  pageN: (c) => `strana ${c}`,
   productMeta: (name, price, c) => `${name} – nejlepší cena: ${price}. Srovnání nabídek z ${fromShops(c)}: dostupnost, vývoj ceny a upozornění na cenu e-mailem.`,
   offersIntro: (c) => `Nabídky z ${fromShops(c)}, od nejlevnější; vyprodané na konci seznamu. Délka pruhu odpovídá ceně.`,
   goToShop: "Zobrazit v obchodě",

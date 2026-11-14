@@ -53,15 +53,16 @@ def one_language(urls: list[str], lang: str | None = None) -> list[str]:
     langs = [k for k in by if k in LANGS]
     if len(langs) < 2 or sum(len(by[k]) for k in langs) < 0.6 * len(urls):
         return urls
-    keep = lang if lang in by else next((l for l in PREFERRED_LANGS if l in by), None)
+    keep = lang if lang in by else next((l for l in ("en", "gb") if l in by), None)
     if keep is None:
-        # nincs /en/ (vagy /hu/) előtag: ha az előtag nélküli címek egy teljes nyelvnyi csoportot adnak (az alapnyelv a
-        # gyökérben van: airsoft-guns.eu), csak azok maradnak; különben a leggyakoribb nyelv
+        # nincs /en/ előtag: ha az előtag nélküli címek egy teljes nyelvnyi csoportot adnak, az alapnyelv (angol) a gyökérben
+        # van (airsoft-guns.eu: /p/… angol, mellette /hu/p/…, /it/p/…, /hr/p/…) -> csak azok maradnak;
+        # különben magyar, végül a leggyakoribb nyelv
         plain = sum(len(v) for k, v in by.items() if k not in LANGS)
         biggest = max(langs, key=lambda k: len(by[k]))
         if plain >= 0.5 * len(by[biggest]):
             return [u for u in urls if seg(u) not in LANGS]
-        keep = biggest
+        keep = next((l for l in PREFERRED_LANGS if l in by), biggest)
     return [u for u in urls if seg(u) not in LANGS or seg(u) == keep]
 
 

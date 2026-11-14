@@ -97,8 +97,8 @@ export function catalogMeta(locale, p, tr) {
   const clean = one && !p.brands.length && !extra && !p.stock;
   const page = clean && p.page > 1 ? `&page=${p.page}` : "";
   return {
-    title: one ? `${tr.cats[one]}${page ? ` – ${p.page}.` : ""} | AirsoftHunter` : tr.title,
-    description: tr.description,
+    title: one ? `${tr.cats[one]}${page ? ` – ${tr.pageN(p.page)}` : ""} | AirsoftHunter` : tr.title,
+    description: one ? tr.catMeta(tr.cats[one]) : tr.description,
     alternates: { canonical: `/${locale}?cat=${one || "weapons"}${page}`,
                   languages: altLanguages((l) => `/${l}?cat=${one || "weapons"}${page}`) },
   };
