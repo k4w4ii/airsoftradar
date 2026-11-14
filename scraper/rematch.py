@@ -7,6 +7,7 @@ Futtatás: GitHub → Actions → rematch → Run workflow   (vagy helyben: pyth
 """
 from __future__ import annotations
 
+import os
 import sys
 from decimal import Decimal
 
@@ -86,6 +87,12 @@ def main() -> None:
     n = audit_kinds(db, cat, rates)
     print(f"[rematch] rossz helyen lévő ajánlat (alkatrész a fegyver alatt, custom a gyári alatt stb.) leválasztva: {n}", flush=True)
     pending = db.select("offers", select=OFFER_COLS, match_status="eq.pending", is_active="eq.true")
+    # korábbi „review” (bizonytalan) ajánlatok: most már párosulnak vagy külön terméket kapnak. Naponta legfeljebb
+    # REMATCH_REVIEW_MAX darab (alap: 6000), hogy az új termékek írása ne lépje túl a D1 napi írási keretét.
+    review = db.select("offers", select=OFFER_COLS, match_status="eq.review", is_active="eq.true")
+    cap = int(os.environ.get("REMATCH_REVIEW_MAX", "6000"))
+    print(f"[rematch] {len(review)} korábban bizonytalan (review) ajánlat, ebből most {min(cap, len(review))} kerül sorra", flush=True)
+    pending += review[:cap]
     print(f"[rematch] {len(pending)} párosításra váró ajánlat", flush=True)
     stats = match_offers(db, cat, pending, rates, lambda o: lang.get(o["shop_id"], "en"), {})
     print(f"[rematch] párosítás: {dict(stats)}", flush=True)
@@ -110,6 +117,13 @@ def main() -> None:
     if batch:
         db.execute(batch)
     print(f"[rematch] átnevezve: {renamed}", flush=True)
+
+    # ártörténet: a weboldal 90 napot mutat; a régebbi sorok törlése nélkül a tábla pár hónap alatt kinőné a D1 tárhelyét
+    if hasattr(db, "execute"):
+        try:
+            db.execute([("DELETE FROM price_history WHERE observed_on < date('now', '-100 day')", [])])
+        except RuntimeError as e:
+            print(f"[rematch] régi ártörténet törlése nem sikerült (nem kritikus): {e}", flush=True)
 
     import summary                      # az összesítő tábla (product_summary) újraépítése
     summary.rebuild(db)

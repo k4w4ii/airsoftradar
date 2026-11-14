@@ -612,6 +612,10 @@ class TestOneLanguage(unittest.TestCase):
         no_en = [x for x in u if "/en/" not in x]
         self.assertEqual(run_shop.one_language(no_en), ["https://s.eu/hu/termek-1", "https://s.eu/hu/termek-2"])
 
+    def test_default_language_without_prefix(self):
+        u = [f"https://s.eu/{l}/p-{i}" for l in ("pl", "hr", "fr") for i in range(4)] + [f"https://s.eu/product-{i}.html" for i in range(4)]
+        self.assertEqual(run_shop.one_language(u), u[-4:])        # az előtag nélküli (alapnyelvű) címek maradnak
+
     def test_single_language_untouched(self):
         u = ["https://s.eu/en/a", "https://s.eu/en/b", "https://s.eu/products/c"]
         self.assertEqual(run_shop.one_language(u), u)

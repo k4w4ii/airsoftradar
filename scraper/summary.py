@@ -13,6 +13,7 @@ import json
 import os
 import re
 import statistics
+from datetime import date, timedelta
 from collections import Counter, defaultdict
 
 import classify
@@ -21,6 +22,7 @@ import quality
 from filters import is_variant
 
 STOCK_RANK = {"in_stock": 0, "preorder": 1, "out_of_stock": 2}
+MAX_AGE_DAYS = 21     # ennél régebben látott ajánlat nem jelenik meg (tartósan blokkolt boltnál különben hetekig régi ár látszana)
 
 
 def _rates(db) -> dict[str, float]:
@@ -41,10 +43,18 @@ def compute(shops, mfrs, products, offers, rates, fixes=None, diag=None) -> tupl
         rate = rates.get((o["currency"] or "").strip())
         o["price_huf"] = round(float(o["price"]) * rate) if rate else None
         o["price_eur"] = round(o["price_huf"] / eur, 2) if (eur and o["price_huf"] is not None) else None
+    # elavult ajánlatok: a csonka (blokkolt / időkorlátos) futás nem inaktivál, ezért itt szűrünk. A viszonyítás a
+    # legfrissebb ajánlat napja (nem a mai nap): ha a teljes letöltés áll napokig, semmi nem tűnik el az oldalról.
+    newest = max(((o.get("last_seen_at") or "")[:10] for o in offers), default="")
+    oldest_ok = (date.fromisoformat(newest) - timedelta(days=MAX_AGE_DAYS)).isoformat() if newest else ""
+    diag["elavult"] = 0
     # bolt + URL ismétlődés: a legutóbb látott, raktáron lévő, olcsóbb marad
     best = {}
     for o in offers:
         if o["price_huf"] is None:
+            continue
+        if o.get("last_seen_at") and o["last_seen_at"][:10] < oldest_ok:
+            diag["elavult"] += 1
             continue
         key = (o["shop_id"], o["url"])
         rank = ((o["last_seen_at"] or "")[:10], o["stock"] == "in_stock", -o["price_huf"])
@@ -211,7 +221,7 @@ def rebuild(db) -> dict:
             db.execute([(f"DELETE FROM product_summary WHERE id IN ({','.join('?' * len(gone[i:i + 80]))})", gone[i:i + 80])])
     if changed:
         db.upsert("product_summary", changed, on_conflict="id", returning=False)
-    stats = {"termekek": len(rows), "valtozott": len(changed), "torolve": len(gone), "elteroar": len(outliers)}
+    stats = {"termekek": len(rows), "valtozott": len(changed), "torolve": len(gone), "elteroar": len(outliers), "elavult_ajanlat": diag.get("elavult", 0)}
     print(f"[summary] {stats}", flush=True)
     return stats
 

@@ -187,6 +187,23 @@ class TestAuditKinds(unittest.TestCase):
                                   {"EUR": 385, "HUF": 1})
         self.assertEqual(rows[7]["category"], "custom_rifle")
 
+    def test_stale_offers_hidden(self):
+        """Hetek óta nem látott ajánlat (tartósan blokkolt bolt) nem számít a legjobb árba; a viszonyítás a legfrissebb adat."""
+        import summary
+        off = lambda i, shop, price, seen: {"id": i, "product_id": 7, "shop_id": shop, "url": f"u{i}", "title_raw": "CYMA CM.048 AKM AEG",
+                                            "price": price, "currency": "EUR", "stock": "in_stock", "last_seen_at": seen}
+        prods = {7: {"id": 7, "manufacturer_id": 1, "name": "CYMA CM.048 AKM", "slug": "x"}}
+        shops = [{"id": 1, "country": "PL"}, {"id": 2, "country": "CZ"}]
+        diag = {}
+        rows, _ = summary.compute(shops, {1: "CYMA"}, prods,
+                                  [off(1, 1, 150, "2026-10-01T03:00:00Z"), off(2, 2, 170, "2026-11-10T03:00:00Z")],
+                                  {"EUR": 385, "HUF": 1}, diag=diag)
+        self.assertEqual((rows[7]["offer_count"], rows[7]["best_price_huf"], diag["elavult"]), (1, 170 * 385, 1))
+        # ha minden adat régi (a teljes letöltés áll), semmi nem tűnik el
+        rows, _ = summary.compute(shops, {1: "CYMA"}, prods,
+                                  [off(1, 1, 150, "2026-10-01T03:00:00Z"), off(2, 2, 170, "2026-10-03T03:00:00Z")], {"EUR": 385, "HUF": 1})
+        self.assertEqual(rows[7]["offer_count"], 2)
+
 
 
 if __name__ == "__main__":

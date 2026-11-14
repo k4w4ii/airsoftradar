@@ -138,6 +138,8 @@ export async function getOffersD1(productId) {
     o AS (
       SELECT o.*, round(o.price * CASE WHEN o.currency = 'HUF' THEN 1 ELSE (SELECT huf_per_unit FROM r WHERE r.currency = o.currency) END) AS price_huf
       FROM offers o WHERE o.product_id = ? AND o.is_active = 1
+        -- 21 napnál régebben látott ajánlat nem jelenik meg (ugyanaz a szabály, mint a scraper/summary.py MAX_AGE_DAYS)
+        AND substr(o.last_seen_at, 1, 10) >= coalesce((SELECT date(max(substr(last_scraped_at, 1, 10)), '-21 day') FROM shops), '')
     ),
     d AS (
       SELECT o.*, row_number() OVER (PARTITION BY shop_id, url ORDER BY substr(last_seen_at, 1, 10) DESC, stock = 'in_stock' DESC, price_huf ASC) AS rn

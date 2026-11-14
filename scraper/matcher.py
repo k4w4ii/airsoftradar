@@ -300,8 +300,9 @@ def match_offer(o: OfferIn, cat: Catalog) -> MatchResult:
         runner_up = scored[1][1] if len(scored) > 1 else 0.0
         if best >= AUTO_FUZZY and best - runner_up >= 0.05:
             return MatchResult("auto", "fuzzy", round(best, 3), best_pid, candidates=scored, manufacturer_id=mid)
-        if best >= REVIEW_FUZZY:
-            return MatchResult("review", "fuzzy", round(best, 3), None, candidates=scored, manufacturer_id=mid)
+        # (régen: 0,75–0,92 között „review” állapot. Kézi átnézés nincs, így ezek az ajánlatok soha nem jelentek meg az
+        #  oldalon – 2026-11-14-én az aktív ajánlatok 31%-a. Most a 6. lépés külön terméket hoz létre nekik: inkább két
+        #  hasonló termék, mint egy láthatatlan ajánlat. Ugyanaz a cím más boltból már 0,92 felett ide párosul.)
 
     # 6. ismert gyártó, nincs kód és nincs hasonló termék -> új termék cím alapján
     #    (EMG, Krytac, VFC... gyakran nem ad modellkódot; különben láthatatlan maradna)
